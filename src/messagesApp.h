@@ -2,10 +2,6 @@
 #define messages_h
 
 #include "main.h"
-// extern uint16_t directoryCount;
-// extern String directories[255];
-// extern String BinaryFiles[255];
-// extern uint16_t binaryCount;//Number of binary files available for loading
 extern int16_t y;
 extern String smsContent[smsNumber];
 extern String phoneNumber[smsNumber];

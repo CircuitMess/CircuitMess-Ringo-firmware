@@ -4,7 +4,8 @@
 #include "mainMenu.h"
 #include "sprites.c"
 MAKERphone mp;
-int backgroundColors[7] = {
+Oscillator *osc;
+int backgroundColors[7] PROGMEM = {
     TFT_CYAN,
     TFT_GREEN,
     TFT_RED,
@@ -13,7 +14,7 @@ int backgroundColors[7] = {
     TFT_ORANGE,
     TFT_PINK
 };
-String backgroundColorsNames[7] = {
+String backgroundColorsNames[7] PROGMEM = {
     "Cyan",
     "Green",
     "Red",
@@ -22,7 +23,7 @@ String backgroundColorsNames[7] = {
     "Orange",
     "Pink"
 };
-String titles[10] = {
+String titles[10] PROGMEM = {
 	"Messages",
 	"Media",
 	"Contacts",
@@ -34,9 +35,8 @@ String titles[10] = {
 	"Flashlight",
 	"Calendar"
 };
-int32_t cameraY = 0;
-int32_t cameraY_actual = 0;
-uint16_t cursor = 0;
+int textPointer = 0;
+StaticJsonBuffer<capacity> jb;
 
 void menuDrawBox(String text, uint8_t i, int32_t y) {
 	uint8_t scale;
@@ -67,6 +67,9 @@ void menuDrawBox(String text, uint8_t i, int32_t y) {
 		mp.display.drawString(text, 3, y);
 }
 int8_t menu(const char* title, String* items, uint8_t length) {
+	int32_t cameraY = 0;
+	int32_t cameraY_actual = 0;
+	int16_t cursor = 0;
 	uint8_t offset;
 	uint8_t boxHeight;
 	if(mp.resolutionMode)
@@ -111,8 +114,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.gui.osc->note(75, 0.05);
-			mp.gui.osc->play();
+			osc->note(75, 0.05);
+			osc->play();
 			while (!mp.update());// Exit when pressed
 			break;
 		}
@@ -120,8 +123,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			return -1;
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			mp.gui.osc->note(75, 0.05);
-			mp.gui.osc->play();
+			osc->note(75, 0.05);
+			osc->play();
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
 			while(!mp.update());
@@ -145,8 +148,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			mp.gui.osc->note(75, 0.05);
-			mp.gui.osc->play();
+			osc->note(75, 0.05);
+			osc->play();
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
 			while (!mp.update());
@@ -190,13 +193,301 @@ void menuDrawCursor(uint8_t i, int32_t y) {
 	y += i * (boxHeight + 1) + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 2, TFT_RED);
 }
+String readSerial() {
+	uint8_t _timeout = 0;
+	while (!Serial1.available() && _timeout < 300)
+	{
+		delay(20);
+		_timeout++;
+	}
+	if (Serial1.available()) {
+		return Serial1.readString();
+	}
+	return "";
+}
+uint16_t countSubstring(String string, String substring) {
+	if (substring.length() == 0) return 0;
+	int count = 0;
+	for (size_t offset = string.indexOf(substring); offset != -1;
+		offset = string.indexOf(substring, offset + substring.length()))
+	{
+		count++;
+	}
+	return count;
+}
+void callNumber(String number) {
+	mp.dataRefreshFlag = 0;
+	
+	String localBuffer = "";
+	Serial1.print(F("ATD"));
+	Serial1.print(number);
+	Serial1.print(";\r\n");
+	mp.display.setFreeFont(TT1);
+	mp.display.setTextColor(TFT_BLACK);
+	bool firstPass = 1;
+	uint32_t timeOffset = 0;
+	uint16_t textLength;
+	uint8_t scale;
+	String temp;
+	if(mp.resolutionMode)
+	{
+		scale = 1;
+		mp.display.setFreeFont(TT1);
+	}
+	else
+	{
+		scale = 2;
+		mp.display.setTextFont(2);
+	}
+	mp.display.setTextSize(1);
+
+	mp.display.printCenter(number);
+	textLength = mp.display.cursor_x - textLength;
+	while (1)
+	{
+		mp.display.fillScreen(TFT_WHITE);
+		if (Serial1.available())
+			localBuffer = Serial1.readString();
+		Serial.println(localBuffer);
+		delay(5);
+		if (localBuffer.indexOf("CLCC:") != -1)
+		{
+			if (localBuffer.indexOf(",0,0,0,0") != -1)
+			{
+				if (firstPass == 1)
+				{
+					timeOffset = millis();
+					firstPass = 0;
+				}
+
+
+				temp = "";
+				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
+					temp += (int((millis() - timeOffset) / 1000) / 60) ;
+				else
+				{
+					temp += "0";
+					temp += (int((millis() - timeOffset) / 1000) / 60);
+				}
+				temp += ":";
+				if (int((millis() - timeOffset) / 1000) % 60 > 9)
+					temp += (int((millis() - timeOffset) / 1000) % 60);
+				else
+				{
+					temp += "0";
+					temp += (int((millis() - timeOffset) / 1000) % 60);
+				}
+				mp.display.setCursor(9, 9);
+				mp.display.printCenter(temp);
+				Serial.println("CALL ACTIVE");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
+			}
+
+			else if (localBuffer.indexOf(",0,3,") != -1)
+			{
+				mp.display.setCursor(25, 9);
+				Serial.println("ringing");
+				mp.display.printCenter("Ringing...");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+			}
+			else if (localBuffer.indexOf(",0,2,") != -1)
+			{
+				mp.display.setCursor(25, 9);
+				mp.display.printCenter("Calling...");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+			}
+			else if (localBuffer.indexOf(",0,6,") != -1)
+			{
+				mp.display.fillScreen(TFT_WHITE);
+				mp.display.setCursor(32, 9);
+				if (timeOffset == 0)
+					mp.display.printCenter("00:00");
+				else
+				{
+					temp = "";
+					if ((int((millis() - timeOffset) / 1000) / 60) > 9)
+						temp += (int((millis() - timeOffset) / 1000) / 60) ;
+					else
+					{
+						temp += "0";
+						temp += (int((millis() - timeOffset) / 1000) / 60);
+					}
+					temp += ":";
+					if (int((millis() - timeOffset) / 1000) % 60 > 9)
+						temp += (int((millis() - timeOffset) / 1000) % 60);
+					else
+					{
+						temp += "0";
+						temp += (int((millis() - timeOffset) / 1000) % 60);
+					}
+					mp.display.setCursor(9, 9);
+					mp.display.printCenter(temp);
+				}
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
+				if(mp.resolutionMode)
+					mp.display.setCursor(11, 20);
+				else
+					mp.display.setCursor(11, 28);
+				mp.display.printCenter(number);
+				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+				if(mp.resolutionMode)
+					mp.display.setCursor(2, 62);
+				else
+					mp.display.setCursor(2, 112);
+				mp.display.print("Call ended");
+				Serial.println("ENDED");
+				while (!mp.update());
+				delay(1000);
+				break;
+			}
+			if(mp.resolutionMode)
+					mp.display.setCursor(11, 20);
+			else
+				mp.display.setCursor(11, 28);
+			mp.display.printCenter(number);
+			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+			if(mp.resolutionMode)
+			{
+				mp.display.setCursor(2, 62);
+				mp.display.print("press");
+				mp.display.drawBitmap(24, 52, letterB, TFT_BLACK);
+				mp.display.setCursor(35, 62);
+				mp.display.print("to hang up");
+			}
+			else
+			{
+				mp.display.setCursor(2, 112);
+				mp.display.print("press");
+				mp.display.drawBitmap(37, 105, letterB, TFT_BLACK, scale);
+				mp.display.setCursor(55, 112);
+				mp.display.print("to hang up");
+			}
+
+		}
+		else if (localBuffer.indexOf("CLCC:") == -1)
+		{
+			if (localBuffer.indexOf("ERROR") != -1)
+			{
+
+				mp.display.setCursor(3, 9);
+				mp.display.printCenter("Couldn't dial number!");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
+				if(mp.resolutionMode)
+					mp.display.setCursor(11, 20);
+				else
+					mp.display.setCursor(11, 28);
+				mp.display.printCenter(number);
+				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+				if(mp.resolutionMode)
+				{
+					mp.display.setCursor(2, 57);
+					mp.display.print("Invalid number or");
+					mp.display.setCursor(2, 63);
+					mp.display.print("SIM card missing!");
+				}
+				else
+				{
+					mp.display.setCursor(2, 100);
+					mp.display.print("Invalid number or");
+					mp.display.setCursor(2, 112);
+					mp.display.print("SIM card missing!");
+				}
+				while (!mp.buttons.released(BTN_B))
+					mp.update();
+				break;
+			}
+			else
+			{
+				mp.display.setCursor(25, 9);
+				mp.display.printCenter("Calling...");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+				if(mp.resolutionMode)
+					mp.display.setCursor(11, 20);
+				else
+					mp.display.setCursor(11, 28);
+				mp.display.printCenter(number);
+				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+				if(mp.resolutionMode)
+				{
+					mp.display.setCursor(2, 62);
+					mp.display.print("press");
+					mp.display.drawBitmap(24, 52, letterB, TFT_BLACK);
+					mp.display.setCursor(35, 62);
+					mp.display.print("to hang up");
+				}
+				else
+				{
+					mp.display.setCursor(2, 112);
+					mp.display.print("press");
+					mp.display.drawBitmap(37, 105, letterB, TFT_BLACK, scale);
+					mp.display.setCursor(55, 112);
+					mp.display.print("to hang up");
+				}
+			}
+		}
+		if (mp.buttons.pressed(BTN_B)) // hanging up
+		{
+			Serial.println("B PRESSED");
+			Serial1.println("ATH");
+			while (readSerial().indexOf(",0,6,") == -1)
+			{
+				Serial1.println("ATH");
+			}
+			mp.display.fillScreen(TFT_WHITE);
+			mp.display.setCursor(32, 9);
+			if (timeOffset == 0)
+				mp.display.printCenter("00:00");
+			else
+			{
+				temp = "";
+				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
+					temp += (int((millis() - timeOffset) / 1000) / 60) ;
+				else
+				{
+					temp += "0";
+					temp += (int((millis() - timeOffset) / 1000) / 60);
+				}
+				temp += ":";
+				if (int((millis() - timeOffset) / 1000) % 60 > 9)
+					temp += (int((millis() - timeOffset) / 1000) % 60);
+				else
+				{
+					temp += "0";
+					temp += (int((millis() - timeOffset) / 1000) % 60);
+				}
+				mp.display.setCursor(9, 9);
+				mp.display.printCenter(temp);
+			}
+			mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
+			if(mp.resolutionMode)
+					mp.display.setCursor(11, 20);
+			else
+				mp.display.setCursor(11, 28);
+			mp.display.printCenter(number);
+			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+			mp.display.setCursor(2, 112);
+			mp.display.print("Call ended");
+			Serial.println("ENDED");
+			while (!mp.update());
+			delay(1000);
+			break;
+		}
+		mp.update();
+	}
+}
+
+
+
+uint32_t timer = millis();
 void setup() {
   Serial.begin(115200);
-  mp.begin(0);
+	mp.begin(0);
+	osc = new Oscillator();
+	osc->setVolume(256);
+	addOscillator(osc);
 }
-uint32_t timer = millis();
 void loop()
 {
   lockscreen();
-  mainMenu();
+	mainMenu();
 }

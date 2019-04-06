@@ -13,7 +13,6 @@ uint32_t start = 0;
 uint32_t end = 0;
 String input;
 String buffer;
-int textPointer = 0;
 
 //Messages app
 void messagesApp() {
@@ -134,16 +133,7 @@ void messagesApp() {
 		}
 	}
 }
-uint16_t countSubstring(String string, String substring) {
-	if (substring.length() == 0) return 0;
-	int count = 0;
-	for (size_t offset = string.indexOf(substring); offset != -1;
-		offset = string.indexOf(substring, offset + substring.length()))
-	{
-		count++;
-	}
-	return count;
-}
+
 String readSms(uint8_t index) {
 	String buffer;
 	Serial1.print(F("AT+CMGF=1\r"));
@@ -353,15 +343,15 @@ int16_t smsMenu(const char* title, String* contact, String *date, String *conten
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.gui.osc->note(75, 0.05);
-			mp.gui.osc->play();
+			osc->note(75, 0.05);
+			osc->play();
 			while (!mp.update());// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			mp.gui.osc->note(75, 0.05);
-			mp.gui.osc->play();
+			osc->note(75, 0.05);
+			osc->play();
 
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -378,8 +368,8 @@ int16_t smsMenu(const char* title, String* contact, String *date, String *conten
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			mp.gui.osc->note(75, 0.05);
-			mp.gui.osc->play();
+			osc->note(75, 0.05);
+			osc->play();
 
 			cursor++;
 			if (cursor > 0)

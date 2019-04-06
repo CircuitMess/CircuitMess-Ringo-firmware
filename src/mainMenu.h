@@ -3,6 +3,8 @@
 
 #include "main.h"
 #include "messagesApp.h"
+#include "mediaApp.h"
+#include "contactsApp.h"
 extern uint16_t directoryCount;
 extern String directories[255];
 extern String BinaryFiles[255];
