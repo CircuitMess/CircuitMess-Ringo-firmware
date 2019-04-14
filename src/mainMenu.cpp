@@ -393,38 +393,15 @@ void mainMenu()
 			if (titles[index] == "Apps")
 			{
 				mp.display.fillScreen(TFT_BLACK);
-				mp.update();
-				if(mp.SDinsertedFlag)
-				{
-					while(!mp.SD.begin(5, SPI, 8000000));
-					listBinaries("/", 0);
-					int8_t index = menu("Load from SD", BinaryFiles, binaryCount);
-
-					if (index != -1) {  //IF BUTTON "BACK" WAS NOT PRESSED
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setCursor(0,mp.display.height() / 2 - 16);
-						mp.display.printCenter(F("LOADING NOW..."));
-						while(!mp.update());
-
-
-						mp.updateFromFS(BinaryFiles[index]);
-					}
-				}
-				else
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("No SD inserted!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Insert SD card and reset"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-
-
-
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("PLACEHOLDER"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("PLACEHOLDER"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
 			}
 
 			if (titles[index] == "Messages")
@@ -556,8 +533,8 @@ void mainMenu()
 			if (titles[index] == "Settings")
 				if(settingsApp())
 					return;
-			// if(titles[index] == "Clock")
-			// 	clockApp();
+			if(titles[index] == "Clock")
+				clockApp();
 			// if(titles[index] == "Flashlight")
 			// 	flashlightApp();
 			if (index == -2)

@@ -37,6 +37,8 @@ String titles[10] PROGMEM = {
 };
 int textPointer = 0;
 StaticJsonBuffer<capacity> jb;
+uint8_t audioCount = 0;
+String audioFiles[100]; 
 
 void menuDrawBox(String text, uint8_t i, int32_t y) {
 	uint8_t scale;
@@ -276,6 +278,40 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 	}
 	return cursor;
 
+}
+void listAudio(const char * dirname, uint8_t levels) {
+	audioCount = 0;
+	while(!mp.SD.begin(5, SPI, 9000000))
+        Serial.println(F("SD ERROR"));
+	Serial.printf("Listing directory: %s\n", dirname);
+	SDAudioFile root = mp.SD.open(dirname);
+	if (!root) {
+		Serial.println(F("Failed to open directory"));
+		return;
+	}
+	if (!root.isDirectory()) {
+		Serial.println(F("Not a directory"));
+		return;
+	}
+	int counter = 1;
+	uint8_t start = 0;
+	SDAudioFile file = root.openNextFile();
+	while (file) {
+		String Name(file.name());
+		Serial.println(Name);
+		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3")) 
+		 || Name.endsWith(F(".wav")) || Name.endsWith(F(".WAV")))
+		{
+			Serial.print(counter);
+			Serial.print(F(".   "));
+			Serial.println(Name);
+			audioFiles[counter - 1] = Name;
+			Serial.println(Name);
+			audioCount++;
+			counter++;
+		}
+		file = root.openNextFile();
+	}
 }
 String readSerial() {
 	uint8_t _timeout = 0;
