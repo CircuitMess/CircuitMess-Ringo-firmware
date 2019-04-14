@@ -10,6 +10,7 @@
 #include "clockApp.h"
 #include "calculatorApp.h"
 #include "flashlightApp.h"
+#include "calendarApp.h"
 extern uint16_t directoryCount;
 extern String directories[100];
 extern String BinaryFiles[100];
@@ -19,6 +20,5 @@ void listDirectories(const char * dirname);
 void listBinaries(const char * dirname, uint8_t levels);
 int16_t scrollingMainMenu();
 void mainMenu();
-
 
 #endif

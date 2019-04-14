@@ -1205,7 +1205,7 @@ void saveAlarms()
 {
 	const char * path = "/alarms.json";
 	Serial.println("");
-	_SD.remove(path);
+	mp.SD.remove(path);
 	JsonArray& alarms = mp.jb.createArray();
 
 	if (alarms.success()) {
@@ -1226,7 +1226,7 @@ void saveAlarms()
 			alarms.add(tempAlarm);	
 		}
 
-		SDAudioFile file1 = _SD.open(path, "w");
+		SDAudioFile file1 = mp.SD.open(path, "w");
 		alarms.prettyPrintTo(file1);
 		alarms.prettyPrintTo(Serial);
 		file1.close();
@@ -1238,7 +1238,7 @@ void loadAlarms()
 {
 	const char * path = "/alarms.json";
 	Serial.println(""); 
-	SDAudioFile file = _SD.open(path);
+	SDAudioFile file = mp.SD.open(path);
 	JsonArray& alarms = mp.jb.parseArray(file);
 	file.close();
 	

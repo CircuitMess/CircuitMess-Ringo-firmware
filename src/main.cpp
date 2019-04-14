@@ -596,7 +596,6 @@ void callNumber(String number) {
 	}
 }
 
-uint32_t timer = millis();
 void setup() {
   Serial.begin(115200);
 	mp.begin(0);

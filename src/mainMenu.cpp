@@ -27,7 +27,7 @@ void listDirectories(const char * dirname) {
 			String Name(file.name());
 			Serial.println(Name);
 			if(Name != "/Images\0" && Name != "/Music\0" && Name != "/Video\0"
-			 && Name != "/System Volume Information\0" && _SD.exists(String(Name + "/" + Name + ".BIN")))
+			 && Name != "/System Volume Information\0" && mp.SD.exists(String(Name + "/" + Name + ".BIN")))
 			{
 				Serial.println(Name);
 				directories[directoryCount] = Name.substring(1);
@@ -539,25 +539,25 @@ void mainMenu()
 				calculatorApp();
 			if(titles[index] == "Flashlight")
 				flashlightApp();
+			if(titles[index] == "Calendar")
+				calendarApp();
 			if (index == -2)
 			{
 				Serial.println(F("pressed"));
 				break;
 			}
-			// if (index == -3) // DEBUG MODE
-				// debugMode();
 		}
-		// else
-		// {
-		// 	mp.display.fillScreen(TFT_BLACK);
-		// 	mp.display.setCursor(0,mp.display.height() / 2 - 16);
-		// 	mp.display.printCenter(F("LOADING NOW..."));
-		// 	while(!mp.update());
+		else
+		{
+			mp.display.fillScreen(TFT_BLACK);
+			mp.display.setCursor(0,mp.display.height() / 2 - 16);
+			mp.display.printCenter(F("LOADING NOW..."));
+			while(!mp.update());
 
-		// 	String foo = directories[index - 10];
-		// 	initWavLib();
-		// 	updateFromFS(String(F("/" + foo + "/" + foo + ".bin"));
-		// }
+			String foo = directories[index - 10]; //10 is the number of preloaded apps
+			initWavLib();
+			mp.updateFromFS(String("/" + foo + "/" + foo + ".bin"));
+		}
 		mp.update();
 	}
 }
