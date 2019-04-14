@@ -5,9 +5,10 @@
 #include "messagesApp.h"
 #include "mediaApp.h"
 #include "contactsApp.h"
+#include "settingsApp.h"
 extern uint16_t directoryCount;
-extern String directories[255];
-extern String BinaryFiles[255];
+extern String directories[100];
+extern String BinaryFiles[100];
 extern uint16_t binaryCount;//Number of binary files available for loading
 
 void listDirectories(const char * dirname);

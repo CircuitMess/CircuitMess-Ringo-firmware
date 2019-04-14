@@ -2,14 +2,14 @@
 // uint8_t cursor = 0;
 // int32_t cameraY = 0;
 // int32_t cameraY_actual = 0;
-String audioFiles[255]; 
+String audioFiles[100]; 
 uint8_t audioCount = 0;
 String mediaItems[3] PROGMEM = {
     "Music",
     "Photo",
     "Video",
 };
-String photoFiles[255];
+String photoFiles[100];
 uint8_t photoCount = 0;
 //Media app
 
@@ -262,90 +262,7 @@ void mediaMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 	mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
 }
 
-int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint16_t index) {
-	
-	int32_t cameraY = 0;
-	int32_t cameraY_actual = 0;
-	String Name;
-	uint8_t scale = 2;
-	uint8_t offset = 17;
-	uint8_t boxHeight = 15;
-	uint16_t start = 0;
-	int16_t cursor = index;
-	if (length > 12) {
-		cameraY = -cursor * (boxHeight + 1) - 1;
-	}
-	while (1) {
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, 0);
-		cameraY_actual = (cameraY_actual + cameraY) / 2;
-		if (cameraY_actual - cameraY == 1) {
-			cameraY_actual = cameraY;
-		}
 
-		for (uint8_t i = 0; i < length; i++) {
-			Name = items[i];
-			while (Name.indexOf("/", start) != -1)
-				start = Name.indexOf("/", start) + 1;
-			Name = Name.substring(start, Name.indexOf("."));
-			menuDrawBox(Name, i, cameraY_actual);
-		}
-		menuDrawCursor(cursor, cameraY_actual);
-
-			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(0,-2);
-			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-		mp.display.setTextSize(1);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print(title);
-
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			while (!mp.update());
-			break;
-		}
-
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-
-			while (!mp.update());
-			if (cursor == 0) {
-				cursor = length - 1;
-				if (length > 6*scale) {
-					cameraY = -(cursor - 5) * (boxHeight + 1) - 1;
-				}
-			}
-			else {
-				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
-					cameraY += (boxHeight + 1);
-				}
-				cursor--;
-			}
-			
-		}
-
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			while (!mp.update());
-			cursor++;
-			if ((cursor * (boxHeight + 1) + cameraY + offset) > 54*scale) {
-				cameraY -= (boxHeight + 1);
-			}
-			if (cursor >= length) {
-				cursor = 0;
-				cameraY = 0;
-
-			}
-
-		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
-		{
-			while (!mp.update());
-			return -1;
-		}
-		mp.update();
-	}
-	return cursor;
-
-}
 void listAudio(const char * dirname, uint8_t levels) {
 	audioCount = 0;
 	while(!_SD.begin(5, SPI, 9000000))

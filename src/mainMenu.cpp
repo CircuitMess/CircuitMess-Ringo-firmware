@@ -1,7 +1,7 @@
 #include "mainMenu.h"
 uint16_t directoryCount = 0;
-String directories[255];
-String BinaryFiles[255];
+String directories[100];
+String BinaryFiles[100];
 uint16_t binaryCount = 0;
 void listDirectories(const char * dirname) {
 	
@@ -91,9 +91,8 @@ void listBinaries(const char * dirname, uint8_t levels) {
 }
 int16_t scrollingMainMenu()
 {
-    bool previousButtonState = 0;
-
-    bool cursorState = 0;
+	bool previousButtonState = 0;
+	bool cursorState = 0;
 	uint16_t index = 0;
 	uint8_t cursorX = 0;
 	uint8_t cursorY = 0;
@@ -206,7 +205,7 @@ int16_t scrollingMainMenu()
 		mp.display.setCursor(0,-2);
 		mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		if(index < 10)
-			mp.display.print(mp.titles[index]);
+			mp.display.print(titles[index]);
 		else
 			mp.display.print(directories[index-10]);
 		
@@ -552,16 +551,11 @@ void mainMenu()
 						mp.update();
 					while(!mp.update());
 				}
-
 			}
 
-			// if (titles[index] == "Settings")
-			// {
-			// 	Serial.println(F("entering"));
-			// 	delay(5);
-			// 	if(settingsApp())
-			// 		return;
-			// }
+			if (titles[index] == "Settings")
+				if(settingsApp())
+					return;
 			// if(titles[index] == "Clock")
 			// 	clockApp();
 			// if(titles[index] == "Flashlight")

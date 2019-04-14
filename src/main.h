@@ -17,5 +17,7 @@ void menuDrawCursor(uint8_t i, int32_t y);
 String readSerial();
 uint16_t countSubstring(String string, String substring);
 void callNumber(String number);
+int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint16_t index = 0);
+
 
 #endif
