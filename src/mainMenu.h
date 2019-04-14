@@ -6,6 +6,7 @@
 #include "mediaApp.h"
 #include "contactsApp.h"
 #include "settingsApp.h"
+#include "phoneApp.h"
 extern uint16_t directoryCount;
 extern String directories[100];
 extern String BinaryFiles[100];
