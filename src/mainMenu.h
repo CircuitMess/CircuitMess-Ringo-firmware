@@ -8,6 +8,8 @@
 #include "settingsApp.h"
 #include "phoneApp.h"
 #include "clockApp.h"
+#include "calculatorApp.h"
+#include "flashlightApp.h"
 extern uint16_t directoryCount;
 extern String directories[100];
 extern String BinaryFiles[100];

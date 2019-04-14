@@ -535,8 +535,10 @@ void mainMenu()
 					return;
 			if(titles[index] == "Clock")
 				clockApp();
-			// if(titles[index] == "Flashlight")
-			// 	flashlightApp();
+			if(titles[index] == "Calculator")
+				calculatorApp();
+			if(titles[index] == "Flashlight")
+				flashlightApp();
 			if (index == -2)
 			{
 				Serial.println(F("pressed"));
