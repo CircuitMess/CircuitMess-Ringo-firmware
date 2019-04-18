@@ -9,11 +9,13 @@ void phoneApp() {
 	while (1)
 	{ // za 20 prema gore
 		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setTextSize(1);
-		mp.display.fillRect(0, 59, mp.display.width(), 26, TFT_DARKGREY);
-		mp.display.setCursor(2, 100);
-		mp.display.print("Press D to open call-log");
-		mp.display.setCursor(2, 112);
+		mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
+		mp.display.drawRect(108, 110, 52, 17, TFT_WHITE);
+		mp.display.setCursor(110, 110);
+		mp.display.print("Call log");
+		mp.display.setCursor(2, 110);
 		mp.display.print("Press A to call");
 		mp.display.setCursor(2, -1);
 		mp.display.setTextColor(TFT_LIGHTGREY);
@@ -22,11 +24,11 @@ void phoneApp() {
 
 
 		key = mp.buttons.kpdNum.getKey();
-		if (key == 'A') //clear number
+		if (key == 'B') //clear number
 			callBuffer = "";
 		else if (key == 'C')
 			callBuffer.remove(callBuffer.length()-1);
-		else if (key == 'D')
+		else if (key == 'A')
 			callLog();
 		else if (key != NO_KEY && key!= 'A' && key != 'C' && key != 'B' && key != 'D')
 		{
@@ -86,14 +88,14 @@ void phoneApp() {
 			}
 			callBuffer += key;
 		}
-        mp.display.setCursor(0, 56);
+        mp.display.setCursor(0, 76);
 		mp.display.setTextSize(2);
 		mp.display.print(callBuffer);
 
 		if (mp.display.cursor_x + 4  >= mp.display.width())
 		{
-			mp.display.fillRect(0, 59, mp.display.width(), 26, TFT_DARKGREY);
-			mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, 56);
+			mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
+			mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, 76);
 			mp.display.print(callBuffer);
 		}
 
@@ -118,14 +120,12 @@ void callLog() {
 	mp.display.setTextWrap(0);
     mp.display.setTextFont(2);
 
-	uint16_t curr_id = 0;
-
 	SDAudioFile file = mp.SD.open("/call_log.json", "r");
 
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
-		JsonArray& jarr = jb.parseArray("[{\"dateTime\":\"2019-04-18 12:00:00\", \"number\":\"+385992010102\", \"duration\":\"124\"}]");
+		JsonArray& jarr = jb.parseArray("[{\"dateTime\":\"2019-04-18 12:00:00\", \"number\":\"911\", \"duration\":\"124\"}]");
 		delay(10);
 		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
 		jarr.prettyPrintTo(file1);
@@ -136,6 +136,12 @@ void callLog() {
 	}
 
 	JsonArray& jarr = jb.parseArray(file);
+
+	void saveToFile(JsonArray *jarr, char file_name[]) {
+		SDAudioFile tmp_file = mp.SD.open(file_name, "w");
+		jarr->prettyPrintTo(tmp_file);
+		tmp_file.close();
+	}
 
 	if(!jarr.success())
 	{
@@ -149,15 +155,7 @@ void callLog() {
 	}
 	else
 	{
-		// Maybe later read from core.json
-		// uint8_t contactNumber = countSubstring(input, "CPBR:");
-		// Serial.println(contactNumber);
-
-		// index(&jarr);
 		// add("5555", "2019-04-18 13:00:00", "342", &jarr);
-		// index(&jarr);
-		// remove(1, &jarr);
-		// index(&jarr);
 
 		while (1)
 		{
@@ -167,14 +165,17 @@ void callLog() {
 			mp.update();
 			if (menuChoice != -2)
 			{
-				if(menuChoice >= 0){
-					Serial.print("OPEN ");
-					Serial.println(menuChoice);
-				} else {
-					Serial.println("reaload");
+				if(menuChoice >= 0)
+				{
+					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"], jarr[menuChoice]["duration"])){
+						jarr.remove(menuChoice);
+						// TODO: save
+					}
 				}
 				while(!mp.update());
-			} else {
+			}
+			else
+			{
 				break;
 			}
 		}
@@ -193,7 +194,18 @@ int callLogMenu(JsonArray *call_log){
 		while (!mp.update());
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Call log");
+
 		if(call_log->size() == 0){
+			mp.display.setTextSize(2);
+			mp.display.setCursor(0, 16);
+			mp.display.setTextColor(TFT_WHITE);
 			mp.display.printCenter("No calls");
 		} else {
 			cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -208,21 +220,13 @@ int callLogMenu(JsonArray *call_log){
 			}
 			callLogMenuDrawCursor(cursor, cameraY_actual);
 
-			// last draw the top entry thing
-			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(0,-2);
-			mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
-			mp.display.setTextSize(1);
-			mp.display.setTextColor(TFT_WHITE);
-			mp.display.print("Call log");
-
-			if (mp.buttons.kpd.pin_read(BTN_A) == 0) {   //BUTTON CONFIRM
-				while (mp.buttons.kpd.pin_read(BTN_A) == 0); // Exit when pressed
+			if (mp.buttons.released(BTN_A)) {
+				while (!mp.update());
 				break;
 			}
-			if (mp.buttons.kpd.pin_read(BTN_LEFT) == 0) {
-				while (mp.buttons.kpd.pin_read(BTN_LEFT) == 0); // Delete
+			if (mp.buttons.kpdNum.getKey() == 'C') //BUTTON BACK
+			{
+				while(mp.buttons.kpdNum.getKey() == 'C'){}
 				call_log->remove(cursor);
 				// TODO: SAVE
 				return -10;
@@ -291,4 +295,65 @@ void callLogMenuDrawCursor(uint8_t i, int32_t y) {
 	}
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
+}
+
+uint8_t showCall(int id, String number, String dateTime, String duration)
+{
+	while (1)
+	{
+		mp.display.fillScreen(TFT_BLACK);
+        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+        mp.display.setTextFont(2);
+        mp.display.setCursor(2,-2);
+        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Call log");
+
+		mp.display.setCursor(0, 18);
+		mp.display.print(" ");
+		mp.display.println(dateTime);
+		mp.display.print(" ");
+		mp.display.println(number);
+
+		int seconds = duration.toInt() % 60;
+		int minutes = duration.toInt() / 60;
+
+		mp.display.print(" ");
+		if(minutes < 10)
+			mp.display.print("0");
+		mp.display.print(minutes);
+		mp.display.print(":");
+		if(seconds < 10)
+			mp.display.print("0");
+		mp.display.print(seconds);
+
+		mp.display.fillRect(105, 102, 30*2, 9*2, TFT_GREENYELLOW);
+		mp.display.fillRect(5, 102, 30*2, 9*2, TFT_RED);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setCursor(10, 103);
+		mp.display.print("C Delete");
+		mp.display.setCursor(115, 103);
+		mp.display.print("A Call");
+
+		if (mp.buttons.kpdNum.getKey() == 'C') //BUTTON BACK
+		{
+			while(mp.buttons.kpdNum.getKey() == 'C'){}
+			return 1;
+		}
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			Serial.println("Go back");
+			while (!mp.update());
+			break;
+		}
+		if (mp.buttons.released(BTN_A)) // Call
+		{
+			callNumber(number);
+			while(!mp.update());
+			return 0;
+		}
+
+		mp.update();
+	}
+	return 0;
 }

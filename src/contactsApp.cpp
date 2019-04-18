@@ -852,7 +852,6 @@ int contactsMenuSD(JsonArray *contacts){
 		if (cursor >= length + 1) {
 			cursor = 0;
 			cameraY = 0;
-
 		}
 
 		}

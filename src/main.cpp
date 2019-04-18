@@ -603,99 +603,11 @@ void setup()
 	osc = new Oscillator();
 	osc->setVolume(256);
 	addOscillator(osc);
-
-	// test();
-}
-
-/*
-[{\"dateTime\":\"2019-04-18 12:00:00\", \"number\":\"+385992010102\", \"duration\":124}]
-[
-	{
-		"dateTime": "2019-04-18 12:00:00",
-		"number": "+385992010102",
-		"duration": "124"
-	}
-]
-*/
-
-void test(){
-	SDAudioFile file = mp.SD.open("/call_log.json", "r");
-
-	if(file.size() < 2){ // empty -> FILL
-		Serial.println("Override");
-		file.close();
-		JsonArray& jarr = jb.parseArray("[{\"dateTime\":\"2019-04-18 12:00:00\", \"number\":\"+385992010102\", \"duration\":\"124\"}]");
-		delay(10);
-		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
-		jarr.prettyPrintTo(file1);
-		file1.close();
-		file = mp.SD.open("/call_log.json", "r");
-		while(!file)
-			Serial.println("CONTACTS ERROR");
-	}
-
-	JsonArray& jarr = jb.parseArray(file);
-
-	if(!jarr.success())
-	{
-		Serial.println("Error");
-		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
-		mp.display.printCenter("Error: Call log - loading data");
-		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-		while (!mp.update());
-	}
-	else
-	{
-		// Maybe later read from core.json
-		// uint8_t contactNumber = countSubstring(input, "CPBR:");
-		// Serial.println(contactNumber);
-
-		index(&jarr);
-		add("5555", "2019-04-18 13:00:00", "342", &jarr);
-		index(&jarr);
-		remove(1, &jarr);
-		index(&jarr);
-	}
-
-	while(1);
-}
-
-void add(String number, String dateTime, String duration, JsonArray *jarr){
-	JsonObject& new_item = jb.createObject();
-	new_item["number"] = number;
-	new_item["dateTime"] = dateTime;
-	new_item["duration"] = duration;
-	jarr->add(new_item);
-	saveToFile(jarr, "/call_log.json");
-}
-
-void remove(int id, JsonArray *jarr) {
-	jarr->remove(id);
-	saveToFile(jarr, "/call_log.json");
-}
-
-void saveToFile(JsonArray *jarr, char file_name[]) {
-	SDAudioFile tmp_file = mp.SD.open(file_name, "w");
-	jarr->prettyPrintTo(tmp_file);
-	tmp_file.close();
-}
-
-void index(JsonArray *jarr){
-	Serial.println("Print arr");
-	for (JsonObject& elem : *jarr) {
-		Serial.print(elem["dateTime"].as<char*>());
-		Serial.print(" ");
-		Serial.print(elem["number"].as<char*>());
-		Serial.print(" ");
-		Serial.println(elem["duration"].as<char*>());
-	}
 }
 
 void loop()
 {
 	phoneApp();
-	// lockscreen();
-	// mainMenu();
+	lockscreen();
+	mainMenu();
 }

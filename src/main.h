@@ -20,10 +20,4 @@ uint16_t countSubstring(String string, String substring);
 void callNumber(String number);
 int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint16_t index = 0);
 void listAudio(const char * dirname, uint8_t levels);
-
-void test();
-void add(String number, String dateTime, String duration, JsonArray *jarr);
-void remove(int id, JsonArray *jarr);
-void index(JsonArray *jarr);
-void saveToFile(JsonArray *jarr, char file_name[]);
 #endif
