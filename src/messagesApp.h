@@ -23,13 +23,14 @@ String readSerial();
 String readSms(uint8_t index);
 String readAllSms();
 void viewSms(String content, String contact, String date);
-void smsMenuDrawBox(String contact, String date, String content, uint8_t i, int32_t y);
+void smsMenuDrawBox(String contact, String date, String content, uint8_t sms_day, uint8_t sms_month, uint8_t i, int32_t y);
 void smsMenuComposeBox(uint8_t i, int32_t y);
 void smsMenuDrawCursor(uint8_t i, int32_t y);
 void smsMenuComposeBoxCursor(uint8_t i, int32_t y);
-int16_t smsMenu(const char* title, String* contact, String *date, String *content, uint8_t length);
+int16_t smsMenu(JsonArray *messages);
 void messagesApp();
-void composeSMS();
+void composeSMS(JsonArray *messages);
+void saveMessage(String text, String number, JsonArray *messages);
 void incomingMessagePopup();
 
 #endif

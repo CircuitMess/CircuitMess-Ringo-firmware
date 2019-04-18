@@ -14,159 +14,63 @@ uint32_t end = 0;
 String input;
 String buffer;
 
+/*
+[
+	{
+		number: "123123",
+		dateTime: "2018-12-12 12:12:12",
+		text: "asd asd asd asd"
+	}
+]
+*/
+
 //Messages app
 void messagesApp() {
-	
 	mp.dataRefreshFlag = 0;
-	//sim800.println("AT+CMGL=\"REC READ\"");
-	//sim800.flush();
-	/*while (sim800.available())
-	input += (char)sim800.read();*/
-	while(!mp.simReady)
-		mp.update();
-	input = readAllSms();
-	while (input == "")
-	{
-		input = readSerial();
+	SDAudioFile file = mp.SD.open("/messages.json", "r");
+
+	if(file.size() < 2){ // empty -> FILL
+		Serial.println("Override");
+		file.close();
+		// JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}]");
+		JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}, {\"number\":\"09123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"Some other text\"}, {\"number\":\"911\", \"dateTime\":\"2018-03-12 12:12:12\", \"text\":\"Help\"}]");
+		delay(10);
+		SDAudioFile file1 = mp.SD.open("/messages.json", "w");
+		jarr.prettyPrintTo(file1);
+		file1.close();
+		file = mp.SD.open("/messages.json", "r");
+		while(!file)
+			Serial.println("Messages ERROR");
 	}
-	
-	if (input == "ERROR")
+
+	JsonArray& jarr = jb.parseArray(file);
+
+	if(!jarr.success())
 	{
+		Serial.println("Error");
 		mp.display.fillScreen(TFT_BLACK);
         mp.display.setCursor(0, mp.display.height()/2 - 16);
         mp.display.setTextFont(2);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.printCenter("Error loading SMS!");
+		mp.display.printCenter("Error: Messages - loading data");
+		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 		while (!mp.update());
-		while (!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-			mp.update();
-	}
-	else if (input == "OK")
-	{
-		mp.display.setFreeFont(TT1);
-		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.printCenter("No messages :(");
-		while (!mp.update());
-		while (!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-			mp.update();
 	}
 	else
 	{
-		Serial.println(input);
-		delay(5);
-
-
-		/////////////////////////////////////////////////////
-		//parsing the raw input data for contact number,
-		//date and text content
-		////////////////////////////////////////////////////
-		uint16_t numberOfTexts = countSubstring(input, "+CMGL:");
-		for (uint8_t i = 0; i < numberOfTexts; i++)
-		{
-			start = input.indexOf("\n", input.indexOf("CMGL:", end));
-			end = input.indexOf("\n", start + 1);
-			smsContent[i] = input.substring(start + 1, end);
-		}
-
-
-		end = 0;
-		for (uint8_t i = 0; i < numberOfTexts; i++)
-		{
-			start = input.indexOf("D\",\"", input.indexOf("CMGL:", end));
-			end = input.indexOf("\"", start + 4);
-			phoneNumber[i] = input.substring(start + 4, end);
-		}
-		//////////////////////////////////////////
-		//Parsing for date and time of sending
-		////////////////////////////
-		end = 0;
-		for (uint8_t i = 0; i < numberOfTexts; i++)
-		{
-			start = input.indexOf("\"\",\"", input.indexOf("CMGL:", end));
-			end = input.indexOf("\"", start + 4);
-			tempDate[i] = input.substring(start + 4, end);
-		}
-
-		int8_t index = -8;
-		for (uint8_t i = 0; i < numberOfTexts; i++)
-		{
-
-			char c1, c2; //buffer for saving date and time numerals in form of characters
-			c1 = tempDate[i].charAt(index + 8);
-			c2 = tempDate[i].charAt(index + 9);
-			smsYear[i] = 2000 + ((c1 - '0') * 10) + (c2 - '0');
-
-			c1 = tempDate[i].charAt(index + 11);
-			c2 = tempDate[i].charAt(index + 12);
-			smsMonth[i] = ((c1 - '0') * 10) + (c2 - '0');
-
-			c1 = tempDate[i].charAt(index + 14);
-			c2 = tempDate[i].charAt(index + 15);
-			smsDay[i] = ((c1 - '0') * 10) + (c2 - '0');
-
-			c1 = tempDate[i].charAt(index + 17);
-			c2 = tempDate[i].charAt(index + 18);
-			smsHour[i] = ((c1 - '0') * 10) + (c2 - '0');
-
-			c1 = tempDate[i].charAt(index + 20);
-			c2 = tempDate[i].charAt(index + 21);
-			smsMinute[i] = ((c1 - '0') * 10) + (c2 - '0');
-
-			c1 = tempDate[i].charAt(index + 23);
-			c2 = tempDate[i].charAt(index + 24);
-			smsSecond[i] = ((c1 - '0') * 10) + (c2 - '0');
-		}
-
 		while (1)
 		{
-			int16_t menuChoice = smsMenu("Messages", phoneNumber, tempDate, smsContent, numberOfTexts);
+			int16_t menuChoice = smsMenu(&jarr);
 			Serial.println(menuChoice);
 			if (menuChoice == -1)
 				break;
 			else if (menuChoice == 0)
-				composeSMS();
+				composeSMS(&jarr);
 			else
-				viewSms(smsContent[menuChoice-1], phoneNumber[menuChoice-1], tempDate[menuChoice-1]);
+				viewSms(jarr[menuChoice-1]["text"].as<char*>(), jarr[menuChoice-1]["number"].as<char*>(), jarr[menuChoice-1]["dateTime"].as<char*>());
 		}
 	}
 }
 
-String readSms(uint8_t index) {
-	String buffer;
-	Serial1.print(F("AT+CMGF=1\r"));
-	if ((readSerial().indexOf("ER")) == -1) {
-		Serial1.print(F("AT+CMGR="));
-		Serial1.print(index);
-		Serial1.print("\r");
-		buffer = readSerial();
-		if (buffer.indexOf("CMGR:") != -1) {
-			return buffer;
-		}
-		else return "";
-	}
-	else
-		return "";
-}
-String readAllSms() {
-	
-	Serial1.print(F("AT+CMGL=\"ALL\"\r"));
-	buffer = readSerial();
-	delay(10);
-	if (buffer.indexOf("CMGL:") != -1) {
-		return buffer;
-	}
-	else if (buffer.indexOf("ERROR", buffer.indexOf("AT+CMGL")) != -1)
-		return "ERROR";
-	else if (buffer.indexOf("CMGL:") == -1 && buffer.indexOf("OK", buffer.indexOf("AT+CMGL")) != -1)
-		return "OK";
-	else
-		return "";
-
-
-}
 void viewSms(String content, String contact, String date) {
 	y = 14;  //Beggining point
 	unsigned long buttonHeld = millis();
@@ -176,8 +80,6 @@ void viewSms(String content, String contact, String date) {
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
-		//while (kpd.pin_read(3))
-		//{
 
 		mp.display.setCursor(1, y);
 		mp.display.print(content);
@@ -261,7 +163,7 @@ void viewSms(String content, String contact, String date) {
 		mp.update();
 	}
 }
-void smsMenuDrawBox(String contact, String date, String content, uint8_t i, int32_t y) {
+void smsMenuDrawBox(String contact, String date, String content, uint8_t sms_day, uint8_t sms_month, uint8_t i, int32_t y) {
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
@@ -286,9 +188,9 @@ void smsMenuDrawBox(String contact, String date, String content, uint8_t i, int3
 		mp.display.drawString(content, 3, y + 13);
 		mp.display.setTextFont(1);
 		mp.display.setCursor(124, y+3);
-		mp.display.print(monthsList[smsMonth[i-1]-1]);
+		mp.display.print(monthsList[sms_month-1]);
 		mp.display.print(" ");
-		mp.display.print(smsDay[i - 1]);
+		mp.display.print(sms_day);
 }
 void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	uint8_t offset;
@@ -304,13 +206,14 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
-int16_t smsMenu(const char* title, String* contact, String *date, String *content, uint8_t length) {
+int16_t smsMenu(JsonArray *messages) {
 	uint8_t cursor = 0;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
+	int length = messages->size();
     scale = 2;
     offset = 19;
     boxHeight = 30;
@@ -323,11 +226,16 @@ int16_t smsMenu(const char* title, String* contact, String *date, String *conten
 			cameraY_actual = cameraY;
 		}
 
-		for (uint8_t i = 0; i < length+1; i++) {
-			if (i == 0)
-				smsMenuComposeBox(i, cameraY_actual);
-			else
-				smsMenuDrawBox(contact[i-1], date[i-1], content[i-1], i, cameraY_actual);
+		uint8_t i = 0;
+
+		smsMenuComposeBox(i, cameraY_actual);
+		for (JsonObject& elem : *messages) {
+			String date = elem["dateTime"];
+			int day = date.substring(8, 10).toInt();
+			int month = date.substring(5, 7).toInt();
+
+			smsMenuDrawBox(elem["number"].as<char*>(), elem["dateTime"].as<char*>(), elem["text"].as<char*>(), day, month, i+1, cameraY_actual);
+			i++;
 		}
 		if (cursor == 0)
 			smsMenuComposeBoxCursor(cursor, cameraY_actual);
@@ -340,7 +248,7 @@ int16_t smsMenu(const char* title, String* contact, String *date, String *conten
         mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print(title);
+		mp.display.print("Messages");
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
@@ -354,7 +262,7 @@ int16_t smsMenu(const char* title, String* contact, String *date, String *conten
 			osc->play();
 
 			if (cursor == 0) {
-				cursor = length - 1;
+				cursor = length;
 				if (length > 2) {
 					cameraY = -(cursor - 1) * (boxHeight-1);
 				}
@@ -431,7 +339,7 @@ void smsMenuComposeBox(uint8_t i, int32_t y) {
 	mp.display.setFreeFont(TT1);
 
 }
-void composeSMS()
+void composeSMS(JsonArray *messages)
 {
 	textPointer = 0;
     y = 16; //beginning point
@@ -446,8 +354,6 @@ void composeSMS()
 
 	while (1)
 	{
-
-
 		mp.display.fillScreen(TFT_DARKGREY);
 
 		mp.display.setTextColor(TFT_WHITE);
@@ -584,6 +490,8 @@ void composeSMS()
 			mp.display.printCenter("Sending text...");
 			while (!mp.update());
 
+			saveMessage(contact, content, messages);
+
 			Serial1.print("AT+CMGS=\"");
 			Serial1.print(contact);
 			Serial1.println("\"");
@@ -608,4 +516,17 @@ void composeSMS()
 
 		mp.update();
 	}
+}
+
+void saveMessage(String text, String number, JsonArray *messages){
+	JsonObject& new_item = jb.createObject();
+
+	new_item["number"] = number;
+	new_item["text"] = text;
+	new_item["dateTime"] = mp.currentDateTime();
+
+	messages->add(new_item);
+	SDAudioFile file1 = mp.SD.open("/messages.json", "w");
+	messages->prettyPrintTo(file1);
+	file1.close();
 }
