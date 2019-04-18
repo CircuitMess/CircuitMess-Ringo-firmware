@@ -605,6 +605,6 @@ void setup() {
 }
 void loop()
 {
-  lockscreen();
+  // lockscreen();
 	mainMenu();
 }
