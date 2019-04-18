@@ -69,9 +69,9 @@ void settingsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 	mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
 	mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
 }
-int8_t settingsMenu(String* title, uint8_t length) {
+int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 	bool pressed = 0;
-	uint8_t cursor = 0;
+	uint8_t cursor = _cursor;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t	scale = 2;
@@ -146,10 +146,11 @@ int8_t settingsMenu(String* title, uint8_t length) {
 
 }
 bool settingsApp() {
+	int8_t input = 0;
 	while (!mp.update());
 	while (1)
 	{
-		int8_t input = settingsMenu(settingsItems, 6);
+		input = settingsMenu(settingsItems, 6, input);
 		if (input == -1) //BUTTON BACK
 			break;
 		if (input == 0)
@@ -880,26 +881,26 @@ void securityMenu() {
 		mp.display.printCenter("GSM still booting...");
 		mp.update();
 	}
+	mp.display.setCursor(0, mp.display.height()/2 - 16);
+	mp.display.setTextFont(2);
+	mp.display.setTextColor(TFT_WHITE);
+	mp.display.fillScreen(TFT_BLACK);
+	mp.display.printCenter("Loading SIM card...");
+	while(!mp.update());
 	while (reply.indexOf("+SPIC:") == -1)
 	{
+		mp.update();
 		Serial1.println("AT+SPIC");
 		reply = Serial1.readString();
 		Serial.println(reply);
 		delay(5);
 	}
-	timesRemaining = reply.substring(reply.indexOf(" ", reply.indexOf("+SPIC:")), reply.indexOf(",", reply.indexOf(" ", reply.indexOf("+SPIC:")))).toInt();
+	uint8_t foo = reply.indexOf(" ", reply.indexOf("+SPIC:"));
+	timesRemaining = reply.substring(foo, reply.indexOf(",", foo)).toInt();
 	Serial.println(timesRemaining);
 	delay(5);
 	if (timesRemaining == 0) //PUK lock WIP
-	{
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(0, mp.display.height()/2 - 16);
-		mp.display.setTextFont(2);
-		mp.display.printCenter("PUK lock");
-		while (!mp.buttons.released(BTN_A))
-			mp.update();
-	}
+		mp.enterPUK();
 	//check if the SIM card is locked
 	while (reply.indexOf("+CLCK:") == -1)
 	{
@@ -918,12 +919,9 @@ void securityMenu() {
 	{
 		if (timesRemaining == 0) //PUK lock WIP
 		{
-			mp.display.fillScreen(TFT_BLACK);
-			mp.display.setTextColor(TFT_WHITE);
-			mp.display.setCursor(34, 30);
-			mp.display.printCenter("PUK lock");
-			while (!mp.buttons.pressed(BTN_A))
-				mp.update();
+			mp.enterPUK();
+			pinLockBuffer = 1;
+			timesRemaining = 3;
 		}
 		else
 		{
@@ -988,22 +986,25 @@ void securityMenu() {
 					if (pinLock)
 						while (1)
 						{
+							mp.display.setTextColor(TFT_BLACK);
+							mp.display.setTextSize(1);
 							mp.display.setTextFont(2);
-							mp.display.setTextColor(TFT_WHITE);
-							mp.display.fillScreen(TFT_BLACK);
-							mp.display.setCursor(5, 10);
+							mp.display.fillScreen(0xED1F);
+							mp.display.setCursor(5, 7);
 							mp.display.printCenter("Enter PIN:");
-							mp.display.setCursor(5, 40);
-							mp.display.setTextFont(1);
-							String temp = "Remaining attempts: ";
-							temp += timesRemaining;
-							mp.display.printCenter(temp);
-							mp.display.setTextFont(2);
-							mp.display.setCursor(1, 60);
+							mp.display.drawRect(14, 45, 134, 30, TFT_BLACK);
+							mp.display.drawRect(13, 44, 136, 32, TFT_BLACK);
+							mp.display.setCursor(47, 52);
 							mp.display.printCenter(pinBuffer);
-							mp.display.setCursor(2, 111);
-							mp.display.setTextFont(2);
-							mp.display.print("Press A to confirm");
+
+							mp.display.setCursor(1, 112);
+							mp.display.print("Erase");
+							mp.display.setCursor(110, 112);
+							mp.display.print("Confirm");
+							mp.display.setCursor(5, 85);
+							String temp = "Remaining attempts: ";
+							temp+=timesRemaining;
+							mp.display.printCenter(temp);
 
 							key = mp.buttons.kpdNum.getKey();
 							if (key == 'A') //clear number
@@ -1023,7 +1024,7 @@ void securityMenu() {
 								while (!Serial1.available());
 								while (reply.indexOf("OK", reply.indexOf("AT+CLCK")) == -1 && reply.indexOf("ERROR", reply.indexOf("AT+CLCK")) == -1)
 									reply = Serial1.readString();
-								mp.display.fillScreen(TFT_BLACK);
+								mp.display.fillScreen(0xED1F);
 								mp.display.setCursor(0, mp.display.height()/2 - 16);
 								mp.display.setTextFont(2);
 								if (reply.indexOf("OK", reply.indexOf("AT+CLCK")) != -1)
@@ -1060,7 +1061,7 @@ void securityMenu() {
 									else
 										mp.display.printCenter("Invalid PIN");
 									while (!mp.update());
-									delay(2000);
+									delay(1000);
 								}
 								pinBuffer = "";
 							}
@@ -1109,22 +1110,25 @@ void securityMenu() {
 
 					while (1)
 					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
 						mp.display.setTextFont(2);
-						mp.display.setTextColor(TFT_WHITE);
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setCursor(5, 10);
+						mp.display.fillScreen(0xED1F);
+						mp.display.setCursor(5, 7);
 						mp.display.printCenter("Enter old PIN:");
-						mp.display.setCursor(5, 40);
-						mp.display.setTextFont(1);
-						String temp = "Remaining attempts: ";
-						temp += timesRemaining;
-						mp.display.printCenter(temp);
-						mp.display.setTextFont(2);
-						mp.display.setCursor(1, 60);
+						mp.display.drawRect(14, 45, 134, 30, TFT_BLACK);
+						mp.display.drawRect(13, 44, 136, 32, TFT_BLACK);
+						mp.display.setCursor(47, 52);
 						mp.display.printCenter(oldPin);
-						mp.display.setCursor(2, 111);
-						mp.display.setTextFont(2);
-						mp.display.print("Press A to confirm");
+
+						mp.display.setCursor(1, 112);
+						mp.display.print("Erase");
+						mp.display.setCursor(110, 112);
+						mp.display.print("Confirm");
+						mp.display.setCursor(5, 85);
+						String temp = "Remaining attempts: ";
+						temp+=timesRemaining;
+						mp.display.printCenter(temp);
 
 						key = mp.buttons.kpdNum.getKey();
 						if (key == 'A') //clear number
@@ -1134,7 +1138,7 @@ void securityMenu() {
 						if (key != NO_KEY && isDigit(key) && oldPin.length() != 4)
 							oldPin += key;
 
-						if (mp.buttons.released(BTN_A))//enter PIN
+						if ((mp.buttons.released(BTN_A) || key == 'A') && oldPin.length() == 4)//enter PIN
 						{
 							while(!mp.update());
 							if (pinLock)
@@ -1152,9 +1156,10 @@ void securityMenu() {
 									Serial.println(reply);
 									delay(5);
 								}
-								mp.display.fillScreen(TFT_BLACK);
+								mp.display.fillScreen(0xED1F);
 								mp.display.setCursor(0, mp.display.height()/2 - 16);
 								mp.display.setTextFont(2);
+								mp.display.setTextColor(TFT_BLACK);
 								if (reply.indexOf("OK", reply.indexOf("AT+CPWD")) != -1)
 								{
 									timesRemaining = 3;
@@ -1169,6 +1174,8 @@ void securityMenu() {
 									{
 										oldPin = "";
 										timesRemaining--;
+										if(timesRemaining == 0)
+											break;
 										mp.display.printCenter("Wrong PIN :(");
 									}
 									else if (reply.indexOf("PUK") != -1)
@@ -1179,7 +1186,7 @@ void securityMenu() {
 									else
 										mp.display.printCenter("Invalid PIN");
 									while (!mp.update());
-									delay(2000);
+									delay(1000);
 								}
 							}
 							else
@@ -1194,6 +1201,10 @@ void securityMenu() {
 									Serial.println(reply);
 									delay(5);
 								}
+								mp.display.fillScreen(0xED1F);
+								mp.display.setCursor(0, mp.display.height()/2 - 16);
+								mp.display.setTextFont(2);
+								mp.display.setTextColor(TFT_BLACK);
 								if (reply.indexOf("OK", reply.indexOf("AT+CLCK")) != -1)
 								{
 									reply = "";
@@ -1209,9 +1220,6 @@ void securityMenu() {
 										Serial.println(reply);
 										delay(5);
 									}
-									mp.display.fillScreen(TFT_BLACK);
-									mp.display.setCursor(0, mp.display.height()/2 - 16);
-									mp.display.setTextFont(2);
 									if (reply.indexOf("OK", reply.indexOf("AT+CPWD")) != -1)
 									{
 										timesRemaining = 3;
@@ -1232,12 +1240,7 @@ void securityMenu() {
 								}
 								else
 								{
-
 									saved = 0;
-
-									mp.display.fillScreen(TFT_BLACK);
-									mp.display.setTextFont(2);
-									mp.display.setCursor(0, mp.display.height()/2 - 16);
 									if (reply.indexOf("incorrect") != -1)
 									{
 										timesRemaining--;
@@ -1251,7 +1254,7 @@ void securityMenu() {
 									else
 										mp.display.printCenter("Invalid PIN");
 									while (!mp.update());
-									delay(2000);
+									delay(1000);
 									Serial.println(timesRemaining);
 									delay(5);
 									if (timesRemaining == 0)

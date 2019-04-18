@@ -379,7 +379,6 @@ int16_t scrollingMainMenu()
 }
 void mainMenu()
 {
-	while (!mp.buttons.released(BTN_A));
 	Serial.println(F("entered main menu"));
 	mp.dataRefreshFlag = 0;
 	listDirectories("/");
