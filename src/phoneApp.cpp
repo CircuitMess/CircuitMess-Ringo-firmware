@@ -115,6 +115,36 @@ void phoneApp() {
 	}
 }
 
+void addCall(String number, String dateTime, int duration){
+	SDAudioFile file = mp.SD.open("/call_log.json", "r");
+
+	if(file.size() < 2){
+		Serial.println("Override");
+		file.close();
+		JsonArray& jarr = jb.parseArray("[]");
+		delay(10);
+		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
+		jarr.prettyPrintTo(file1);
+		file1.close();
+		file = mp.SD.open("/call_log.json", "r");
+		while(!file)
+			Serial.println("CONTACTS ERROR");
+	}
+
+	JsonArray& jarr = jb.parseArray(file);
+	file.close();
+
+	JsonObject& new_item = jb.createObject();
+	new_item["number"] = number;
+	new_item["dateTime"] = dateTime;
+	new_item["duration"] = duration;
+	jarr.add(new_item);
+
+	SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
+	jarr.prettyPrintTo(file1);
+	file1.close();
+}
+
 void callLog() {
 	mp.dataRefreshFlag = 0;
 	mp.display.setTextWrap(0);
@@ -136,12 +166,6 @@ void callLog() {
 	}
 
 	JsonArray& jarr = jb.parseArray(file);
-
-	void saveToFile(JsonArray *jarr, char file_name[]) {
-		SDAudioFile tmp_file = mp.SD.open(file_name, "w");
-		jarr->prettyPrintTo(tmp_file);
-		tmp_file.close();
-	}
 
 	if(!jarr.success())
 	{
@@ -169,7 +193,9 @@ void callLog() {
 				{
 					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"], jarr[menuChoice]["duration"])){
 						jarr.remove(menuChoice);
-						// TODO: save
+						SDAudioFile file = mp.SD.open("/call_log.json", "w");
+						jarr.prettyPrintTo(file);
+						file.close();
 					}
 				}
 				while(!mp.update());
@@ -228,14 +254,16 @@ int callLogMenu(JsonArray *call_log){
 			{
 				while(mp.buttons.kpdNum.getKey() == 'C'){}
 				call_log->remove(cursor);
-				// TODO: SAVE
+				SDAudioFile file = mp.SD.open("/call_log.json", "w");
+				call_log->prettyPrintTo(file);
+				file.close();
 				return -10;
 			}
 
 			if (mp.buttons.kpd.pin_read(BTN_UP) == 0) {  //BUTTON UP
 				while (mp.buttons.kpd.pin_read(BTN_UP) == 0);
 				if (cursor == 0) {
-					cursor = length;
+					cursor = length - 1;
 					if (length > 2) {
 					cameraY = -(cursor - 2) * (boxHeight+1);
 					}
@@ -254,10 +282,9 @@ int callLogMenu(JsonArray *call_log){
 				if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
 					cameraY -= (boxHeight+1);
 				}
-				if (cursor >= length + 1) {
+				if (cursor >= length) {
 					cursor = 0;
 					cameraY = 0;
-
 				}
 			}
 		}

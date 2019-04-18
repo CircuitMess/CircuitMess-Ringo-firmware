@@ -348,6 +348,7 @@ void callNumber(String number) {
 	uint32_t timeOffset = 0;
 	uint16_t textLength;
 	uint8_t scale;
+	unsigned int tmp_time = 0;
 	String temp;
 	if(mp.resolutionMode)
 	{
@@ -368,7 +369,7 @@ void callNumber(String number) {
 		mp.display.fillScreen(TFT_WHITE);
 		if (Serial1.available())
 			localBuffer = Serial1.readString();
-		Serial.println(localBuffer);
+		// Serial.println(localBuffer);
 		delay(5);
 		if (localBuffer.indexOf("CLCC:") != -1)
 		{
@@ -457,6 +458,39 @@ void callNumber(String number) {
 				mp.display.print("Call ended");
 				Serial.println("ENDED");
 				while (!mp.update());
+
+				mp.updateTimeRTC();
+				// 2019-04-18 12:00:00
+				String dateTime = String(mp.clockYear);
+				dateTime += "-";
+				if(mp.clockMonth < 10){
+					dateTime += "0";
+				}
+				dateTime += String(mp.clockMonth);
+				dateTime += "-";
+				if(mp.clockDay < 10){
+					dateTime += "0";
+				}
+				dateTime += String(mp.clockDay);
+				dateTime += " ";
+
+				if(mp.clockHour < 10){
+					dateTime += "0";
+				}
+				dateTime += String(mp.clockHour);
+				dateTime += ":";
+				if(mp.clockMinute < 10){
+					dateTime += "0";
+				}
+				dateTime += String(mp.clockMinute);
+				dateTime += ":";
+				if(mp.clockSecond < 10){
+					dateTime += "0";
+				}
+				dateTime += String(mp.clockSecond);
+
+				addCall(number, dateTime, tmp_time);
+
 				delay(1000);
 				break;
 			}
@@ -589,9 +623,42 @@ void callNumber(String number) {
 			mp.display.print("Call ended");
 			Serial.println("ENDED");
 			while (!mp.update());
+			mp.updateTimeRTC();
+			// 2019-04-18 12:00:00
+			String dateTime = String(mp.clockYear);
+			dateTime += "-";
+			if(mp.clockMonth < 10){
+				dateTime += "0";
+			}
+			dateTime += String(mp.clockMonth);
+			dateTime += "-";
+			if(mp.clockDay < 10){
+				dateTime += "0";
+			}
+			dateTime += String(mp.clockDay);
+			dateTime += " ";
+
+			if(mp.clockHour < 10){
+				dateTime += "0";
+			}
+			dateTime += String(mp.clockHour);
+			dateTime += ":";
+			if(mp.clockMinute < 10){
+				dateTime += "0";
+			}
+			dateTime += String(mp.clockMinute);
+			dateTime += ":";
+			if(mp.clockSecond < 10){
+				dateTime += "0";
+			}
+			dateTime += String(mp.clockSecond);
+
+			addCall(number, dateTime, tmp_time);
 			delay(1000);
 			break;
 		}
+
+		tmp_time = int((millis() - timeOffset) / 1000);
 		mp.update();
 	}
 }
