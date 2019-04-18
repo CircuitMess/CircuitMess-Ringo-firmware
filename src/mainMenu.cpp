@@ -1,4 +1,6 @@
 #include "mainMenu.h"
+uint8_t pageIndex = 0;
+uint8_t cameraY = 0;
 uint16_t directoryCount = 0;
 String directories[100];
 String BinaryFiles[100];
@@ -89,7 +91,7 @@ void listBinaries(const char * dirname, uint8_t levels) {
 		file = root.openNextFile();
 	}
 }
-int16_t scrollingMainMenu()
+int16_t scrollingMainMenu(uint16_t _cursor)
 {
 	bool previousButtonState = 0;
 	bool cursorState = 0;
@@ -112,8 +114,9 @@ int16_t scrollingMainMenu()
 	Serial.println(pageNumber);
 	Serial.println(y_elements);
 	delay(5);
-	uint8_t pageIndex = 0;
-	uint8_t cameraY = 0;
+	cursorY = int(_cursor / x_elements);
+	cursorX = _cursor % x_elements;
+	
 	String appNames[] = {"Clock", "Calculator", "Flashlight", "Calendar", "Invaders"};
 	String passcode = "";
 	uint32_t passcodeMillis = millis();
@@ -369,6 +372,8 @@ int16_t scrollingMainMenu()
 			mp.vibration(200);
 			FastLED.clear();
 			while(!mp.update());
+			pageIndex = 0;
+			cameraY = 0;
 			return -2;
 		}
 		if (passcode == "UPUPDOWNDOWNLEFTRIGHTLEFTRIGHT")
@@ -379,12 +384,13 @@ int16_t scrollingMainMenu()
 }
 void mainMenu()
 {
+	int16_t index = 0;
 	Serial.println(F("entered main menu"));
 	mp.dataRefreshFlag = 0;
 	listDirectories("/");
 	while (1)
 	{
-		int8_t index = scrollingMainMenu();
+		index = scrollingMainMenu(index);
 		Serial.println(index);
 		delay(5);
 		if(index < 10) 
