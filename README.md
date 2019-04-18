@@ -1,6 +1,12 @@
 
 
-# MAKERphone firmware
+# MAKERphone firmware (a.k.a. MAKERphone library)
+
+This is the main Arduino code library containing all functions necessary for coding your own MAKERphone apps.
+
+A complete library reference is under construction.
+
+#
 
 Copyright © 2019 CircuitMess
 
