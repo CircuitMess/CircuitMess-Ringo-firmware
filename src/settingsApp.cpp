@@ -166,7 +166,7 @@ bool settingsApp() {
 			if(updateMenu())
 				return true;
 	}
-	
+
 
 	mp.applySettings();
 	mp.display.fillScreen(TFT_BLACK);
@@ -211,7 +211,7 @@ bool settingsApp() {
 		while(!mp.update());
 	}
 	return false;
-	
+
 }
 void networkMenu() {
 	uint8_t cursor = 0;
@@ -325,7 +325,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0 && mp.wifi == 1)
 			{
-				osc->note(75, 0.05);            
+				osc->note(75, 0.05);
 				osc->play();
 				mp.wifi = !mp.wifi;
 			}
@@ -377,7 +377,7 @@ void networkMenu() {
 			}
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0) 
+		if (mp.buttons.kpd.pin_read(BTN_UP) == 0)
 		{
 			osc->note(75, 0.05);
 			osc->play();
@@ -403,7 +403,7 @@ void networkMenu() {
 			while(!mp.update());
 			break;
 		}
-			
+
 
 		mp.update();
 	}
@@ -647,7 +647,7 @@ void soundMenu() {
 	mp.SD.begin(5, SPI, 8000000);
 	listRingtones("/ringtones", 0);
 	listNotifications("/notifications", 0);
-	
+
 	mp.ringtone = "/ringtones/chiptune.mp3";
 	mp.notification = "/notifications/to-the-point.mp3";
 	String parsedRingtone;
@@ -792,7 +792,7 @@ void soundMenu() {
 }
 void listRingtones(const char * dirname, uint8_t levels) {
 	ringtoneCount = 0;
-	
+
 	Serial.printf("Listing directory: %s\n", dirname);
 
 	SDAudioFile root = mp.SD.open(dirname);
@@ -825,7 +825,7 @@ void listRingtones(const char * dirname, uint8_t levels) {
 }
 void listNotifications(const char * dirname, uint8_t levels) {
 	notificationCount = 0;
-	
+
 	Serial.printf("Listing directory: %s\n", dirname);
 
 	SDAudioFile root = mp.SD.open(dirname);
@@ -857,7 +857,7 @@ void listNotifications(const char * dirname, uint8_t levels) {
 	}
 }
 void securityMenu() {
-	
+
 	pinNumber = 1234;
 
 	String pinBuffer = "";

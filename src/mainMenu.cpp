@@ -4,10 +4,10 @@ String directories[100];
 String BinaryFiles[100];
 uint16_t binaryCount = 0;
 void listDirectories(const char * dirname) {
-	
+
 	directoryCount = 0;
 	Serial.printf("Listing directory: %s\n", dirname);
-	
+
 	SDAudioFile root = mp.SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
@@ -39,7 +39,7 @@ void listDirectories(const char * dirname) {
 	}
 }
 void listBinaries(const char * dirname, uint8_t levels) {
-	
+
 	binaryCount = 0;
 	Serial.printf("Listing directory: %s\n", dirname);
 
@@ -101,14 +101,14 @@ int16_t scrollingMainMenu()
 	delay(5);
 	uint8_t x_elements = 3;
 	uint8_t y_elements = ceil((float)elements/x_elements);
-	
+
 	uint8_t pageNumber;
 	if(elements < 6)
 		pageNumber = 0;
 	else
 
 		pageNumber = ceil((float)(elements - 6)/3);
-	
+
 	Serial.println(pageNumber);
 	Serial.println(y_elements);
 	delay(5);
@@ -124,7 +124,7 @@ int16_t scrollingMainMenu()
 	while(!mp.update());
 	while (1)
 	{
-		
+
 		mp.display.fillRect(0,0,mp.display.width(), 14, TFT_BLACK);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
@@ -175,7 +175,7 @@ int16_t scrollingMainMenu()
 					case 9:
 						mp.display.drawIcon(calendar_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
-					default: 
+					default:
 						if(pageIndex * 3 + i < elements)
 						{
 							Serial.println(directories[pageIndex * 3 + i - 10]);
@@ -184,7 +184,7 @@ int16_t scrollingMainMenu()
 								mp.display.drawBmp(String("/" + directories[pageIndex * 3 + i - 10] + "/icon.bmp"), 4 + tempX * 52, 18 + tempY * 56, 2);
 							else
 								mp.display.drawIcon(defaultIcon, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
-							
+
 						}
 						break;
 				}
@@ -195,7 +195,7 @@ int16_t scrollingMainMenu()
 		mp.display.fillRect(0, 0, 160, 12, TFT_BLACK);
 		while(cursorY*x_elements + cursorX >= elements)
 			cursorX--;
-	
+
 		index = cursorY * x_elements + cursorX;
 		// Serial.println(index);
 		// Serial.println(pageIndex);
@@ -208,7 +208,7 @@ int16_t scrollingMainMenu()
 			mp.display.print(titles[index]);
 		else
 			mp.display.print(directories[index-10]);
-		
+
 		if (millis() - elapsedMillis >= 250) {
 			elapsedMillis = millis();
 			cursorState = !cursorState;
@@ -250,11 +250,11 @@ int16_t scrollingMainMenu()
 			FastLED.clear();
 			while (!mp.update());
 
-			if (cursorY == 0) 
+			if (cursorY == 0)
 			{
 				newScreen = 1;
 				cursorY = y_elements-1;
-				
+
 				if(pageNumber > 0)
 				{
 					cameraY = 1;
@@ -291,7 +291,7 @@ int16_t scrollingMainMenu()
 			FastLED.clear();
 			while (!mp.update());
 
-			if (cursorY == y_elements - 1) 
+			if (cursorY == y_elements - 1)
 			{
 				newScreen = 1;
 				cursorY = 0;
@@ -310,7 +310,7 @@ int16_t scrollingMainMenu()
 				cursorY++;
 				pageIndex++;
 			}
-			
+
 			elapsedMillis = millis();
 			cursorState = 1;
 		}
@@ -388,7 +388,7 @@ void mainMenu()
 		int8_t index = scrollingMainMenu();
 		Serial.println(index);
 		delay(5);
-		if(index < 10) 
+		if(index < 10)
 		{
 			if (titles[index] == "Apps")
 			{

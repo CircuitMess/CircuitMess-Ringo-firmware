@@ -294,7 +294,7 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		} else {
 		contactsMenuDrawCursor(cursor, cameraY_actual);
 		}
-		
+
         mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
         mp.display.setTextFont(2);
         mp.display.setCursor(0,-2);
