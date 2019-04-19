@@ -1,10 +1,22 @@
 
 
-# MAKERphone firmware (a.k.a. MAKERphone library)
+# MAKERphone firmware 
 
-This is the main Arduino code library containing all functions necessary for coding your own MAKERphone apps.
+A repository for the core firmware that comes preloaded on every MAKERphone.
 
-A complete library reference is under construction.
+Functionalities that are currently available:
+- home screen
+- call log
+- caller app
+- SMS app
+- sleep mode
+- calculator app
+- clock app
+- media app
+- settings app
+- loading other apps (.bin format) from SD card
+- WAV file playback
+- basic notification sounds and ringtones
 
 #
 
