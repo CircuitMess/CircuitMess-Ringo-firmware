@@ -15,14 +15,11 @@ void timeMenu();
 bool updateMenu();
 void wifiMenu();
 
-void listRingtones(const char * dirname, uint8_t levels);
-void listNotifications(const char * dirname, uint8_t levels);
+int8_t notificationsAudioMenu(String* items, uint8_t length);
+void notificationsDrawBox(String text, uint8_t i, int32_t y);
+void notificationsDrawCursor(uint8_t i, int32_t y);
 
 extern String settingsItems[6];
-extern uint8_t ringtoneCount;
-extern uint8_t notificationCount;
-extern String ringtoneFiles[100];
-extern String notificationFiles[100];
 extern uint16_t pinNumber;
 extern uint8_t timesRemaining;
 extern bool pinLock;

@@ -674,7 +674,9 @@ void setup()
 
 void loop()
 {
-	phoneApp();
-	lockscreen();
-	mainMenu();
+
+	soundMenu();
+	mp.incomingCall();
+	// lockscreen();
+	// mainMenu();
 }

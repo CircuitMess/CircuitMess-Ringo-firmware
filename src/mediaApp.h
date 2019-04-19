@@ -2,9 +2,6 @@
 #define media_h
 
 #include "main.h"
-// extern uint8_t cursor;
-// extern int32_t cameraY;
-// extern int32_t cameraY_actual;
 extern String mediaItems[3];
 extern String photoFiles[100];
 extern uint8_t photoCount;

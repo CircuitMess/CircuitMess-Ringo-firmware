@@ -1,10 +1,6 @@
 #include "settingsApp.h"
-uint8_t ringtoneCount=0;
-uint8_t notificationCount=0;
 uint16_t pinNumber = 1234;
 uint8_t timesRemaining = 0;
-String ringtoneFiles[100];
-String notificationFiles[100];
 String settingsItems[6] PROGMEM = {
     "Network",
     "Display",
@@ -13,6 +9,13 @@ String settingsItems[6] PROGMEM = {
     "Security",
     "About"
 };
+String notificationSounds[4] PROGMEM = {
+	"Oxygen",
+	"Resonance", 
+	"Mayday", 
+	"Buzzer"
+};
+
 bool pinLock = 0;
 void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
 	uint8_t	scale = 2;
@@ -74,7 +77,6 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 	uint8_t cursor = _cursor;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
-	uint8_t	scale = 2;
 	uint8_t	boxHeight = 20;
 	while (1) {
 		while (!mp.update());
@@ -645,29 +647,24 @@ void displayMenu() {
 	mp.sleepTimeActual = sleepTimeActualBuffer;
 }
 void soundMenu() {
-	mp.SD.begin(5, SPI, 8000000);
-	listRingtones("/ringtones", 0);
-	listNotifications("/notifications", 0);
-
-	mp.ringtone = "/ringtones/chiptune.mp3";
-	mp.notification = "/notifications/to-the-point.mp3";
+	if(mp.SDinsertedFlag)
+		listAudio("/Music", 0);
 	String parsedRingtone;
-	String parsedNotification;
 	uint8_t start = 0;
 	int8_t i;
 	mp.display.setTextFont(1);
 	mp.display.setTextColor(TFT_BLACK);
 	uint8_t cursor = 0;
-	while (mp.ringtone.indexOf("/", start) != -1)
-		start = mp.ringtone.indexOf("/", start) + 1;
-	parsedRingtone = mp.ringtone.substring(start, mp.ringtone.indexOf("."));
+	while (mp.ringtone_path.indexOf("/", start) != -1)
+		start = mp.ringtone_path.indexOf("/", start) + 1;
+	parsedRingtone = mp.ringtone_path.substring(start, mp.ringtone_path.indexOf("."));
 	start = 0;
-	while (mp.notification.indexOf("/", start) != -1)
-		start = mp.notification.indexOf("/", start) + 1;
-	parsedNotification = mp.notification.substring(start, mp.notification.indexOf("."));
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	while (1)
 	{
 		mp.display.setTextFont(2);
+		mp.display.setTextColor(TFT_BLACK);
 		mp.display.fillScreen(0xA7FF);
 		mp.display.setCursor(20, 4);
 		mp.display.printCenter("Volume");
@@ -685,11 +682,15 @@ void soundMenu() {
 		mp.display.printCenter("Notification");
 		mp.display.drawRect(3*2, 100, 74*2, 11*2, TFT_BLACK);
 		mp.display.setCursor(6*2, 103);
-		mp.display.print(parsedNotification);
-
+		mp.display.printCenter(notificationSounds[mp.notification]);
+		if(millis()-blinkMillis >= 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		if (cursor == 0)
 		{
-			if (millis() % 1000 <= 500)
+			if (blinkState)
 			{
 				mp.display.drawBitmap(4*2, 10*2, noSound, TFT_BLACK, 2);
 				mp.display.drawBitmap(67*2, 10*2, fullSound, TFT_BLACK, 2);
@@ -718,35 +719,58 @@ void soundMenu() {
 		}
 		if (cursor == 1)
 		{
-			if (millis() % 1000 <= 500)
+			if (blinkState)
 				mp.display.drawRect(3*2, 55, 74*2, 11*2, TFT_BLACK);
 			else
 				mp.display.drawRect(3*2, 55, 74*2, 11*2, 0xA7FF);
 
 			if (mp.buttons.released(BTN_A))
 			{
-				osc->note(75, 0.05);
-				osc->play();
 				while(!mp.update());
-				mp.display.setFreeFont(TT1);
-				Serial.println(ringtoneCount);
-				i = audioPlayerMenu("Select ringtone:", ringtoneFiles, ringtoneCount);
-				mp.display.setTextColor(TFT_BLACK);
-				if (i >= 0)
-					mp.ringtone = ringtoneFiles[i];
+				if(mp.SDinsertedFlag)
+				{
+					osc->note(75, 0.05);
+					osc->play();
+					i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
+					mp.display.setTextColor(TFT_BLACK);
+					if (i >= 0)
+						mp.ringtone_path = audioFiles[i];
+					else
+						Serial.println("pressed B in menu");
+					start = 0;
+					while (mp.ringtone_path.indexOf("/", start) != -1)
+						start = mp.ringtone_path.indexOf("/", start) + 1;
+					parsedRingtone = mp.ringtone_path.substring(start, mp.ringtone_path.indexOf("."));
+				}
 				else
-					Serial.println("pressed B in menu");
-				start = 0;
-				while (mp.ringtone.indexOf("/", start) != -1)
-					start = mp.ringtone.indexOf("/", start) + 1;
-				parsedRingtone = mp.ringtone.substring(start, mp.ringtone.indexOf("."));
+				{
+					mp.display.setTextColor(TFT_BLACK);
+					mp.display.setTextSize(1);
+					mp.display.setTextFont(2);
+					mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+					mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+					mp.display.fillRect(15, 46, 132, 36, 0xA7FF);
+					mp.display.setCursor(47, 55);
+					mp.display.printCenter("No SD card!");
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 1500)
+					{
+						mp.update();
+						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+						{
+							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+								mp.update();
+							break;
+						}
+					}
+					while(!mp.update());
+				}
+				
 			}
 		}
 		if (cursor == 2)
 		{
-			osc->note(75, 0.05);
-			osc->play();
-			if (millis() % 1000 <= 500)
+			if (blinkState)
 				mp.display.drawRect(3*2, 100, 74*2, 11*2, TFT_BLACK);
 			else
 				mp.display.drawRect(3*2, 100, 74*2, 11*2, 0xA7FF);
@@ -754,15 +778,9 @@ void soundMenu() {
 			if (mp.buttons.released(BTN_A))
 			{
 				while(!mp.update());
-				mp.display.setFreeFont(TT1);
-				i = audioPlayerMenu("Select notification:", notificationFiles, notificationCount);
-				mp.display.setTextColor(TFT_BLACK);
-				if (i >= 0)
-					mp.notification = notificationFiles[i];
-				start = 0;
-				while (mp.notification.indexOf("/", start) != -1)
-					start = mp.notification.indexOf("/", start) + 1;
-				parsedNotification = mp.notification.substring(start, mp.notification.indexOf("."));
+				int8_t temp = notificationsAudioMenu(notificationSounds, 4);
+				if(temp>=0)
+					mp.notification = temp;
 			}
 		}
 
@@ -775,6 +793,8 @@ void soundMenu() {
 			else
 				cursor--;
 			while(!mp.update());
+			blinkState = 0;
+			blinkMillis = millis();
 		}
 		if (mp.buttons.released(BTN_DOWN))
 		{
@@ -785,76 +805,15 @@ void soundMenu() {
 			else
 				cursor++;
 			while(!mp.update());
+			blinkState = 0;
+			blinkMillis = millis();
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			while(!mp.update());
 			break;
+		}
 		mp.update();
-	}
-}
-void listRingtones(const char * dirname, uint8_t levels) {
-	ringtoneCount = 0;
-
-	Serial.printf("Listing directory: %s\n", dirname);
-
-	SDAudioFile root = mp.SD.open(dirname);
-	if (!root) {
-		Serial.println("Failed to open directory");
-		return;
-	}
-	if (!root.isDirectory()) {
-		Serial.println("Not a directory");
-		return;
-
-	}
-	int counter = 1;
-	SDAudioFile file = root.openNextFile();
-	while (file) {
-		String Name(file.name());
-		Serial.println(Name);
-		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3")))
-		{
-			Serial.print(counter);
-			Serial.print(".   ");
-			Serial.println(Name);
-			ringtoneFiles[counter - 1] = Name;
-			Serial.println(Name);
-			ringtoneCount++;
-			counter++;
-		}
-		file = root.openNextFile();
-	}
-}
-void listNotifications(const char * dirname, uint8_t levels) {
-	notificationCount = 0;
-
-	Serial.printf("Listing directory: %s\n", dirname);
-
-	SDAudioFile root = mp.SD.open(dirname);
-	if (!root) {
-		Serial.println("Failed to open directory");
-		return;
-	}
-	if (!root.isDirectory()) {
-		Serial.println("Not a directory");
-		return;
-
-	}
-	int counter = 1;
-	SDAudioFile file = root.openNextFile();
-	while (file) {
-		String Name(file.name());
-		Serial.println(Name);
-		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3")))
-		{
-			Serial.print(counter);
-			Serial.print(".   ");
-			Serial.println(Name);
-			notificationFiles[counter - 1] = Name;
-			Serial.println(Name);
-			notificationCount++;
-			counter++;
-		}
-		file = root.openNextFile();
 	}
 }
 void securityMenu() {
@@ -2232,4 +2191,112 @@ bool updateMenu()
 	}
 	while(!mp.update());
 	return false;
+}
+int8_t notificationsAudioMenu(String* items, uint8_t length) {
+	char key;
+	int32_t cameraY = 0;
+	int32_t cameraY_actual = 0;
+	uint8_t scale = 2;
+	uint8_t offset = 23;
+	uint8_t boxHeight = 20;
+	int16_t cursor = mp.notification;
+	if (length > 12) {
+		cameraY = -cursor * (boxHeight + 2) - 1;
+	}
+	while (1) {
+		key = mp.buttons.kpdNum .getKey();
+
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(0, 0);
+		cameraY_actual = (cameraY_actual + cameraY) / 2;
+		if (cameraY_actual - cameraY == 1) {
+			cameraY_actual = cameraY;
+		}
+
+		for (uint8_t i = 0; i < length; i++)
+			notificationsDrawBox(items[i], i, cameraY_actual);
+
+		notificationsDrawCursor(cursor, cameraY_actual);
+
+		mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(2,1);
+		mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Notifications");
+		mp.display.setCursor(130,110);
+		mp.display.print("Play");
+		if(key == 'A')
+			mp.playNotification(cursor);
+
+		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+			while (!mp.update());
+			break;
+		}
+		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+
+			while (!mp.update());
+			if (cursor == 0) {
+				cursor = length - 1;
+				if (length > 6*scale) {
+					cameraY = -(cursor - 5) * (boxHeight + 2) - 1;
+				}
+			}
+			else {
+				if (cursor > 0 && (cursor * (boxHeight + 2) - 1 + cameraY + offset) <= boxHeight) {
+					cameraY += (boxHeight + 2);
+				}
+				cursor--;
+			}
+
+		}
+
+		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			while (!mp.update());
+			cursor++;
+			if ((cursor * (boxHeight + 2) + cameraY + offset) > 54*scale) {
+				cameraY -= (boxHeight + 2);
+			}
+			if (cursor >= length) {
+				cursor = 0;
+				cameraY = 0;
+
+			}
+
+		}
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			while (!mp.update());
+			return -1;
+		}
+		mp.update();
+	}
+	return cursor;
+
+}
+void notificationsDrawBox(String text, uint8_t i, int32_t y) {
+	uint8_t offset;
+	uint8_t boxHeight;
+	offset = 23;
+	boxHeight = 20;
+	y += i * (boxHeight + 2) + offset;
+	if (y < 0 || y > mp.display.height()) {
+		return;
+	}
+	mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 1, TFT_DARKGREY);
+	mp.display.setTextColor(TFT_WHITE);
+	mp.display.drawString(text, 5, y+2);
+}
+void notificationsDrawCursor(uint8_t i, int32_t y) {
+	uint8_t offset;
+	uint8_t boxHeight;
+	offset = 23;
+	boxHeight = 20;
+	if (millis() % 500 <= 250) {
+		return;
+	}
+	y += i * (boxHeight + 2) + offset;
+	mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
+	mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
 }
