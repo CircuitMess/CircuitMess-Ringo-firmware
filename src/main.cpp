@@ -667,6 +667,7 @@ void setup()
 {
 	Serial.begin(115200);
 	mp.begin(0);
+	mp.homePopupEnable(0);
 	osc = new Oscillator();
 	osc->setVolume(256);
 	addOscillator(osc);
@@ -674,9 +675,6 @@ void setup()
 
 void loop()
 {
-
-	soundMenu();
-	mp.incomingCall();
-	// lockscreen();
-	// mainMenu();
+	lockscreen();
+	mainMenu();
 }
