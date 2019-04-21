@@ -221,6 +221,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 			while (Name.indexOf("/", start) != -1)
 				start = Name.indexOf("/", start) + 1;
 			Name = Name.substring(start, Name.indexOf("."));
+			start = 0;
 			menuDrawBox(Name, i, cameraY_actual);
 		}
 		menuDrawCursor(cursor, cameraY_actual);
@@ -312,6 +313,8 @@ void listAudio(const char * dirname, uint8_t levels) {
 		}
 		file = root.openNextFile();
 	}
+	root.close();
+	file.close();
 }
 String readSerial() {
 	uint8_t _timeout = 0;

@@ -648,7 +648,17 @@ void displayMenu() {
 }
 void soundMenu() {
 	if(mp.SDinsertedFlag)
+	{
 		listAudio("/Music", 0);
+		String tempList[audioCount];
+		uint16_t tempCount = audioCount;
+		for (int i = 0; i < audioCount;i++)
+			tempList[i] = audioFiles[i];
+		listAudio("/Ringtones", 0);
+		for (int i = 0; i < tempCount;i++)
+			audioFiles[i + audioCount] = tempList[i];
+		audioCount += tempCount;
+	}
 	String parsedRingtone;
 	uint8_t start = 0;
 	int8_t i;
