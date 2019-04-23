@@ -1203,7 +1203,7 @@ void clockTimer()
 }
 void saveAlarms()
 {
-	const char * path = "/alarms.json";
+	const char * path = "/.core/alarms.json";
 	Serial.println("");
 	mp.SD.remove(path);
 	JsonArray& alarms = mp.jb.createArray();
@@ -1236,7 +1236,7 @@ void saveAlarms()
 }
 void loadAlarms()
 {
-	const char * path = "/alarms.json";
+	const char * path = "/.core/alarms.json";
 	Serial.println(""); 
 	SDAudioFile file = mp.SD.open(path);
 	JsonArray& alarms = mp.jb.parseArray(file);

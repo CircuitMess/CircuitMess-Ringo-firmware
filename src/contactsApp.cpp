@@ -585,17 +585,17 @@ uint8_t deleteContactSD(String name, String number)
 void contactsAppSD(){
 	Serial.println("");
 	Serial.println("Begin contacts");
-	SDAudioFile file = mp.SD.open("/contacts.json", "r");
+	SDAudioFile file = mp.SD.open("/.core/contacts.json", "r");
 
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
 		JsonArray& jarr = jb.parseArray("[{\"name\":\"foo\", \"number\":\"099\"}]");
 		delay(10);
-		SDAudioFile file1 = mp.SD.open("/contacts.json", "w");
+		SDAudioFile file1 = mp.SD.open("/.core/contacts.json", "w");
 		jarr.prettyPrintTo(file1);
 		file1.close();
-		file = mp.SD.open("/contacts.json", "r");
+		file = mp.SD.open("/.core/contacts.json", "r");
 		while(!file)
 			Serial.println("CONTACTS ERROR");
 	}
@@ -639,7 +639,7 @@ void contactsAppSD(){
 						newContact["name"] = name;
 						newContact["number"] = number;
 						jarr.add(newContact);
-						SDAudioFile file = mp.SD.open("/contacts.json");
+						SDAudioFile file = mp.SD.open("/.core/contacts.json");
 						jarr.prettyPrintTo(file);
 						file.close();
 					}
@@ -647,7 +647,7 @@ void contactsAppSD(){
 					int id = menuChoice + 1000 - 1;
 					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"])){
 						jarr.remove(id);
-						SDAudioFile file = mp.SD.open("/contacts.json");
+						SDAudioFile file = mp.SD.open("/.core/contacts.json");
 						jarr.prettyPrintTo(file);
 						file.close();
 					}
