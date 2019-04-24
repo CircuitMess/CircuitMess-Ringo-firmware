@@ -2237,7 +2237,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		mp.display.setCursor(130,110);
 		mp.display.print("Play");
 		if(key == 'A')
-			mp.playNotification(cursor);
+			mp.playNotificationSound(cursor);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			while (!mp.update());

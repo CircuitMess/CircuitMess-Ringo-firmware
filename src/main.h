@@ -1,6 +1,8 @@
 #ifndef Main_h
 #define Main_h
+#include "sprites.c"
 #include <MAKERphone.h>
+
 extern MAKERphone mp;
 extern int backgroundColors[7];
 extern String backgroundColorsNames[7];

@@ -1,24 +1,44 @@
 #include "lockscreen.h"
-// #include "main.h"
-void drawNotificationWindow(uint8_t x, uint8_t y, uint8_t width, uint8_t height, String text) {
-	uint8_t scale;
-	if(mp.resolutionMode)
+String monthsList[] PROGMEM = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+void drawNotificationWindow(uint8_t y, uint8_t index) {
+	mp.display.setTextFont(2);
+	mp.display.setTextSize(1);
+	mp.display.setCursor(30, y + 2);
+	mp.display.fillRoundRect(2, y + 2, 154, 20, 2, TFT_DARKGREY);
+	mp.display.fillRoundRect(4, y, 154, 20, 2, TFT_WHITE);
+	mp.display.print(mp.notificationDescriprionList[index]);
+	switch (mp.notificationTypeList[index])
 	{
-		scale = 1;
-		mp.display.setFreeFont(TT1);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(x + 3*scale, y + 3*scale + 5*scale);
+		case NotificationType::Phone:
+			mp.display.drawBitmap(7, y + 2, missedcall, TFT_RED, 2);
+			break;
+		case NotificationType::Messages:
+			mp.display.drawBitmap(7, y + 2, newtext, TFT_RED, 2);
+			break;
+		case NotificationType::System:
+			mp.display.drawBitmap(7, y + 2, systemNotification, TFT_RED, 2);
+			break;
 	}
-	else
-	{
-		scale = 2;
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(x + 3*scale, y + scale);
-	}
-	mp.display.fillRoundRect(x - scale, y + scale, width, height, scale, TFT_DARKGREY);
-	mp.display.fillRoundRect(x, y, width, height, scale, TFT_WHITE);
-	mp.display.print(text);
+	mp.display.setTextFont(1);
+	mp.display.setCursor(120, y + 1);
+	String temp = "";
+	DateTime now = mp.notificationTimeList[index];
+	if (now.hour() < 10)
+		temp.concat("0");
+	temp.concat(now.hour());
+	temp.concat(":");
+	if (now.minute() < 10)
+		temp.concat("0");
+	temp.concat(now.minute());
+	mp.display.print(temp);
+	mp.display.setCursor(119, y + 11);
+	temp = "";
+	temp.concat(monthsList[now.month() - 1]);
+	temp.concat(" ");
+	if (now.day() < 10)
+		temp.concat("0");
+	temp.concat(now.day());
+	mp.display.print(temp);
 }
 void lockscreen() {
 	mp.dataRefreshFlag = 1;
@@ -149,9 +169,27 @@ void lockscreen() {
 			mp.display.drawBitmap(74*scale, 1*scale, batteryLow, TFT_BLACK, scale);
 		else if (mp.batteryVoltage < 3500)
 			mp.display.drawBitmap(74*scale, 1*scale, batteryEmpty, TFT_BLACK, scale);
+		bool anyNotifications = 0;
+		uint8_t temp = 0;
+		for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
+		{
+			if(mp.notificationTypeList[i] != NotificationType::NONE)
+			{
+				temp++;
+				if(temp == 1)
+					drawNotificationWindow(64,i);
+				else if(temp == 2)
+					drawNotificationWindow(88,i);
+				anyNotifications = 1;
+			}
+		}
 
-		drawNotificationWindow(2*scale, 32*scale, 77*scale, 10*scale, "Missed call from Dad");
-		drawNotificationWindow(2*scale, 44*scale, 77*scale, 10*scale, "Text from Jack");
+		if(!anyNotifications)
+		{
+			           
+		}
+		// drawNotificationWindow(64,"Missed call from Dad");
+		// drawNotificationWindow(88, "Text from Jack");
 		mp.display.setFreeFont(TT1);
 		mp.display.setTextSize(2*scale);
 		if (millis() - elapsedMillis >= 500) {

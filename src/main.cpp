@@ -2,7 +2,6 @@
 #include "main.h"
 #include "lockscreen.h"
 #include "mainMenu.h"
-#include "sprites.c"
 MAKERphone mp;
 Oscillator *osc;
 int backgroundColors[7] PROGMEM = {
@@ -674,6 +673,7 @@ void setup()
 	osc = new Oscillator();
 	osc->setVolume(256);
 	addOscillator(osc);
+
 }
 
 void loop()
