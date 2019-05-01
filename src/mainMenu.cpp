@@ -248,8 +248,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			passcodeMillis = millis();
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
-			while(!mp.update());
-			mp.vibration(200);
 			FastLED.clear();
 			while (!mp.update());
 
@@ -289,8 +287,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			passcodeMillis = millis();
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
-			while (!mp.update());
-			mp.vibration(200);
 			FastLED.clear();
 			while (!mp.update());
 
@@ -327,8 +323,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			passcodeMillis = millis();
 			mp.leds[6] = CRGB::Blue;
 			mp.leds[5] = CRGB::Blue;
-			while (!mp.update());
-			mp.vibration(200);
 			FastLED.clear();
 			while (!mp.update());
 
@@ -350,8 +344,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			passcodeMillis = millis();
 			mp.leds[1] = CRGB::Blue;
 			mp.leds[2] = CRGB::Blue;
-			while (!mp.update());
-			mp.vibration(200);
 			FastLED.clear();
 			while (!mp.update());
 
@@ -369,7 +361,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[0] = CRGB::Red;
 			mp.leds[7] = CRGB::Red;
 			FastLED.show();
-			mp.vibration(200);
 			FastLED.clear();
 			while(!mp.update());
 			pageIndex = 0;

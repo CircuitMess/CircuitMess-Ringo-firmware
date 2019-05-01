@@ -181,48 +181,49 @@ void viewSms(String content, String contact, String date) {
 
 		mp.display.setCursor(1, y);
 		mp.display.print(content);
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0) { //BUTTON DOWN
+		if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
 			Serial.println(mp.display.cursor_y);
 			if (mp.display.cursor_y >= 128)
 			{
 				buttonHeld = millis();
 
-				if (mp.buttons.kpd.pin_read(BTN_DOWN) == 1)
+				if (!mp.buttons.released(BTN_DOWN))
 				{
 					y -= 4;
 					break;
 				}
-
-				while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0)
+				while (!mp.buttons.released(BTN_DOWN))
 				{
 					if (millis() - buttonHeld > 100) {
 						y -= 4;
 						break;
 					}
+					while(!mp.update());
 				}
 			}
+			while(!mp.update());
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0) { //BUTTON UP
+		if (mp.buttons.pressed(BTN_UP)) { //BUTTON UP
 			if (y < 14)
 			{
 				buttonHeld = millis();
 
-				if (mp.buttons.kpd.pin_read(BTN_UP) == 1)
+				if (!mp.buttons.released(BTN_UP))
 				{
 					y += 4;
 					break;
 				}
-
-				while (mp.buttons.kpd.pin_read(BTN_UP) == 0)
+				while (!mp.buttons.released(BTN_UP))
 				{
 					if (millis() - buttonHeld > 100) {
 						y += 4;
 						break;
 					}
+					while(!mp.update());
 				}
 			}
-
+			while(!mp.update());
 		}
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
@@ -465,10 +466,10 @@ void composeSMS()
 		}
 		if (cursor == 0) //inputting the contact number
 		{
-			key = mp.buttons.kpdNum.getKey();
-			if (key == 'A') //clear number
+			key = mp.buttons.getKey();
+			if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
 				contact = "";
-			else if (key == 'C')
+			else if (mp.buttons.released(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key))
 				contact += key;
@@ -507,68 +508,13 @@ void composeSMS()
 			if(blinkState == 1)
                 mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
 
-			/*if (blinkState == 1)
-			{
-				mp.display.fillRect(0, 0, mp.display.width(), 7, TFT_DARKGREY);
-				mp.display.setTextColor(TFT_WHITE);
-				mp.display.setCursor(1, 6);
-				mp.display.print("From: ");
-				mp.display.print(contact);
-				mp.display.drawFastHLine(0, 7, LCDWIDTH, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.setTextColor(TFT_WHITE);
-				mp.display.setCursor(1, 6);
-				mp.display.drawFastHLine(0, 7, LCDWIDTH, TFT_BLACK);
-			}*/
 		}
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0 && cursor == 1) { //BUTTON UP
-			/*Serial.println(mp.display.cursor_y);
-			if (mp.display.cursor_y >= 64)
-			{
-				buttonHeld = millis();
-
-				if (mp.buttons.kpd.pin_read(BTN_UP) == 1)
-				{
-					y -= 2;
-					break;
-				}
-
-				while (mp.buttons.kpd.pin_read(BTN_UP) == 0)
-				{
-					if (millis() - buttonHeld > 100) {
-						y -= 2;
-						break;
-					}
-				}
-			}*/
+		if (mp.buttons.released(BTN_UP) && cursor == 1) { //BUTTON UP
 			cursor = 0;
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0 && cursor == 0) { //BUTTON DOWN
-			/*if (y < 14)
-			{
-
-
-				buttonHeld = millis();
-
-				if (mp.buttons.kpd.pin_read(BTN_DOWN) == 1)
-				{
-					y += 2;
-					break;
-				}
-
-				while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0)
-				{
-					if (millis() - buttonHeld > 100) {
-						y += 2;
-						break;
-					}
-				}
-			}*/
+		if (mp.buttons.released(BTN_DOWN) && cursor == 0) { //BUTTON DOWN
 			cursor = 1;
-
 		}
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK

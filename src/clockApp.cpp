@@ -246,17 +246,10 @@ void clockStopwatch()
 	String temp;
 	uint32_t timeMillis = 0;
 	uint32_t timeActual = 0;
-	char key;
 	uint32_t blinkMills = millis();
 	bool blinkState = 1;
 	while(!mp.buttons.released(BTN_B))
 	{
-		key = mp.buttons.kpdNum.getKey();
-		if(key != NO_KEY)
-		{
-			Serial.println(key);
-			delay(5);
-		}
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.fillScreen(0xFF92);
 		mp.display.setTextFont(2);
@@ -300,9 +293,6 @@ void clockStopwatch()
 				mp.display.fillRect(82, 0, 70, 60, 0xFF92);
 			}
 		}
-		// if(blinkState)
-		// else
-		// 	mp.display.printCenter(":");
 		if(!running)
 		{
 			mp.display.drawBitmap(72, 90, pause2, TFT_BLACK, 2);
@@ -312,13 +302,13 @@ void clockStopwatch()
 				blinkMills = millis();
 				running = 1;
 				timeMillis = millis() - timeActual;
+				while(!mp.update());
 			}
-			if(key == 'A')
+			if(mp.buttons.released(BTN_FUN_RIGHT))
 			{
 				timeMillis = 0;
 				timeActual = 0;
 			}
-			while (!mp.update());
 			if (millis() - blinkMills >= 350)
 			{
 				blinkMills = millis();
@@ -334,16 +324,15 @@ void clockStopwatch()
 			{
 				running = 0;
 				timeMillis = millis();
+				while(!mp.update());
 			}
-			if(key == 'A')
+			if(mp.buttons.released(BTN_FUN_RIGHT))
 			{
 				running = 0;
 				timeMillis = 0;
 				timeActual = 0;
 			}
-			while (!mp.update());
 		}
-		mp.display.printCenter(temp);
 		mp.update();
 	}
 	while(!mp.update());
@@ -484,12 +473,10 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 	int32_t cameraY_actual = 0;
 	uint8_t bottomBezel = 30;
 	mp.dataRefreshFlag = 0;
-	char key;
 	uint8_t boxHeight;
 	boxHeight = 28; //actually 2 less than that
 	while (1) {
 		while (!mp.update());
-		key = mp.buttons.kpdNum.getKey();
 		mp.display.fillScreen(0xFC92);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -571,8 +558,9 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			return -1;
-		if(key == 'C' && cursor > 0)
+		if(mp.buttons.released(BTN_FUN_LEFT) && cursor > 0)
 		{
+			while(!mp.update());
 			return -(cursor + 2);
 		}
 	}
@@ -636,7 +624,7 @@ void clockAlarmEdit(uint8_t index)
 	while(1)
 	{
 		color = TFT_BLACK;
-		key = mp.buttons.kpdNum.getKey();
+		key = mp.buttons.getKey();
 		mp.display.fillScreen(0xFC92);
 		//Hour black
 		mp.display.setTextColor(TFT_BLACK);
@@ -744,17 +732,23 @@ void clockAlarmEdit(uint8_t index)
 				switch (cursorX)
 				{
 					case 0:
-						if(key == 'C')
+						if(mp.buttons.released(BTN_FUN_LEFT))
+						{
+							while(!mp.update());
 							hours /= 10;
-						else if (key != 'B' && key != 'D' && key != '#' && key != '*' && key != NO_KEY && hours < 10)
+						}
+						else if (isdigit(key) && hours < 10)
 							hours = hours * 10 + key - 48;
 						if(!blinkState)
 							mp.display.fillRect(0, 0, 46, 50, 0xFC92);
 					break;
 					case 1:
-						if(key == 'C')
+						if(mp.buttons.released(BTN_FUN_LEFT))
+						{
+							while(!mp.update());
 							mins /= 10;
-						else if (key != 'B' && key != 'D' && key != '#' && key != '*' && key != NO_KEY && mins < 10)
+						}
+						else if (isdigit(key) && mins < 10)
 							mins = mins * 10 + key - 48;
 						if(!blinkState)
 							mp.display.fillRect(51, 0, 40, 45, 0xFC92);
@@ -857,7 +851,6 @@ void clockAlarmEdit(uint8_t index)
 					while(!mp.update());
 					mp.display.setFreeFont(TT1);
 					listAudio("/Music", 1);
-					int16_t i = 0;
 					if(audioCount == 0)
 					{
 						mp.display.fillScreen(0xFC92);
@@ -971,7 +964,7 @@ void clockTimer()
 	mp.display.setTextColor(TFT_BLACK);
 	while (!mp.buttons.released(BTN_B))
 	{
-		key = mp.buttons.kpdNum.getKey();
+		key = mp.buttons.getKey();
 		Serial.println(state);
 		Serial.println(key);
 		Serial.println("-------------");
@@ -1007,8 +1000,9 @@ void clockTimer()
 			case 0:
 				if(key != NO_KEY)
 				{
-					if(key == 'A' && (secs > 0 || mins > 0 || hours > 0))
+					if(mp.buttons.released(BTN_FUN_RIGHT) && (secs > 0 || mins > 0 || hours > 0))
 					{
+						while(!mp.update());
 						if(secs > 59)
 						{
 							secs %= 60;
@@ -1028,21 +1022,30 @@ void clockTimer()
 					switch (cursor)
 					{
 						case 0:
-							if(key == 'C')
+							if(mp.buttons.released(BTN_FUN_LEFT))
+							{
 								secs /= 10;
-							else if (key != 'B' && key != 'D' && key != '#' && key != '*' && secs < 10)
+								while(!mp.update());
+							}
+							else if (isdigit(key) && secs < 10)
 								secs = secs * 10 + key - 48;
 						break;
 						case 1:
-							if(key == 'C')
+							if(mp.buttons.released(BTN_FUN_LEFT))
+							{
 								mins /= 10;
-							else if (key != 'B' && key != 'D' && key != '#' && key != '*' && mins < 10)
+								while(!mp.update());
+							}
+							else if (isdigit(key) && mins < 10)
 								mins = mins * 10 + key - 48;
 						break;
 						case 2:
-							if(key == 'C')
+							if(mp.buttons.released(BTN_FUN_LEFT))
+							{
 								hours /= 10;
-							else if (key != 'B' && key != 'D' && key != '#' && key != '*' && hours < 10)
+								while(!mp.update());
+							}
+							else if (isdigit(key) && hours < 10)
 								hours = hours * 10 + key - 48;
 						break;
 					}
@@ -1146,13 +1149,13 @@ void clockTimer()
 						}
 					}
 				}
-				if(mp.buttons.released(BTN_A) || key == 'A')
+				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 				{
 					state = 2;
 					while(!mp.update());
 					break;
 				}
-				if(key == 'C')
+				if(mp.buttons.released(BTN_FUN_LEFT))
 				{
 					state = 0;
 					secs = 0;
@@ -1170,7 +1173,7 @@ void clockTimer()
 				// 	mp.display.fillRect(64, 0, 33, 60, 0x97F6);
 				// 	mp.display.fillRect(0, 0, 56, 60, 0x97F6);
 				// }
-				if(mp.buttons.released(BTN_A) || key == 'A')
+				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 				{
 					state = 1;
 					mp.display.fillRect(0, 64, 160, 100, 0x97F6);
@@ -1181,7 +1184,7 @@ void clockTimer()
 					while(!mp.update());
 					break;
 				}
-				if(key == 'C')
+				if(mp.buttons.released(BTN_FUN_LEFT))
 				{
 					state = 0;
 					secs = 0;
