@@ -233,7 +233,6 @@ int16_t smsMenu(JsonArray *messages) {
 			String date = elem["dateTime"];
 			int day = date.substring(8, 10).toInt();
 			int month = date.substring(5, 7).toInt();
-
 			smsMenuDrawBox(elem["number"].as<char*>(), elem["dateTime"].as<char*>(), elem["text"].as<char*>(), day, month, i+1, cameraY_actual);
 			i++;
 		}
@@ -490,7 +489,7 @@ void composeSMS(JsonArray *messages)
 			mp.display.printCenter("Sending text...");
 			while (!mp.update());
 
-			saveMessage(contact, content, messages);
+			saveMessage(content, contact, messages);
 
 			Serial1.print("AT+CMGS=\"");
 			Serial1.print(contact);
