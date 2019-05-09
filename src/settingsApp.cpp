@@ -2715,7 +2715,7 @@ int8_t checkForUpdate()
 
 	Serial.print("[HTTP] begin...\n");
 	// configure traged server and url
-	http.begin("https://raw.githubusercontent.com/CircuitMess/MAKERphone-firmware/master/README.md", ca); //HTTPS
+	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/README.md", ca); //HTTPS
 	//http.begin("http://example.com/index.html"); //HTTP
 
 	Serial.print("[HTTP] GET...\n");
@@ -2799,7 +2799,7 @@ bool fetchUpdate()
 	SDAudioFile file = mp.SD.open("/.core/LOADER.BIN", "w");
 	Serial.print("[HTTP] begin...\n");
 	// configure traged server and url
-	http.begin("https://raw.githubusercontent.com/CircuitMess/MAKERphone-firmware/master/firmware.bin", ca); //HTTPS
+	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/firmware.bin", ca); //HTTPS
 	//http.begin("http://example.com/index.html"); //HTTP
 
 	Serial.print("[HTTP] GET...\n");
