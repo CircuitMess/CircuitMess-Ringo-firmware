@@ -666,10 +666,38 @@ void setup()
 	osc->setVolume(256);
 	addOscillator(osc);
 
+	DateTime now = DateTime(2017, 4, 2, 23, 59, 57);
+	DateTime alarm = DateTime(2017, 4, 3, 0, 0, 0);
+	mp.RTC.adjust(now);
+	delay(1000);
+	alarm_flags FLAG;
+	FLAG.minute = 1;
+	FLAG.day = 1;
+	FLAG.hour = 1;
+	FLAG.wday = 0;
+	mp.RTC.set_alarm(alarm, FLAG);
+	mp.RTC.on_alarm();
+	DateTime test = mp.RTC.get_alarm();
+	char buf[100];
+	strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
+	Serial.println(test.format(buf));
+	delay(5);
+	now = mp.RTC.now();
+	Serial.println(now.format(buf));
+	delay(500);
+	mp.buttons.kpd.pin_mode(1, INPUT);
+
 }
 
 void loop()
 {
-	lockscreen();
-	mainMenu();
+	char buf[100];
+	strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
+	DateTime now = mp.RTC.now();
+
+	Serial.println(now.format(buf));
+	Serial.println(mp.buttons.kpd.pin_read(1));
+	// delay(1000);
+	// lockscreen();
+	// mainMenu();
 }
