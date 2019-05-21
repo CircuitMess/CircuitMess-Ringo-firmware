@@ -665,18 +665,10 @@ void setup()
 	osc = new Oscillator();
 	osc->setVolume(256);
 	addOscillator(osc);
-
-}
+}	
 
 void loop()
 {
-	mp.display.fillScreen(TFT_BLACK);
-	mp.display.setTextColor(TFT_WHITE);
-	mp.display.setTextSize(1);
-	mp.display.setTextFont(2);
-	mp.display.setCursor(0, 54);
-	mp.display.printCenter(analogRead(VOLTAGE_PIN));
-	mp.update();
-	// lockscreen();
-	// mainMenu();
+	lockscreen();
+	mainMenu();
 }
