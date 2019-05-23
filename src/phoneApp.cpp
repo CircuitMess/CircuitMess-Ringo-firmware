@@ -23,14 +23,12 @@ void phoneApp() {
 		mp.display.setTextColor(TFT_WHITE);
 
 
-		key = mp.buttons.kpdNum.getKey();
-		if (key == 'B') //clear number
-			callBuffer = "";
-		else if (key == 'C')
+		key = mp.buttons.getKey();
+		if (mp.buttons.released(BTN_FUN_LEFT))
 			callBuffer.remove(callBuffer.length()-1);
-		else if (key == 'A')
+		else if (mp.buttons.released(BTN_FUN_RIGHT))
 			callLog();
-		else if (key != NO_KEY && key!= 'A' && key != 'C' && key != 'B' && key != 'D')
+		else if (key != NO_KEY && isdigit(key))
 		{
 			switch (key)
 			{
@@ -100,7 +98,7 @@ void phoneApp() {
 		}
 
 
-		if (mp.buttons.pressed(BTN_A))//initate call
+		if (mp.buttons.released(BTN_A))//initate call
 		{
 			callNumber(callBuffer);
 			while (!mp.update());
@@ -113,6 +111,7 @@ void phoneApp() {
 
 		mp.update();
 	}
+	while(!mp.update());
 }
 
 void addCall(String number, String dateTime, int duration){
@@ -174,7 +173,7 @@ void callLog() {
         mp.display.setCursor(0, mp.display.height()/2 - 16);
         mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Call log - loading data");
-		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+		while (!mp.buttons.released(BTN_B))//BUTTON BACK
 		while (!mp.update());
 	}
 	else
@@ -250,9 +249,9 @@ int callLogMenu(JsonArray *call_log){
 				while (!mp.update());
 				break;
 			}
-			if (mp.buttons.kpdNum.getKey() == 'C') //BUTTON BACK
+			if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 			{
-				while(mp.buttons.kpdNum.getKey() == 'C'){}
+				while (!mp.update());
 				call_log->remove(cursor);
 				SDAudioFile file = mp.SD.open("/call_log.json", "w");
 				call_log->prettyPrintTo(file);
@@ -260,8 +259,8 @@ int callLogMenu(JsonArray *call_log){
 				return -10;
 			}
 
-			if (mp.buttons.kpd.pin_read(BTN_UP) == 0) {  //BUTTON UP
-				while (mp.buttons.kpd.pin_read(BTN_UP) == 0);
+			if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+				while (!mp.update());
 				if (cursor == 0) {
 					cursor = length - 1;
 					if (length > 2) {
@@ -275,9 +274,8 @@ int callLogMenu(JsonArray *call_log){
 					}
 				}
 			}
-			if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0) { //BUTTON DOWN
-				while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0);
-
+			if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+				while (!mp.update());
 				cursor++;
 				if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
 					cameraY -= (boxHeight+1);
@@ -289,7 +287,7 @@ int callLogMenu(JsonArray *call_log){
 			}
 		}
 
-		if (mp.buttons.released(BTN_B) == 1) //BUTTON BACK
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			while (!mp.update());
 			return -2;
@@ -362,9 +360,9 @@ uint8_t showCall(int id, String number, String dateTime, String duration)
 		mp.display.setCursor(115, 103);
 		mp.display.print("A Call");
 
-		if (mp.buttons.kpdNum.getKey() == 'C') //BUTTON BACK
+		if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
-			while(mp.buttons.kpdNum.getKey() == 'C'){}
+			while (!mp.update());
 			return 1;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK

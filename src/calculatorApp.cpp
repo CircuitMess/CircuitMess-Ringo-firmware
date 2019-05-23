@@ -60,7 +60,7 @@ void calculatorApp()
 	mp.display.print("Erase");
 	while(1)
 	{
-		key = mp.buttons.kpdNum.getKey();
+		key = mp.buttons.getKey();
 		if(key != NO_KEY && key > 47 && key < 58 && input.length() < 8)
 		{
 			if(clear)
@@ -90,8 +90,9 @@ void calculatorApp()
 		mp.display.drawRect(7 + 37 * (cursor % 4), 48 + 27 * (int)(cursor / 4), 35, 25, blinkState ? TFT_RED : 0xA794);
 		mp.display.drawRect(6 + 37 * (cursor % 4), 47 + 27 * (int)(cursor / 4), 37, 27, blinkState ? TFT_RED : 0xA794);
 
-		if(key == 'C')
+		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
+			while(!mp.update());
 			result = 0;
 			operation = -1;
 			input = "0";
@@ -226,8 +227,9 @@ void calculatorApp()
 			}
 			while(!mp.update());
 		}
-		if(key == 'A')
+		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{
+			while(!mp.update());
 			if(operation != -1 && !clear)
 			{
 				if(!set)

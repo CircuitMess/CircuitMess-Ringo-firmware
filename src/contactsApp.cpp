@@ -103,10 +103,10 @@ uint8_t newContact()
 		}
 		if (cursor == 0) //inputting the contact number
 		{
-			key = mp.buttons.kpdNum.getKey();
-			if (key == 'A') //clear number
+			key = mp.buttons.getKey();
+			if (mp.buttons.pressed(BTN_FUN_RIGHT)) //clear number
 				contact = "";
-			else if (key == 'C')
+			else if (mp.buttons.pressed(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 14)
 				contact += key;
@@ -162,11 +162,13 @@ uint8_t newContact()
 		mp.display.setCursor(31*2, 103);
 		mp.display.printCenter("SAVE");
 
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0 && cursor == 1) { //BUTTON UP
+		if (mp.buttons.released(BTN_DOWN) && cursor == 1) { //BUTTON UP
+		while (!mp.update());
 		cursor = 0;
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0 && cursor == 0) { //BUTTON DOWN
+		if (mp.buttons.released(BTN_UP) && cursor == 0) { //BUTTON DOWN
+		while (!mp.update());
 		cursor = 1;
 		}
 
@@ -303,21 +305,21 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print(title);
 
-		if (mp.buttons.kpd.pin_read(BTN_A) == 0) {   //BUTTON CONFIRM
-		while (mp.buttons.kpd.pin_read(BTN_A) == 0);// Exit when pressed
+		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		while(!mp.update());// Exit when pressed
 		break;
 		}
-		if (mp.buttons.kpd.pin_read(BTN_LEFT) == 0 && cursor != 0) {
-		while (mp.buttons.kpd.pin_read(BTN_LEFT) == 0); // Delete
+		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
+		while(!mp.update()); // Delete
 		return -1000 + cursor;
 		}
-		if (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0 && cursor != 0) {
-		while (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0); // Edit contact
+		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
+		while(!mp.update()); // Edit contact
 		return -3000 + cursor;
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0) {  //BUTTON UP
-		while (mp.buttons.kpd.pin_read(BTN_UP) == 0);
+		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+		while(!mp.update());
 		if (cursor == 0) {
 			cursor = length;
 			if (length > 2) {
@@ -332,9 +334,8 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		}
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0) { //BUTTON DOWN
-		while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0);
-
+		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		while(!mp.update());
 		cursor++;
 		if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
 			cameraY -= (boxHeight+1);
@@ -344,9 +345,8 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 			cameraY = 0;
 
 		}
-
 		}
-		if (mp.buttons.released(BTN_B) == 1) //BUTTON BACK
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 		while (!mp.update());
 		return -2;
@@ -653,7 +653,8 @@ void contactsAppSD(){
 					}
 				// EDIT
 				} else {
-					callNumber(jarr[menuChoice - 1]["number"].as<char*>());
+					if(mp.simInserted)
+						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
 					while(!mp.update());
 				}
 			} else {
@@ -689,10 +690,10 @@ uint8_t newContactSD(String *name, String *number)
 		}
 		if (cursor == 0) //inputting the contact number
 		{
-			key = mp.buttons.kpdNum.getKey();
-			if (key == 'A') //clear number
+			key = mp.buttons.getKey();
+			if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
 				contact = "";
-			else if (key == 'C')
+			else if (mp.buttons.released(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 14)
 				contact += key;
@@ -748,11 +749,13 @@ uint8_t newContactSD(String *name, String *number)
 		mp.display.setCursor(31*2, 103);
 		mp.display.printCenter("SAVE");
 
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0 && cursor == 1) { //BUTTON UP
+		if (mp.buttons.released(BTN_DOWN) == 0 && cursor == 1) { //BUTTON UP
+		while(!mp.update());
 		cursor = 0;
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0 && cursor == 0) { //BUTTON DOWN
+		if (mp.buttons.released(BTN_UP) == 0 && cursor == 0) { //BUTTON DOWN
+		while(!mp.update());
 		cursor = 1;
 		}
 
@@ -813,21 +816,21 @@ int contactsMenuSD(JsonArray *contacts){
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
 
-		if (mp.buttons.kpd.pin_read(BTN_A) == 0) {   //BUTTON CONFIRM
-		while (mp.buttons.kpd.pin_read(BTN_A) == 0);// Exit when pressed
+		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		while(!mp.update());// Exit when pressed
 		break;
 		}
-		if (mp.buttons.kpd.pin_read(BTN_LEFT) == 0 && cursor != 0) {
-		while (mp.buttons.kpd.pin_read(BTN_LEFT) == 0); // Delete
+		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
+		while(!mp.update()); // Delete
 		return -1000 + cursor;
 		}
-		if (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0 && cursor != 0) {
-		while (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0); // Edit contact
+		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
+		while(!mp.update()); // Edit contact
 		return -3000 + cursor;
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0) {  //BUTTON UP
-		while (mp.buttons.kpd.pin_read(BTN_UP) == 0);
+		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+		while(!mp.update());
 		if (cursor == 0) {
 			cursor = length;
 			if (length > 2) {
@@ -842,8 +845,8 @@ int contactsMenuSD(JsonArray *contacts){
 		}
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0) { //BUTTON DOWN
-		while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0);
+		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		while(!mp.update());
 
 		cursor++;
 		if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {

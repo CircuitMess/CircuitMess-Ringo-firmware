@@ -46,7 +46,7 @@ void lockscreen() {
     bool goOut = 0;
 	uint32_t elapsedMillis = millis();
     uint32_t buttonHeld;
-	FastLED.clear();
+	// FastLED.clear();
 
 	while (1)
 	{
@@ -206,7 +206,6 @@ void lockscreen() {
 
 		if (mp.buttons.pressed(BTN_A)) {
 			mp.display.setTextSize(1);
-			// vibration(200);
 
 			mp.display.fillRect(0, 112, mp.display.width(), 14, backgroundColors[mp.backgroundIndex]);
 			if(mp.resolutionMode)
@@ -220,59 +219,37 @@ void lockscreen() {
 				mp.display.setTextFont(2);
 			}
 			mp.display.print("Unlocking");
-			mp.update();
 			buttonHeld = millis();
-			while (mp.buttons.kpd.pin_read(BTN_A) == 0)
+			while (!mp.buttons.released(BTN_A))
 			{
 
-				if (millis() - buttonHeld > 250 && millis() - buttonHeld < 500) {
+				if (mp.buttons.timeHeld(BTN_A) > 5 && mp.buttons.timeHeld(BTN_A) < 12) {
 					mp.display.fillRect(0, 114, mp.display.width(), 14, backgroundColors[mp.backgroundIndex]);
-					if(mp.resolutionMode)
-					{
-						mp.display.setCursor(1, 63);
-						mp.display.setFreeFont(TT1);
-					}
-					else
-					{
-						mp.display.setCursor(2, 111);
-						mp.display.setTextFont(2);
-					}
+					mp.display.setCursor(2, 111);
+					mp.display.setTextFont(2);
+					mp.display.print("Unlocking *");
+
 					mp.leds[0] = CRGB::Red;
 					mp.leds[7] = CRGB::Red;
-					mp.display.print("Unlocking *");
+					// FastLED.show();
 				}
-				else if (millis() - buttonHeld > 500 && millis() - buttonHeld < 750)
+				else if (mp.buttons.timeHeld(BTN_A) >= 12 && mp.buttons.timeHeld(BTN_A) < 18)
 				{
 					mp.display.fillRect(0, 114, mp.display.width(), 14, backgroundColors[mp.backgroundIndex]);
-					if(mp.resolutionMode)
-					{
-						mp.display.setCursor(1, 63);
-						mp.display.setFreeFont(TT1);
-					}
-					else
-					{
-						mp.display.setCursor(2, 111);
-						mp.display.setTextFont(2);
-					}
+					mp.display.setCursor(2, 111);
+					mp.display.setTextFont(2);
 					mp.display.print("Unlocking * *");
 					mp.leds[0] = CRGB::Red;
 					mp.leds[7] = CRGB::Red;
 					mp.leds[1] = CRGB::Red;
 					mp.leds[6] = CRGB::Red;
+					// FastLED.show();
 				}
-				else if (millis() - buttonHeld > 750 && millis() - buttonHeld < 1000)
+				else if (mp.buttons.timeHeld(BTN_A) >= 18 && mp.buttons.timeHeld(BTN_A) < 24)
 				{
 					mp.display.fillRect(0, 114, mp.display.width(), 14, backgroundColors[mp.backgroundIndex]);
-					if(mp.resolutionMode)
-					{
-						mp.display.setCursor(1, 63);
-						mp.display.setFreeFont(TT1);
-					}
-					else
-					{
-						mp.display.setCursor(2, 111);
-						mp.display.setTextFont(2);
-					}
+					mp.display.setCursor(2, 111);
+					mp.display.setTextFont(2);
 					mp.display.print("Unlocking * * *");
 					mp.leds[0] = CRGB::Red;
 					mp.leds[7] = CRGB::Red;
@@ -280,36 +257,39 @@ void lockscreen() {
 					mp.leds[6] = CRGB::Red;
 					mp.leds[2] = CRGB::Red;
 					mp.leds[5] = CRGB::Red;
+					// FastLED.show();
 				}
-				else if (millis() - buttonHeld > 1000)
+				else if (mp.buttons.timeHeld(BTN_A) >= 24)
 				{
-					mp.leds[0] = CRGB::Red;
-					mp.leds[7] = CRGB::Red;
-					mp.leds[1] = CRGB::Red;
-					mp.leds[6] = CRGB::Red;
-					mp.leds[2] = CRGB::Red;
-					mp.leds[5] = CRGB::Red;
-					mp.leds[3] = CRGB::Red;
-					mp.leds[4] = CRGB::Red;
-
-					FastLED.show();
-
-					while(!mp.update());
-					if(mp.buttons.released(BTN_A))
+					mp.display.fillRect(0, 114, mp.display.width(), 14, backgroundColors[mp.backgroundIndex]);
+					mp.display.setCursor(2, 111);
+					mp.display.setTextFont(2);
+					mp.display.print("Unlocking * * * *");
+					
+					// FastLED.show();
+					while(!mp.buttons.released(BTN_A))
 					{
-						// vibration(200);
-						Serial.println(millis() - buttonHeld);
-						goOut = 1;
-						FastLED.clear();
-						delay(10);
-						break;
+						mp.leds[0] = CRGB::Red;
+						mp.leds[7] = CRGB::Red;
+						mp.leds[1] = CRGB::Red;
+						mp.leds[6] = CRGB::Red;
+						mp.leds[2] = CRGB::Red;
+						mp.leds[5] = CRGB::Red;
+						mp.leds[3] = CRGB::Red;
+						mp.leds[4] = CRGB::Red;
+						mp.update();
 					}
+					Serial.println(millis() - buttonHeld);
+					goOut = 1;
+					FastLED.clear();
+					delay(10);
+					break;
 				}
 				mp.update();
 			}
 		}
-		if (mp.buttons.released(BTN_A))
-			FastLED.clear();
+		// if (mp.buttons.released(BTN_A))
+			// FastLED.clear();
 		if (mp.buttons.released(BTN_B)) {
 			mp.sleep();
 		}

@@ -7,7 +7,7 @@ String settingsItems[6] PROGMEM = {
     "Date & time",
     "Sound",
     "Security",
-    "About"
+    "About & update"
 };
 String notificationSounds[4] PROGMEM = {
 	"Oxygen",
@@ -51,7 +51,7 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
 		mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xED1F);
 		mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
 	}
-	if (title == "About")//orange
+	if (title == "About & update")//orange
 	{
 		mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFD29);
 		mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
@@ -92,7 +92,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		}
 		settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
 
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 1 && mp.buttons.kpd.pin_read(BTN_UP) == 1)
+		if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
 			pressed = 0;
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
@@ -137,7 +137,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		}
 
 
-		if (mp.buttons.released(BTN_B) == 1) //BUTTON BACK
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			while(!mp.update());
 			return -1;
@@ -217,6 +217,8 @@ bool settingsApp() {
 }
 void networkMenu() {
 	uint8_t cursor = 0;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	while (1)
 	{
 		Serial.println(mp.airplaneMode);
@@ -311,89 +313,111 @@ void networkMenu() {
 
 		if (cursor == 0)
 		{
-			if (millis() % 500 <= 250 && mp.wifi == 1)
+			if (blinkState && mp.wifi)
 			{
 				mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
 			}
-			else if (millis() % 500 <= 250 && mp.wifi == 0)
+			else if (blinkState && !mp.wifi)
 			{
 				mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
 			}
-			if (mp.buttons.kpd.pin_read(BTN_LEFT) == 0 && mp.wifi == 0)
+			if (mp.buttons.released(BTN_LEFT) && !mp.wifi)
 			{
+				while(!mp.update());
 				osc->note(75, 0.05);
 				osc->play();
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.wifi = !mp.wifi;
 			}
-			if (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0 && mp.wifi == 1)
+			if (mp.buttons.released(BTN_RIGHT) && mp.wifi)
 			{
+				while(!mp.update());
 				osc->note(75, 0.05);
 				osc->play();
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.wifi = !mp.wifi;
 			}
 		}
 		if (cursor == 1)
 		{
-			if (millis() % 500 <= 250 && mp.bt == 1)
+			if (blinkState && mp.bt)
 			{
 				mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
 			}
-			else if (millis() % 500 <= 250 && mp.bt == 0)
+			else if (blinkState && !mp.bt)
 			{
 				mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
 			}
-			if (mp.buttons.kpd.pin_read(BTN_LEFT) == 0 && mp.bt == 0)
+			if (mp.buttons.released(BTN_LEFT) && !mp.bt)
 			{
+				while(!mp.update());
 				osc->note(75, 0.05);
 				osc->play();
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.bt = !mp.bt;
 			}
-			if (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0 && mp.bt == 1)
+			if (mp.buttons.released(BTN_RIGHT) && mp.bt)
 			{
+				while(!mp.update());
 				osc->note(75, 0.05);
 				osc->play();
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.bt = !mp.bt;
 			}
 		}
 		if (cursor == 2)
 		{
-			if (millis() % 500 <= 250 && mp.airplaneMode == 1)
+			if (blinkState && mp.airplaneMode)
 			{
 				mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
 			}
-			else if (millis() % 500 <= 250 && mp.airplaneMode == 0)
+			else if (blinkState && !mp.airplaneMode)
 			{
 				mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
 			}
-			if (mp.buttons.kpd.pin_read(BTN_LEFT) == 0 && mp.airplaneMode == 0)
+			if (mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
 			{
+				while(!mp.update());
 				osc->note(75, 0.05);
 				osc->play();
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.airplaneMode = !mp.airplaneMode;
 			}
-			if (mp.buttons.kpd.pin_read(BTN_RIGHT) == 0 && mp.airplaneMode == 1)
+			if (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode)
 			{
+				while(!mp.update());
 				osc->note(75, 0.05);
 				osc->play();
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.airplaneMode = !mp.airplaneMode;
 			}
 		}
 
-		if (mp.buttons.kpd.pin_read(BTN_UP) == 0)
+		if (mp.buttons.released(BTN_UP))
 		{
 			osc->note(75, 0.05);
 			osc->play();
-			while (mp.buttons.kpd.pin_read(BTN_UP) == 0);
+			blinkState = 0;
+			blinkMillis = millis();
+			while (!mp.update());
 			if (cursor == 0)
 				cursor = 2;
 			else
 				cursor--;
 		}
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 0)
+		if (mp.buttons.released(BTN_DOWN))
 		{
 			osc->note(75, 0.05);
 			osc->play();
-			while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0);
+			blinkState = 0;
+			blinkMillis = millis();
+			while (!mp.update());
 			if (cursor == 2)
 				cursor = 0;
 			else
@@ -406,7 +430,11 @@ void networkMenu() {
 			break;
 		}
 
-
+		if(millis() - blinkMillis >= 250)
+		{
+			blinkState = !blinkState;
+			blinkMillis = millis();
+		}
 		mp.update();
 	}
 }
@@ -476,40 +504,38 @@ void displayMenu() {
 				mp.display.drawBitmap(12, 20, noBrightness, 0x8FEA, 2);
 				mp.display.drawBitmap(132, 14, fullBrightness, 0x8FEA, 2);
 			}
-			if (mp.buttons.released(BTN_LEFT) && mp.brightness != 0)
+			if (mp.buttons.released(BTN_LEFT) && mp.brightness > 0)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.brightness--;
-				while(!mp.update());
+				// while(!mp.update());
 			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.brightness != 5)
+			if (mp.buttons.released(BTN_RIGHT) && mp.brightness < 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.brightness++;
-				while(!mp.update());
+				// while(!mp.update());
 			}
 		}
 		if (cursor == 1)
 		{
 			for(int i = 0;i<8;i++)
-			{
 				mp.leds[i] = CRGB::White;
-			}
-			if (mp.buttons.released(BTN_LEFT) && mp.pixelsBrightness!= 0)
+			if (mp.buttons.released(BTN_LEFT) && mp.pixelsBrightness > 0)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.pixelsBrightness--;
-				while(!mp.update());
+				// while(!mp.update());
 			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.pixelsBrightness!= 5)
+			if (mp.buttons.released(BTN_RIGHT) && mp.pixelsBrightness < 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.pixelsBrightness++;
-				while(!mp.update());
+				// while(!mp.update());
 			}
 		}
 		if (cursor == 2)
@@ -633,6 +659,7 @@ void displayMenu() {
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			break;
+
 		mp.update();
 
 		if (mp.brightness == 0)
@@ -840,6 +867,30 @@ void securityMenu() {
 	bool saved = 0;
 	char key = NO_KEY;
 	bool blinkState = 0;
+	if(!mp.simInserted)
+	{
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextSize(1);
+		mp.display.setTextFont(2);
+		mp.display.drawRect(14, 44, 134, 38, TFT_BLACK);
+		mp.display.drawRect(13, 43, 136, 40, TFT_BLACK);
+		mp.display.fillRect(15, 45, 132, 36, TFT_WHITE);
+		mp.display.setCursor(0, mp.display.height()/2 - 21);
+		mp.display.setCursor(47, 54);
+		mp.display.printCenter("No SIM card!");
+		uint32_t tempMillis = millis();
+		while(millis() < tempMillis + 2000)
+		{
+			mp.update();
+			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+			{
+				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				break;
+			}
+		}
+		return;
+	}
 	while (!mp.simReady)
 	{
 		mp.display.setCursor(0, mp.display.height()/2 - 16);
@@ -974,11 +1025,17 @@ void securityMenu() {
 							temp+=timesRemaining;
 							mp.display.printCenter(temp);
 
-							key = mp.buttons.kpdNum.getKey();
-							if (key == 'A') //clear number
+							key = mp.buttons.getKey();
+							if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
+							{
 								pinBuffer = "";
-							else if (key == 'C' && pinBuffer != "")
+								while(!mp.update());
+							}
+							else if (mp.buttons.released(BTN_FUN_LEFT) && pinBuffer != "")
+							{
 								pinBuffer.remove(pinBuffer.length() - 1);
+								while(!mp.update());
+							}
 							if (key != NO_KEY && isDigit(key) && pinBuffer.length() != 4)
 								pinBuffer += key;
 
@@ -1052,11 +1109,17 @@ void securityMenu() {
 
 			else if (cursor == 1 && pinLockBuffer == 1)
 			{
-				key = mp.buttons.kpdNum.getKey();
-				if (key == 'A') //clear number
+				key = mp.buttons.getKey();
+				if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
+				{
 					pinBuffer = "";
-				else if (key == 'C')
+					while(!mp.update());
+				}
+				else if (mp.buttons.released(BTN_FUN_LEFT))
+				{
 					pinBuffer.remove(pinBuffer.length() - 1);
+					while(!mp.update());
+				}
 				if (key != NO_KEY && isdigit(key) && pinBuffer.length() < 4)
 					pinBuffer += key;
 				mp.display.setCursor(6*2, 83);
@@ -1098,15 +1161,21 @@ void securityMenu() {
 						temp+=timesRemaining;
 						mp.display.printCenter(temp);
 
-						key = mp.buttons.kpdNum.getKey();
-						if (key == 'A') //clear number
+						key = mp.buttons.getKey();
+						if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
+						{
 							oldPin = "";
-						else if (key == 'C' && oldPin != "")
+							while(!mp.update());
+						}
+						else if (mp.buttons.released(BTN_FUN_LEFT))
+						{
 							oldPin.remove(oldPin.length() - 1);
+							while(!mp.update());
+						}
 						if (key != NO_KEY && isDigit(key) && oldPin.length() != 4)
 							oldPin += key;
 
-						if ((mp.buttons.released(BTN_A) || key == 'A') && oldPin.length() == 4)//enter PIN
+						if ((mp.buttons.released(BTN_A) || mp.released(BTN_FUN_RIGHT)) && oldPin.length() == 4)//enter PIN
 						{
 							while(!mp.update());
 							if (pinLock)
@@ -1603,11 +1672,17 @@ void timeMenu()
 							break;
 
 					}
-					key = mp.buttons.kpdNum.getKey();
-					if (key == 'A') //clear number
+					key = mp.buttons.getKey();
+					if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
+					{
 						inputBuffer = "";
-					else if (key == 'C')
+						while(!mp.update());
+					}
+					else if (mp.buttons.released(BTN_FUN_LEFT))
+					{
 						inputBuffer.remove(inputBuffer.length() - 1);
+						while(!mp.update());
+					}
 					if (key != NO_KEY && isdigit(key) && inputBuffer.length() < 2)
 						inputBuffer += key;
 					if(millis()-previousMillis >= 500)
@@ -1998,12 +2073,9 @@ void timeMenu()
 									break;
 							}
 						}
-						mp.buttons.kpd.setHour(mp.clockHour);
-						mp.buttons.kpd.setMinute(mp.clockMinute);
-						mp.buttons.kpd.setSecond(mp.clockSecond);
-						mp.buttons.kpd.setDate(mp.clockDay);
-						mp.buttons.kpd.setMonth(mp.clockMonth);
-						mp.buttons.kpd.setYear(mp.clockYear);
+						DateTime now = DateTime(mp.clockYear, mp.clockMonth, mp.clockDay, 
+							mp.clockHour, mp.clockMinute, mp.clockSecond);
+						mp.RTC.adjust(now);
 						break;
 					}
 
@@ -2118,7 +2190,42 @@ bool updateMenu()
 				mp.display.drawRect(20,18,117, 20, 0xFD29);
 			if(mp.buttons.released(BTN_A))
 			{
-
+				if(mp.wifi)
+				{
+					mp.display.setTextColor(TFT_BLACK);
+					mp.display.setTextSize(1);
+					mp.display.setTextFont(2);
+					mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+					mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+					mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+					mp.display.setCursor(47, 54);
+					mp.display.printCenter("Searching for networks");
+					while(!mp.update());
+					wifiConnect();
+				}
+				else
+				{
+					mp.display.setTextColor(TFT_BLACK);
+					mp.display.setTextSize(1);
+					mp.display.setTextFont(2);
+					mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+					mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+					mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+					mp.display.setCursor(47, 54);
+					mp.display.printCenter("Wifi turned off!");
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000)
+					{
+						mp.update();
+						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+						{
+							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+								mp.update();
+							break;
+						}
+					}
+					while(!mp.update());
+				}
 			}
 		}
 		else if (cursor == 1)
@@ -2139,7 +2246,7 @@ bool updateMenu()
 					while(!mp.update());
 
 					String contacts_default = "[{\"name\":\"Foobar\", \"number\":\"099123123\"}]";
-					String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0 }";
+					String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" }";
 
 					const char contacts_path[] = "/.core/contacts.json";
 					const char settings_path[] = "/.core/settings.json";
@@ -2150,11 +2257,11 @@ bool updateMenu()
 					mp.SD.remove(contacts_path);
 					mp.SD.remove(settings_path);
 
-					SDAudioFile contacts_file = mp.SD.open(contacts_path);
+					SDAudioFile contacts_file = mp.SD.open(contacts_path, "w");
 					contacts.prettyPrintTo(contacts_file);
 					contacts_file.close();
 
-					SDAudioFile settings_file = mp.SD.open(settings_path);
+					SDAudioFile settings_file = mp.SD.open(settings_path, "w");
 					settings.prettyPrintTo(settings_file);
 					settings_file.close();
 
@@ -2164,11 +2271,47 @@ bool updateMenu()
 					mp.brightness = settings["brightness"];
 					mp.sleepTime = settings["sleep_time"];
 					mp.backgroundIndex = settings["background_color"];
-
+					mp.notification = settings["notification"];
+					mp.ringtone_path = String(settings["ringtone"].as<char*>());
+					Serial.println("ERASED");
+					delay(5);
 					mp.applySettings();
-
-					return true;
 				}
+				else
+				{
+					mp.wifi = 1;
+					mp.bt = 0;
+					mp.airplaneMode = 0;
+					mp.brightness = 5;
+					mp.sleepTime = 0;
+					mp.backgroundIndex = 0;
+					mp.volume = 10;
+					mp.ringtone_path = "/Music/Default ringtone.wav";
+					mp.notification = 0;
+					mp.applySettings();
+				}
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+				mp.display.fillRect(15, 46, 132, 36, 0xFD29);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setCursor(47, 55);
+				mp.display.printCenter("Reset to defaults!");
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000)
+				{
+					mp.update();
+					if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+					{
+						while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						break;
+					}
+				}
+				return 1;
+
 			}
 		}
 		if(millis()-previousMillis >= 250)
@@ -2202,7 +2345,6 @@ bool updateMenu()
 	return false;
 }
 int8_t notificationsAudioMenu(String* items, uint8_t length) {
-	char key;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t scale = 2;
@@ -2213,7 +2355,6 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		cameraY = -cursor * (boxHeight + 2) - 1;
 	}
 	while (1) {
-		key = mp.buttons.kpdNum .getKey();
 
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
@@ -2236,8 +2377,11 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		mp.display.print("Notifications");
 		mp.display.setCursor(130,110);
 		mp.display.print("Play");
-		if(key == 'A')
+		if(mp.released(BTN_FUN_RIGHT))
+		{
+			while(!mp.update());
 			mp.playNotificationSound(cursor);
+		}
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			while (!mp.update());
@@ -2284,6 +2428,19 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 	return cursor;
 
 }
+
+void notificationsDrawCursor(uint8_t i, int32_t y) {
+	uint8_t offset;
+	uint8_t boxHeight;
+	offset = 23;
+	boxHeight = 20;
+	if (millis() % 500 <= 250) {
+		return;
+	}
+	y += i * (boxHeight + 2) + offset;
+	mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
+	mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
+}
 void notificationsDrawBox(String text, uint8_t i, int32_t y) {
 	uint8_t offset;
 	uint8_t boxHeight;
@@ -2297,11 +2454,484 @@ void notificationsDrawBox(String text, uint8_t i, int32_t y) {
 	mp.display.setTextColor(TFT_WHITE);
 	mp.display.drawString(text, 5, y+2);
 }
-void notificationsDrawCursor(uint8_t i, int32_t y) {
-	uint8_t offset;
-	uint8_t boxHeight;
-	offset = 23;
-	boxHeight = 20;
+void wifiConnect()
+{
+	if(!mp.wifi)
+	{
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextSize(1);
+		mp.display.setTextFont(2);
+		mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+		mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+		mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+		mp.display.setCursor(47, 54);
+		mp.display.printCenter("No networks found!");
+		uint32_t tempMillis = millis();
+		while(millis() < tempMillis + 2000)
+		{
+			mp.update();
+			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+			{
+				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				break;
+			}
+		}
+		while(!mp.update());
+	}
+	bool blinkState = 1;
+	unsigned long elapsedMillis = millis();
+	String content = ""; //password string
+	String prevContent = "";
+	delay(1000);
+	int n = WiFi.scanNetworks();
+	delay(1000);
+	Serial.println("scan done");
+	Serial.println(n);
+	if (n < 1) {
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextSize(1);
+		mp.display.setTextFont(2);
+		mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+		mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+		mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+		mp.display.setCursor(47, 54);
+		mp.display.printCenter("No networks found!");
+		uint32_t tempMillis = millis();
+		while(millis() < tempMillis + 2000)
+		{
+			mp.update();
+			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+			{
+				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				break;
+			}
+		}
+		while(!mp.update());
+
+	}
+	else 
+	{
+		String networkNames[n];
+		String wifiSignalStrengths[n];
+		bool wifiPasswordNeeded[n];
+		Serial.print(n);
+		Serial.println(" networks found");
+		for (int i = 0; i < n; ++i) {
+			// Print SSID and RSSI for each network found
+			networkNames[i] = WiFi.SSID(i);
+			wifiSignalStrengths[i] = WiFi.RSSI(i);
+			wifiPasswordNeeded[i] = !(WiFi.encryptionType(i) == WIFI_AUTH_OPEN);
+			Serial.print(i + 1);
+			Serial.print(": ");
+			Serial.print(WiFi.SSID(i));
+			Serial.print(" (");
+			Serial.print(WiFi.RSSI(i));
+			Serial.print(")");
+			Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+			delay(10);
+		}
+		int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
+		if(selection < 0)
+		{
+			while(!mp.update());
+			return;
+		}
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(8, 8);
+		mp.display.printCenter(networkNames[selection]);
+		mp.display.setCursor(4, 30);
+		mp.display.printCenter("Enter password:");
+		while (!mp.update());
+		mp.display.setCursor(1, 112);
+		mp.display.print("Erase");
+		mp.display.setCursor(110, 112);
+		mp.display.print("Confirm");
+		if (wifiPasswordNeeded[selection])
+		{
+			while (1)
+			{
+				if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine 
+				{
+					elapsedMillis = millis();
+					blinkState = !blinkState;
+				}
+
+				mp.display.setTextFont(2);
+				mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setCursor(1, 6);
+				prevContent = content;
+				content = mp.textInput(content, 18);
+				if (prevContent != content)
+				{
+					blinkState = 1;
+					elapsedMillis = millis();
+				}
+
+				mp.display.setTextWrap(1);
+				mp.display.setCursor(1, 56);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(content);
+				if (blinkState == 1)
+					mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
+				
+				if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
+				{
+					content = "MAKERphone!"; //just for debug purposes
+
+					mp.display.setCursor(20, 50);
+					mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+					mp.display.setCursor(0,40);
+					mp.display.printCenter("Connecting");
+					mp.display.setCursor(60, 60);
+					while (!mp.update());
+
+					char temp[networkNames[selection].length()+1];
+					char temp2[content.length()];
+					networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
+					content.toCharArray(temp2, content.length()+1);
+					WiFi.begin(temp, temp2);
+					uint8_t counter = 0;
+
+					while (WiFi.status() != WL_CONNECTED) 
+					{
+						delay(500);
+						mp.display.print(".");
+						while (!mp.update());
+						counter++;
+						if (counter >= 5)
+						{
+							mp.display.fillRect(0, 40, mp.display.width(), 20, TFT_BLACK);
+							mp.display.setCursor(0, 45);
+							mp.display.printCenter("Wrong password :(");
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000)
+							{
+								mp.update();
+								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+								{
+									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+										mp.update();
+									break;
+								}
+							}
+							while(!mp.update());
+							break;
+						}
+					}
+					if(WiFi.status() != WL_CONNECTED)
+						break;
+
+					int8_t selection = checkForUpdate();
+					if(selection == 1)
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setCursor(0,mp.display.height() / 2 - 16);
+						mp.display.printCenter(F("Downloading update"));
+						while(!mp.update());
+						fetchUpdate();
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setCursor(0,mp.display.height() / 2 - 16);
+						mp.display.printCenter(F("Installing update"));
+						while(!mp.update());
+						mp.updateFromFS("/.core/LOADER.BIN");
+					}
+
+					else if(selection == 0)
+					{
+						mp.display.fillRect(0, 40, mp.display.width(), 20, TFT_BLACK);
+						mp.display.setCursor(0, 45);
+						mp.display.printCenter("No updates available");
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000)
+						{
+							mp.update();
+							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+							{
+								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								break;
+							}
+						}
+						while(!mp.update());
+						break;
+					}
+
+					else
+						break;
+					// while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					// {
+					// 	mp.display.fillScreen(TFT_BLACK);
+					// 	mp.display.setTextFont(2);
+					// 	mp.display.setCursor(70,70);
+					// 	mp.display.printCenter("WIFI success!!!");
+					// 	mp.update();
+					// }
+				}
+				if(mp.buttons.released(BTN_B))
+					break;
+				mp.update();
+			}
+		}
+		else
+		{
+			while (WiFi.status() != WL_CONNECTED)
+				mp.update();
+			mp.display.fillScreen(TFT_BLACK);
+			mp.display.setCursor(30, 32);
+			mp.display.printCenter("CONNECTED!");
+			while (!mp.update());
+		}
+	}
+}
+int8_t checkForUpdate()
+{
+	if(WiFi.status() != WL_CONNECTED)
+		return 0;
+	HTTPClient http;
+	const char* ca = \ 
+	"-----BEGIN CERTIFICATE-----\n" \  
+	"MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \  
+	"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \  
+	"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n" \  
+	"PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD\n" \
+	"Ew5EU1QgUm9vdCBDQSBYMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" \
+	"AN+v6ZdQCINXtMxiZfaQguzH0yxrMMpb7NnDfcdAwRgUi+DoM3ZJKuM/IUmTrE4O\n" \
+	"rz5Iy2Xu/NMhD2XSKtkyj4zl93ewEnu1lcCJo6m67XMuegwGMoOifooUMM0RoOEq\n" \
+	"OLl5CjH9UL2AZd+3UWODyOKIYepLYYHsUmu5ouJLGiifSKOeDNoJjj4XLh7dIN9b\n" \
+	"xiqKqy69cK3FCxolkHRyxXtqqzTWMIn/5WgTe1QLyNau7Fqckh49ZLOMxt+/yUFw\n" \
+	"7BZy1SbsOFU5Q9D8/RhcQPGX69Wam40dutolucbY38EVAjqr2m7xPi71XAicPNaD\n" \
+	"aeQQmxkqtilX4+U9m5/wAl0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNV\n" \
+	"HQ8BAf8EBAMCAQYwHQYDVR0OBBYEFMSnsaR7LHH62+FLkHX/xBVghYkQMA0GCSqG\n" \
+	"SIb3DQEBBQUAA4IBAQCjGiybFwBcqR7uKGY3Or+Dxz9LwwmglSBd49lZRNI+DT69\n" \
+	"ikugdB/OEIKcdBodfpga3csTS7MgROSR6cz8faXbauX+5v3gTt23ADq1cEmv8uXr\n" \
+	"AvHRAosZy5Q6XkjEGB5YGV8eAlrwDPGxrancWYaLbumR9YbK+rlmM6pZW87ipxZz\n" \
+	"R8srzJmwN0jP41ZL9c8PDHIyh8bwRLtTcm1D9SZImlJnt1ir/md2cXjbDaJWFBM5\n" \
+	"JDGFoqgCWjBH4d1QB7wCCZAA62RjYJsWvIjJEubSfZGL+T0yjWW06XyxV3bqxbYo\n" \
+	"Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ\n" \
+	"-----END CERTIFICATE-----\n";
+
+	Serial.print("[HTTP] begin...\n");
+	// configure traged server and url
+	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/README.md", ca); //HTTPS
+	//http.begin("http://example.com/index.html"); //HTTP
+
+	Serial.print("[HTTP] GET...\n");
+	// start connection and send HTTP header
+	int httpCode = http.GET();
+
+	// httpCode will be negative on error
+	if (httpCode > 0) {
+		// HTTP header has been send and Server response header has been handled
+		Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+		// file found at server
+		if (httpCode == HTTP_CODE_OK) {
+			String payload = http.getString();
+			http.end();
+			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
+			String foo = mp.readFile("/.core/settings.json");
+			Serial.println(foo);
+			//uint16_t old_version = foo.substring(foo.indexOf("version=") + 8, foo.indexOf("\n")).toInt();
+			Serial.println(version);
+			if (version > mp.firmware_version)
+			{
+				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
+					+ "." + String(version%10));
+				Serial.println(foo);
+				while(!mp.buttons.released(BTN_A))
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextFont(2);
+					mp.display.setTextSize(1);
+					mp.display.setTextColor(TFT_WHITE);
+					mp.display.setCursor(0,mp.display.height()/2 - 26);
+					if(millis() % 1000 <= 500)
+						mp.display.printCenter("UPDATE AVAILABLE!");
+					mp.display.setCursor(70, 70);
+					mp.display.printCenter(foo);
+					mp.display.setCursor(4,110);
+					mp.display.print("Press A to start update");
+					if(mp.buttons.released(BTN_B))
+					{
+						while(!mp.update());
+						return -1;
+					}
+					mp.update();
+				}
+				EEPROM.write(FIRMWARE_VERSION_ADDRESS, version);
+				EEPROM.commit();
+				return 1;
+			}
+			return 0;
+		}
+	}
+}
+bool fetchUpdate()
+{
+	if(WiFi.status() != WL_CONNECTED)
+		return 0;
+	HTTPClient http;
+	const char* ca = \ 
+	"-----BEGIN CERTIFICATE-----\n" \  
+	"MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \  
+	"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \  
+	"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n" \  
+	"PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD\n" \
+	"Ew5EU1QgUm9vdCBDQSBYMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" \
+	"AN+v6ZdQCINXtMxiZfaQguzH0yxrMMpb7NnDfcdAwRgUi+DoM3ZJKuM/IUmTrE4O\n" \
+	"rz5Iy2Xu/NMhD2XSKtkyj4zl93ewEnu1lcCJo6m67XMuegwGMoOifooUMM0RoOEq\n" \
+	"OLl5CjH9UL2AZd+3UWODyOKIYepLYYHsUmu5ouJLGiifSKOeDNoJjj4XLh7dIN9b\n" \
+	"xiqKqy69cK3FCxolkHRyxXtqqzTWMIn/5WgTe1QLyNau7Fqckh49ZLOMxt+/yUFw\n" \
+	"7BZy1SbsOFU5Q9D8/RhcQPGX69Wam40dutolucbY38EVAjqr2m7xPi71XAicPNaD\n" \
+	"aeQQmxkqtilX4+U9m5/wAl0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNV\n" \
+	"HQ8BAf8EBAMCAQYwHQYDVR0OBBYEFMSnsaR7LHH62+FLkHX/xBVghYkQMA0GCSqG\n" \
+	"SIb3DQEBBQUAA4IBAQCjGiybFwBcqR7uKGY3Or+Dxz9LwwmglSBd49lZRNI+DT69\n" \
+	"ikugdB/OEIKcdBodfpga3csTS7MgROSR6cz8faXbauX+5v3gTt23ADq1cEmv8uXr\n" \
+	"AvHRAosZy5Q6XkjEGB5YGV8eAlrwDPGxrancWYaLbumR9YbK+rlmM6pZW87ipxZz\n" \
+	"R8srzJmwN0jP41ZL9c8PDHIyh8bwRLtTcm1D9SZImlJnt1ir/md2cXjbDaJWFBM5\n" \
+	"JDGFoqgCWjBH4d1QB7wCCZAA62RjYJsWvIjJEubSfZGL+T0yjWW06XyxV3bqxbYo\n" \
+	"Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ\n" \
+	"-----END CERTIFICATE-----\n";
+	mp.SD.remove("/.core/LOADER.BIN");
+	SDAudioFile file = mp.SD.open("/.core/LOADER.BIN", "w");
+	Serial.print("[HTTP] begin...\n");
+	// configure traged server and url
+	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/firmware.bin", ca); //HTTPS
+	//http.begin("http://example.com/index.html"); //HTTP
+
+	Serial.print("[HTTP] GET...\n");
+	// start connection and send HTTP header
+	int httpCode = http.GET();
+
+	// httpCode will be negative on error
+	if (httpCode > 0) {
+		// HTTP header has been send and Server response header has been handled
+		Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+		// file found at server
+		if (httpCode == HTTP_CODE_OK) 
+		{
+			http.writeToStream(&file);  //for large files
+			http.end();
+			file.close();
+			return 1;
+		}
+	}
+	else
+		return 0;
+
+}
+int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
+	int32_t cameraY = 0;
+	int32_t cameraY_actual = 0;
+	uint8_t offset = 22;
+	uint8_t boxHeight = 20;
+	int16_t cursor = 0;
+	if (length > 12) {
+		cameraY = -cursor * (boxHeight + 2) - 1;
+	}
+	while (1) {
+
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(0, 0);
+		cameraY_actual = (cameraY_actual + cameraY) / 2;
+		if (cameraY_actual - cameraY == 1) {
+			cameraY_actual = cameraY;
+		}
+
+		for (uint8_t i = 0; i < length; i++)
+			wifiDrawBox(items[i], signals[i], i, cameraY_actual);
+
+		wifiDrawCursor(cursor, cameraY_actual);
+
+		mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(2,1);
+		mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Networks");
+		if(mp.released(BTN_FUN_RIGHT))
+		{
+			while(!mp.update());
+			mp.playNotificationSound(cursor);
+		}
+
+		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+			while (!mp.update());
+			break;
+		}
+		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+
+			while (!mp.update());
+			if (cursor == 0) {
+				cursor = length - 1;
+				if (length > 4) {
+					cameraY = -(cursor - 5) * (boxHeight + 2) - 1;
+				}
+			}
+			else {
+				if (cursor > 0 && (cursor * (boxHeight + 2) - 1 + cameraY + offset) <= boxHeight) {
+					cameraY += (boxHeight + 2);
+				}
+				cursor--;
+			}
+
+		}
+
+		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			while (!mp.update());
+			cursor++;
+			if ((cursor * (boxHeight + 2) + cameraY + offset) > 100) {
+				cameraY -= (boxHeight + 2);
+			}
+			if (cursor >= length) {
+				cursor = 0;
+				cameraY = 0;
+
+			}
+
+		}
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			while (!mp.update());
+			return -1;
+		}
+		mp.update();
+	}
+	return cursor;
+
+}
+void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y) {
+	uint8_t offset = 23;
+	uint8_t boxHeight = 20;
+	y += i * (boxHeight + 2) + offset;
+	if (y < 0 || y > mp.display.height()) {
+		return;
+	}
+	mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 1, TFT_DARKGREY);
+	mp.display.setTextColor(TFT_WHITE);
+	mp.display.drawString(text, 5, y+2);
+	int strength = signalStrength.toInt();
+	//> -50 full
+	// < -40 && > -60 high
+	// < -60 && > -85 low
+	// < -95 nosignal
+	if(strength > -50)
+		mp.display.drawBitmap(140, y+2, signalFullIcon, TFT_WHITE, 2);
+	else if(strength <= -50 && strength > -70)
+		mp.display.drawBitmap(140, y+2, signalHighIcon, TFT_WHITE, 2);
+	else if(strength <= -70 && strength > -95)
+		mp.display.drawBitmap(140, y+2, signalLowIcon, TFT_WHITE, 2);
+	else if(strength <= -95)
+		mp.display.drawBitmap(140, y+2, noSignalIcon, TFT_WHITE, 2);
+}
+void wifiDrawCursor(uint8_t i, int32_t y) {
+	uint8_t offset = 23;
+	uint8_t boxHeight = 20;
 	if (millis() % 500 <= 250) {
 		return;
 	}

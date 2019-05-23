@@ -1,13 +1,11 @@
 #include "flashlightApp.h"
 void flashlightApp()
 {
-	char key = NO_KEY;
 	bool state = 0;
 	uint8_t color = 4;
 	uint8_t localBrightness = 5;
 	while(1)
 	{
-		key = mp.buttons.kpdNum.getKey();
 		for(int i = 0; i < 8; i++)
 		{
 			switch(color)
@@ -61,7 +59,7 @@ void flashlightApp()
 		}
 		if(mp.buttons.released(BTN_B))
 			break;
-		if(key == 'C')
+		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 			{

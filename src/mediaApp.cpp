@@ -330,7 +330,6 @@ void audioPlayer(uint16_t index) {
 		mp3->setVolume(256*14/mp.volume);
 		while (1) 
 		{
-			c = mp.buttons.kpdNum.getKey();
 			if (mp.buttons.released(BTN_B))
 			{
 
@@ -558,8 +557,9 @@ void audioPlayer(uint16_t index) {
 				while(!mp.update());
 				break;
 			}
-			if(c == 'A') //shuffle button
+			if(mp.buttons.released(BTN_FUN_RIGHT)) //shuffle button
 			{
+				while(!mp.update());
 				if(!shuffle)
 					memset(shuffleList, 0, sizeof(shuffleList));
 				shuffle = !shuffle;
@@ -568,8 +568,9 @@ void audioPlayer(uint16_t index) {
 				shuffleList[index] = 1;
 
 			}
-			if(c == 'C') //loop button
+			if(mp.buttons.released(BTN_FUN_LEFT)) //loop button
 			{
+				while(!mp.update());
 				loop = !loop;
 				mp.tft.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);

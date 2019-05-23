@@ -129,11 +129,7 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
 			while(!mp.update());
-			mp.vibration(200);
-			FastLED.clear();
-			while (!mp.update());
 
-			while (mp.buttons.kpd.pin_read(BTN_UP) == 0);
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -154,11 +150,7 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
 			while (!mp.update());
-			mp.vibration(200);
-			FastLED.clear();
-			while (!mp.update());
 
-			while (mp.buttons.kpd.pin_read(BTN_DOWN) == 0);
 
 			cursor++;
 			if ((cursor * 8 + cameraY + offset) > 54) {

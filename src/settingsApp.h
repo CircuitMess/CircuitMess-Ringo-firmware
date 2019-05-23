@@ -13,11 +13,16 @@ void soundMenu();
 void securityMenu();
 void timeMenu();
 bool updateMenu();
-void wifiMenu();
+void wifiConnect();
+int8_t checkForUpdate();
+bool fetchUpdate();
 
 int8_t notificationsAudioMenu(String* items, uint8_t length);
 void notificationsDrawBox(String text, uint8_t i, int32_t y);
 void notificationsDrawCursor(uint8_t i, int32_t y);
+int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length);
+void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y);
+void wifiDrawCursor(uint8_t i, int32_t y);
 
 extern String settingsItems[6];
 extern uint16_t pinNumber;
