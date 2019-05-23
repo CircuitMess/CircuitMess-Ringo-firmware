@@ -288,8 +288,6 @@ void lockscreen() {
 				mp.update();
 			}
 		}
-		// if (mp.buttons.released(BTN_A))
-			// FastLED.clear();
 		if (mp.buttons.released(BTN_B)) {
 			mp.sleep();
 		}

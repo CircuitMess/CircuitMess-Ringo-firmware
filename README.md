@@ -1,8 +1,8 @@
 
 
-# MAKERphone firmware 
+# Circuitmess Ringo firmware 
 
-A repository for the core firmware that comes preloaded on every MAKERphone.
+A repository for the core firmware that comes preloaded on every Circuitmess Ringo.
 
 Functionalities that are currently available:
 - home screen
@@ -24,4 +24,7 @@ Copyright © 2019 CircuitMess
 
 Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
 
-[MAKERphone's kickstarter page](https://www.kickstarter.com/projects/albertgajsak/makerphone-an-educational-diy-mobile-phone/updates)
+[Circuitmess Ringo's kickstarter page](https://www.kickstarter.com/projects/albertgajsak/makerphone-an-educational-diy-mobile-phone/updates)
+
+
+version=2

@@ -275,7 +275,6 @@ void listAudio(const char * dirname, uint8_t levels) {
 	audioCount = 0;
 	while(!mp.SD.begin(5, SPI, 9000000))
 		Serial.println(F("SD ERROR"));
-	Serial.printf("Listing directory: %s\n", dirname);
 	SDAudioFile root = mp.SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
@@ -290,15 +289,10 @@ void listAudio(const char * dirname, uint8_t levels) {
 	SDAudioFile file = root.openNextFile();
 	while (file) {
 		String Name(file.name());
-		Serial.println(Name);
 		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3"))
 		 || Name.endsWith(F(".wav")) || Name.endsWith(F(".WAV")))
 		{
-			Serial.print(counter);
-			Serial.print(F(".   "));
-			Serial.println(Name);
 			audioFiles[counter - 1] = Name;
-			Serial.println(Name);
 			audioCount++;
 			counter++;
 		}
@@ -1345,8 +1339,7 @@ void setup()
 	osc = new Oscillator();
 	osc->setVolume(256);
 	addOscillator(osc);
-}	
-
+}
 void loop()
 {
 	lockscreen();
