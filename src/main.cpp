@@ -656,12 +656,692 @@ void callNumber(String number) {
 		mp.update();
 	}
 }
+bool startupWizard()
+{
+	// mp.inHomePopup = 1;
+	// mp.inShutdownPopup = 1;
+	// Connect charger
+	// while(1)
+	// {
+	// 	mp.display.fillScreen(TFT_WHITE);
+	// 	mp.display.setTextFont(2);
+	// 	mp.display.setTextSize(1);
+	// 	mp.display.setCursor(4,4);
+	// 	mp.display.setTextColor(TFT_BLACK);
+	// 	mp.display.printCenter("Startup wizard");
+	// 	mp.display.setCursor(0, mp.display.height()/2 - 14);
+	// 	mp.display.printCenter("Connect your charger");
+	// 	mp.display.drawBitmap(72, 74, batteryCharging, TFT_BLACK, 3);
+	// 	if(batteryVoltage > 4000)
+	// 	{
+	// 		mp.display.setTextColor(TFT_BLACK);
+	// 		mp.display.setTextSize(1);
+	// 		mp.display.setTextFont(2);
+	// 		mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+	// 		mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+	// 		mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+	// 		mp.display.setCursor(47, 55);
+	// 		mp.display.printCenter("Charger connected!");
+	// 		uint32_t tempMillis = millis();
+	// 		while(millis() < tempMillis + 1500)
+	// 		{
+	// 			mp.update();
+	// 			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+	// 			{
+	// 				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	// 					mp.update();
+	// 				break;
+	// 			}
+	// 		}
+	// 		while(!mp.update());
+	// 		break;
+	// 	}
+	// 	mp.update();
+	// }
+	// while(!mp.update());
+
+
+	// // Buttons testing
+	// bool buttonsArray[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+	// bool allPressed = 1; 
+	// while(1)
+	// {
+	// 	mp.display.fillScreen(TFT_WHITE);
+	// 	mp.display.setTextFont(2);
+	// 	mp.display.setTextSize(1);
+	// 	mp.display.setCursor(4,4);
+	// 	mp.display.setTextColor(TFT_BLACK);
+	// 	mp.display.printCenter("Startup wizard");
+	// 	mp.display.setCursor(3, 97);
+	// 	mp.display.print("Press every button");
+	// 	mp.display.setCursor(3, 112);
+	// 	mp.display.print("to continue");
+	// 	allPressed = 1;
+	// 	for(int i = 0; i < 18; i++)
+	// 	{
+	// 		if(buttonsArray[i])
+	// 			mp.display.fillCircle(13 + 26*(i%6), 33 + int(i/6)*22, 8, TFT_GREEN);
+	// 		else
+	// 		{
+	// 			allPressed = 0;
+	// 			switch (i)
+	// 			{
+	// 			case 0:
+	// 				if(mp.buttons.getKey() == 'A')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 1:
+	// 				if(mp.buttons.currentKey == 'B')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 2:
+	// 				if(mp.buttons.currentKey == 'C')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 3:
+	// 				if(mp.buttons.getKey() == 'D')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 4:
+	// 				if(mp.buttons.pressed(BTN_A))
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 5:
+	// 				if(mp.buttons.pressed(BTN_B))
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 6:
+	// 				if(mp.buttons.getKey() == '1')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 7:
+	// 				if(mp.buttons.getKey() == '2')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 8:
+	// 				if(mp.buttons.getKey() == '3')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 9:
+	// 				if(mp.buttons.getKey() == '4')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 10:
+	// 				if(mp.buttons.getKey() == '5')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 11:
+	// 				if(mp.buttons.getKey() == '6')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 12:
+	// 				if(mp.buttons.getKey() == '7')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 13:
+	// 				if(mp.buttons.getKey() == '8')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 14:
+	// 				if(mp.buttons.getKey() == '9')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 15:
+	// 				if(mp.buttons.getKey() == '*')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 16:
+	// 				if(mp.buttons.getKey() == '0')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			case 17:
+	// 				if(mp.buttons.getKey() == '#')
+	// 					buttonsArray[i] = 1;
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// 	mp.display.setCursor(12, 25);
+	// 	mp.display.drawBitmap(33, 27, homeButton);
+	// 	mp.display.drawBitmap(59, 27, powerButton);
+	// 	mp.display.print("-            -   A   B");
+	// 	mp.display.setCursor(10, 47);
+	// 	mp.display.print("1   2   3   4   5   6");
+	// 	mp.display.setCursor(10, 69);
+	// 	mp.display.print("7   8   9   *   0   #");
+	// 	mp.update();
+
+	// 	if(allPressed)
+	// 	{
+	// 		mp.display.setTextColor(TFT_BLACK);
+	// 		mp.display.setTextSize(1);
+	// 		mp.display.setTextFont(2);
+	// 		mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+	// 		mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+	// 		mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+	// 		mp.display.setCursor(47, 55);
+	// 		mp.display.printCenter("Buttons OK!");
+	// 		uint32_t tempMillis = millis();
+	// 		while(millis() < tempMillis + 1500)
+	// 		{
+	// 			mp.update();
+	// 			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+	// 			{
+	// 				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	// 					mp.update();
+	// 				break;
+	// 			}
+	// 		}
+	// 		while(!mp.update());
+	// 		break;
+	// 	}
+	// }
+
+	// // Joystick testing
+	// bool tested[8] = {0,0,0,0,0,0,0,0};
+	// bool allTested = 1;
+	// while(1)
+	// {
+	// 	mp.display.fillScreen(TFT_WHITE);
+	// 	mp.display.setTextFont(2);
+	// 	mp.display.setTextSize(1);
+	// 	mp.display.setCursor(4,4);
+	// 	mp.display.setTextColor(TFT_BLACK);
+	// 	mp.display.printCenter("Startup wizard");
+	// 	mp.display.setCursor(3, 97);
+	// 	mp.display.print("Test every direction");
+	// 	mp.display.setCursor(3, 112);
+	// 	mp.display.print("to continue");
+	// 	mp.display.drawBitmap(74, 24, joystickArrowUp);
+	// 	mp.display.drawBitmap(98, 30, joystickArrowUpRight);
+	// 	mp.display.drawBitmap(100, 54, joystickArrowRight);
+	// 	mp.display.drawBitmap(98, 73, joystickArrowDownRight);
+	// 	mp.display.drawBitmap(74, 76, joystickArrowDown);
+	// 	mp.display.drawBitmap(45, 73, joystickArrowDownLeft);
+	// 	mp.display.drawBitmap(40, 54, joystickArrowLeft);
+	// 	mp.display.drawBitmap(45, 30, joystickArrowUpLeft);
+	// 	allTested = 1;
+	// 	for(uint8_t i = 0; i < 8; i++)
+	// 	{
+	// 		if(tested[i])
+	// 		{
+	// 			switch (i)
+	// 			{
+	// 				case 0:
+	// 					mp.display.drawBitmap(74, 24, joystickArrowUp, TFT_GREEN);
+	// 					break;
+	// 				case 1:
+	// 					mp.display.drawBitmap(98, 30, joystickArrowUpRight, TFT_GREEN);
+	// 					break;
+	// 				case 2:
+	// 					mp.display.drawBitmap(100, 54, joystickArrowRight, TFT_GREEN);
+	// 					break;
+	// 				case 3:
+	// 					mp.display.drawBitmap(98, 73, joystickArrowDownRight, TFT_GREEN);
+	// 					break;
+	// 				case 4:
+	// 					mp.display.drawBitmap(74, 76, joystickArrowDown, TFT_GREEN);
+	// 					break;
+	// 				case 5:
+	// 					mp.display.drawBitmap(45, 73, joystickArrowDownLeft, TFT_GREEN);
+	// 					break;
+	// 				case 6:
+	// 					mp.display.drawBitmap(40, 54, joystickArrowLeft, TFT_GREEN);
+	// 					break;
+	// 				case 7:
+	// 					mp.display.drawBitmap(45, 30, joystickArrowUpLeft, TFT_GREEN);
+	// 					break;
+				
+	// 			}
+	// 		}
+	// 		else
+	// 		{
+	// 			allTested = 0;
+	// 			switch (i)
+	// 			{
+	// 				case 0:
+	// 					if(mp.buttons.getJoystickY() < 100 && mp.buttons.getJoystickX() < 750 && mp.buttons.getJoystickX() > 350)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 1:
+	// 					if(mp.buttons.getJoystickY() < 200 && mp.buttons.getJoystickX() < 200)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 2:
+	// 					if(mp.buttons.getJoystickY() < 750 && mp.buttons.getJoystickY() > 350 && mp.buttons.getJoystickX() < 100)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 3:
+	// 					if(mp.buttons.getJoystickY() > 900 && mp.buttons.getJoystickX() < 200)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 4:
+	// 					if(mp.buttons.getJoystickY() > 1000 && mp.buttons.getJoystickX() < 750 && mp.buttons.getJoystickX() > 350)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 5:
+	// 					if(mp.buttons.getJoystickY() > 900 && mp.buttons.getJoystickX() > 900)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 6:
+	// 					if(mp.buttons.getJoystickY() < 750 && mp.buttons.getJoystickY() > 350 && mp.buttons.getJoystickX() > 1000)
+	// 						tested[i] = 1;
+	// 					break;
+	// 				case 7:
+	// 					if(mp.buttons.getJoystickY() < 200 && mp.buttons.getJoystickX() > 900)
+	// 						tested[i] = 1;
+	// 					break;
+				
+	// 			}
+	// 		}
+	// 	}
+	// 	if(allTested)
+	// 	{
+	// 		mp.display.setTextColor(TFT_BLACK);
+	// 		mp.display.setTextSize(1);
+	// 		mp.display.setTextFont(2);
+	// 		mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+	// 		mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+	// 		mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+	// 		mp.display.setCursor(47, 55);
+	// 		mp.display.printCenter("Buttons OK!");
+	// 		uint32_t tempMillis = millis();
+	// 		while(millis() < tempMillis + 1500)
+	// 		{
+	// 			mp.update();
+	// 			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+	// 			{
+	// 				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	// 					mp.update();
+	// 				break;
+	// 			}
+	// 		}
+	// 		while(!mp.update());
+	// 		break;
+	// 	}
+	// 	mp.update();
+	// }
+
+
+	//SIM module testing
+	mp.display.fillScreen(TFT_WHITE);
+	mp.display.setTextFont(2);
+	mp.display.setTextSize(1);
+	mp.display.setCursor(4,4);
+	mp.display.setTextColor(TFT_BLACK);
+	mp.display.printCenter("Startup wizard");
+	mp.display.setCursor(0,mp.display.height()/2 - 22);
+	mp.display.printCenter("SIM functionality test");
+	mp.display.setCursor(0,mp.display.height()/2 - 2);
+	mp.display.printCenter("Performing test 1/3");
+	while(!mp.update());
+	uint32_t tempMillis = millis();
+	String reply = "";
+	bool response = 0;
+	while(millis() < tempMillis + 1500)
+	{
+		Serial1.println("AT");
+	
+		reply = Serial1.readString();
+		if(reply.indexOf("OK") != -1)
+		{
+			response = 1;
+			break;
+		}
+	}
+	if(response)
+	{
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextSize(1);
+		mp.display.setTextFont(2);
+		mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+		mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+		mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+		mp.display.setCursor(47, 55);
+		mp.display.printCenter("AT OK!");
+		tempMillis = millis();
+		while(millis() < tempMillis + 1000)
+			mp.update();
+	}
+	else
+	{
+		Serial1.begin(9600, SERIAL_8N1, 17, 16);
+		while(millis() < tempMillis + 1500)
+		{
+			Serial1.println("AT");
+			if(reply.indexOf("OK") != -1)
+			{
+				response = 1;
+				break;
+			}
+			reply = Serial1.readString();
+		}
+		if(response)
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+			mp.display.setCursor(47, 55);
+			mp.display.printCenter("AT OK!");
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+		}
+		else
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+			mp.display.setCursor(47, 55);
+			mp.display.printCenter("AT OK failed!");
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+		}
+	}
+	
+	while(1)
+	{
+		mp.display.fillScreen(TFT_WHITE);
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setCursor(4,4);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.printCenter("Startup wizard");
+		mp.display.setCursor(0,mp.display.height()/2 - 22);
+		mp.display.printCenter("SIM functionality test");
+		mp.display.setCursor(0,mp.display.height()/2 - 2);
+		mp.display.printCenter("Performing test 2/3");
+		while(!mp.update());
+		tempMillis = millis();
+		response = 0;
+		reply = "";
+		while(millis() < tempMillis + 1500)
+		{
+			Serial1.println("AT+CSQ");
+		
+			reply = Serial1.readString();
+			Serial.println(reply);
+			if(reply.indexOf("+CSQ:") != -1)
+			{
+				response = 1;
+				break;
+			}
+		}
+		if(response)
+		{
+			uint16_t foo = reply.indexOf(" ", reply.indexOf("+CSQ:")) + 1;
+			if(reply.substring(foo, reply.indexOf(",", foo)).toInt() == 99)
+				response = 0;
+		}
+		if(response)
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+			mp.display.setCursor(47, 55);
+			mp.display.printCenter("Signal OK!");
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+			break;
+		}
+		else
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+			mp.display.setCursor(47, 55);
+			mp.display.printCenter("Signal error!");
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+			bool blinkState = 0;
+			uint32_t blinkMillis = millis();
+			bool cursor = 0;
+			while(!mp.buttons.released(BTN_A))
+			{
+				if(millis() - blinkMillis >= 350)
+				{
+					blinkMillis = millis();
+					blinkState = !blinkState;
+				}
+				mp.display.fillScreen(TFT_WHITE);
+				mp.display.setCursor(0, 32);
+				mp.display.printCenter("Check the antenna");
+				mp.display.setCursor(0,70);
+				mp.display.printCenter("Retry      Skip");
+				mp.display.setCursor(4, 110);
+				mp.display.print("Press A to confirm");
+				if(cursor)
+				{
+					mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
+					mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
+				}
+				else
+				{
+					mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
+					mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
+				}
+
+				if(mp.buttons.released(BTN_LEFT) && cursor)
+				{
+					blinkState = 1;
+					blinkMillis = millis();
+					cursor = 0;
+				}
+				if(mp.buttons.released(BTN_RIGHT) && !cursor)
+				{
+					blinkState = 1;
+					blinkMillis = millis();
+					cursor = 1;
+				}
+				mp.update();
+			}
+			if(cursor)
+				break;
+			else
+			{
+				mp.display.fillScreen(TFT_WHITE);
+				mp.display.setCursor(0,mp.display.height()/2 - 22);
+				mp.display.printCenter("Refreshing signal data");
+				mp.display.setCursor(0,mp.display.height()/2 - 2);
+				mp.display.printCenter("Please wait...");
+				tempMillis = millis();
+				while(millis() < tempMillis + 4000)
+					mp.update();
+			}
+			
+		}
+	}
+	while(1)
+	{
+		mp.display.fillScreen(TFT_WHITE);
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setCursor(4,4);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.printCenter("Startup wizard");
+		mp.display.setCursor(0,mp.display.height()/2 - 22);
+		mp.display.printCenter("SIM functionality test");
+		mp.display.setCursor(0,mp.display.height()/2 - 2);
+		mp.display.printCenter("Performing test 3/3");
+		while(!mp.update());
+		// checkSim();
+		if(mp.simInserted)
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+			mp.display.setCursor(47, 55);
+			mp.display.printCenter("SIM card OK!");
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+			bool blinkState = 0;
+			uint32_t blinkMillis = millis();
+			bool cursor = 0;
+			while(!mp.buttons.released(BTN_A))
+			{
+				if(millis() - blinkMillis >= 350)
+				{
+					blinkMillis = millis();
+					blinkState = !blinkState;
+				}
+				mp.display.fillScreen(TFT_WHITE);
+				mp.display.setCursor(0, 22);
+				mp.display.printCenter("Make a test call?");
+				mp.display.setCursor(0,70);
+				mp.display.printCenter("Yes        No");
+				mp.display.setCursor(4, 110);
+				mp.display.print("Press A to confirm");
+				if(cursor)
+				{
+					mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
+					mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
+				}
+				else
+				{
+					mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
+					mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
+				}
+
+				if(mp.buttons.released(BTN_LEFT) && cursor)
+				{
+					blinkState = 1;
+					blinkMillis = millis();
+					cursor = 0;
+				}
+				if(mp.buttons.released(BTN_RIGHT) && !cursor)
+				{
+					blinkState = 1;
+					blinkMillis = millis();
+					cursor = 1;
+				}
+				mp.update();
+			}
+			if(!cursor)
+			{
+
+			}
+			break;
+		}
+		else
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+			mp.display.setCursor(47, 55);
+			mp.display.printCenter("SIM card not found!");
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+			tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+				mp.update();
+			bool blinkState = 0;
+			uint32_t blinkMillis = millis();
+			bool cursor = 0;
+			while(!mp.buttons.released(BTN_A))
+			{
+				if(millis() - blinkMillis >= 350)
+				{
+					blinkMillis = millis();
+					blinkState = !blinkState;
+				}
+				mp.display.fillScreen(TFT_WHITE);
+				mp.display.setCursor(0, 16);
+				mp.display.printCenter("Reinsert SIM card");
+				mp.display.setCursor(0, 32);
+				mp.display.printCenter("and reset device");
+				mp.display.setCursor(0,70);
+				mp.display.printCenter("Reset      Skip");
+				mp.display.setCursor(4, 110);
+				mp.display.print("Press A to confirm"); // prompt za manual turn on
+				if(cursor)
+				{
+					mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
+					mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
+				}
+				else
+				{
+					mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
+					mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
+				}
+
+				if(mp.buttons.released(BTN_LEFT) && cursor)
+				{
+					blinkState = 1;
+					blinkMillis = millis();
+					cursor = 0;
+				}
+				if(mp.buttons.released(BTN_RIGHT) && !cursor)
+				{
+					blinkState = 1;
+					blinkMillis = millis();
+					cursor = 1;
+				}
+				mp.update();
+			}
+			if(cursor)
+				break;
+			else
+			{
+				mp.tft.setTextFont(2);
+				mp.tft.setTextSize(1);
+				mp.tft.setTextColor(TFT_BLACK);
+				mp.tft.fillRect(12, 36, 138, 56, TFT_WHITE);
+				mp.tft.setCursor(40, 51);
+				mp.tft.print("Turning off...");
+				delay(750);
+				Serial.println("TURN OFF");
+				mp.buttons.kpd.pin_mode(2, OUTPUT);
+  				mp.buttons.kpd.pin_write(2, 1);
+			}
+			
+		}
+		
+
+		mp.update();
+	}
+	return 0;
+}
 
 void setup()
 {
 	Serial.begin(115200);
 	mp.begin(0);
 	mp.homePopupEnable(0);
+	mp.inAlarmPopup = 1;
+	Serial.print("Setup: ");
+	Serial.println(EEPROM.readBool(65));
+	if(!EEPROM.readBool(65))
+	{
+		if(startupWizard())
+			EEPROM.writeBool(65, 1);
+		else
+			EEPROM.writeBool(65, 0);
+		EEPROM.commit();
+	}
 	osc = new Oscillator();
 	osc->setVolume(256);
 	addOscillator(osc);
