@@ -1,22 +1,4 @@
 #include "clockApp.h"
-uint8_t alarmHours[5];
-uint8_t alarmMins[5];
-uint8_t alarmEnabled[5] = {2, 2, 2, 2, 2};
-bool alarmRepeat[5] = {0,0,0,0,0};
-bool alarmRepeatDays[5][7] = {
-    {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0}
-};
-String alarmTrack[5] = {
-    "alarm.wav", 
-    "alarm.wav", 
-    "alarm.wav", 
-    "alarm.wav", 
-    "alarm.wav"
-};
 void clockApp()
 {
 	String clockItems[4] = {
@@ -344,14 +326,14 @@ void clockAlarm()
 	uint16_t alarmCount = 0;
 	for (int i = 0; i < 5;i++)
 	{
-		if(alarmEnabled[i] != 2)
+		if(mp.alarmEnabled[i] != 2)
 			alarmCount++;
 	}
 	uint8_t alarmsArray[alarmCount];
 	uint8_t temp = 0;
 	for (int i = 0; i < 5;i++)
 	{
-		if(alarmEnabled[i] != 2)
+		if(mp.alarmEnabled[i] != 2)
 		{
 			alarmsArray[temp] = i;
 			temp++;
@@ -365,7 +347,7 @@ void clockAlarm()
 			int8_t newAlarm = -1;
 			for(int i = 0;i<5;i++)
 			{
-				if(alarmEnabled[i] == 2)
+				if(mp.alarmEnabled[i] == 2)
 				{
 					newAlarm = i;
 					break;
@@ -399,14 +381,14 @@ void clockAlarm()
 				alarmCount = 0;
 				for (int i = 0; i < 5;i++)
 				{
-					if(alarmEnabled[i] != 2)
+					if(mp.alarmEnabled[i] != 2)
 						alarmCount++;
 				}
 				alarmsArray[alarmCount];
 				temp = 0;
 				for (int i = 0; i < 5;i++)
 				{
-					if(alarmEnabled[i] != 2)
+					if(mp.alarmEnabled[i] != 2)
 					{
 						alarmsArray[temp] = i;
 						temp++;
@@ -421,23 +403,23 @@ void clockAlarm()
 		{
 			index = alarmsArray[-(index + 4)];
 			Serial.printf("Deleting alarm on index %d\n", index);
-			alarmEnabled[index] = 2;
-			alarmHours[index] = 12;
-			alarmMins[index] = 0;
-			alarmRepeat[index] = 0;
+			mp.alarmEnabled[index] = 2;
+			mp.alarmHours[index] = 12;
+			mp.alarmMins[index] = 0;
+			mp.alarmRepeat[index] = 0;
 			for (int i = 0;i<7;i++)
-				alarmRepeatDays[index][i] = 0;
-			alarmTrack[index] = "/alarm.wav";
+				mp.alarmRepeatDays[index][i] = 0;
+			mp.alarmTrack[index] = "/Ringtones/Default ringtone.wav";
 			alarmCount = 0;
 			for (int i = 0; i < 5;i++)
 			{
-				if(alarmEnabled[i] != 2)
+				if(mp.alarmEnabled[i] != 2)
 					alarmCount++;
 			}
 			temp = 0;
 			for (int i = 0; i < 5;i++)
 			{
-				if(alarmEnabled[i] != 2)
+				if(mp.alarmEnabled[i] != 2)
 				{
 					alarmsArray[temp] = i;
 					temp++;
@@ -451,13 +433,13 @@ void clockAlarm()
 			alarmCount = 0;
 			for (int i = 0; i < 5;i++)
 			{
-				if(alarmEnabled[i] != 2)
+				if(mp.alarmEnabled[i] != 2)
 					alarmCount++;
 			}
 			temp = 0;
 			for (int i = 0; i < 5;i++)
 			{
-				if(alarmEnabled[i] != 2)
+				if(mp.alarmEnabled[i] != 2)
 				{
 					alarmsArray[temp] = i;
 					temp++;
@@ -578,19 +560,19 @@ void clockAlarmMenuDrawBox(uint8_t alarmIndex, uint8_t i, int32_t y) {
 	mp.display.setTextFont(2);
 	mp.display.setTextSize(2);
 	mp.display.setCursor(5, y-2);
-	if (alarmHours[alarmIndex] < 10)
+	if (mp.alarmHours[alarmIndex] < 10)
 		mp.display.print("0");
-	mp.display.print(alarmHours[alarmIndex]);
+	mp.display.print(mp.alarmHours[alarmIndex]);
 	mp.display.print(":");
-	if (alarmMins[alarmIndex] < 10)
+	if (mp.alarmMins[alarmIndex] < 10)
 		mp.display.print("0");
-	mp.display.print(alarmMins[alarmIndex]);
+	mp.display.print(mp.alarmMins[alarmIndex]);
 	mp.display.setTextSize(1);
 	mp.display.setCursor(130, y + 7);
-	mp.display.print(alarmEnabled[alarmIndex] ? "ON" : "OFF");
+	mp.display.print(mp.alarmEnabled[alarmIndex] ? "ON" : "OFF");
 
 	mp.display.setCursor(80, y + 11);
-	mp.display.print(alarmRepeat[alarmIndex] ? "repeat" : "once");
+	mp.display.print(mp.alarmRepeat[alarmIndex] ? "repeat" : "once");
 }
 void clockAlarmEdit(uint8_t index)
 {
@@ -606,21 +588,37 @@ void clockAlarmEdit(uint8_t index)
 	uint32_t blinkMillis = millis();
 	uint32_t color = TFT_BLACK;
 	bool blinkState = 1;
-	String parsedAlarmTrack = "alarm.wav";
-	String localAlarmTrack = "/Music/alarm.wav";
-
-	if(alarmEnabled[index] != 2)
+	uint8_t start = 0;
+	String parsedRingtone;
+	String localRingtone = mp.alarm_path;
+	if(mp.SDinsertedFlag)
 	{
-		hours = alarmHours[index];
-		mins = alarmMins[index];
-		enabled = alarmEnabled[index];
-		localAlarmTrack = alarmTrack[index];
+		listAudio("/Music", 0);
+		String tempList[audioCount];
+		uint16_t tempCount = audioCount;
+		for (int i = 0; i < audioCount;i++)
+			tempList[i] = audioFiles[i];
+		listAudio("/Ringtones", 0);
+		for (int i = 0; i < tempCount;i++)
+			audioFiles[i + audioCount] = tempList[i];
+		audioCount += tempCount;
+	}
+	if(mp.alarmEnabled[index] != 2)
+	{
+		hours = mp.alarmHours[index];
+		mins = mp.alarmMins[index];
+		enabled = mp.alarmEnabled[index];
+		localRingtone = mp.alarmTrack[index];
 		for(int i = 0; i < 7; i++)
 		{
-			days[i] = alarmRepeatDays[index][i];
+			days[i] = mp.alarmRepeatDays[index][i];
 		}
-		repeat = alarmRepeat[index];
+		repeat = mp.alarmRepeat[index];
 	}
+	while (localRingtone.indexOf("/", start) != -1)
+		start = mp.alarm_path.indexOf("/", start) + 1;
+	parsedRingtone = localRingtone.substring(start, localRingtone.indexOf("."));
+	start = 0;
 	while(1)
 	{
 		color = TFT_BLACK;
@@ -715,7 +713,7 @@ void clockAlarmEdit(uint8_t index)
 		mp.display.drawRect(20, 98, 120, 20, color);
 		mp.display.drawRect(19, 97, 122, 22, color);
 		mp.display.setCursor(0,100);
-		mp.display.printCenter(parsedAlarmTrack);
+		mp.display.printCenter(parsedRingtone);
 		if(millis()-blinkMillis >= 350)
 		{
 			blinkState = !blinkState;
@@ -848,17 +846,53 @@ void clockAlarmEdit(uint8_t index)
 				}
 				if(mp.buttons.released(BTN_A))
 				{
-					while(!mp.update());
-					mp.display.setFreeFont(TT1);
-					listAudio("/Music", 1);
-					if(audioCount == 0)
+					if(mp.SDinsertedFlag)
 					{
-						mp.display.fillScreen(0xFC92);
-						mp.display.setCursor(0, mp.display.height()/2 - 16);
+						while(!mp.update());
+						if(audioCount == 0)
+						{
+							mp.display.fillScreen(0xFC92);
+							mp.display.setCursor(0, mp.display.height()/2 - 16);
+							mp.display.setTextFont(2);
+							mp.display.printCenter("No audio tracks found!");
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000)
+							{
+								mp.update();
+								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+								{
+									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+										mp.update();
+									break;
+								}
+							}
+						}
+						else
+						{
+							int8_t i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
+							mp.display.setTextColor(TFT_BLACK);
+							if (i >= 0)
+								localRingtone = audioFiles[i];
+							else
+								Serial.println("pressed B in menu");
+							start = 0;
+							while (localRingtone.indexOf("/", start) != -1)
+								start = localRingtone.indexOf("/", start) + 1;
+							parsedRingtone = localRingtone.substring(start, localRingtone.indexOf("."));
+						}
+					}
+					else
+					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
 						mp.display.setTextFont(2);
-						mp.display.printCenter("No audio tracks found!");
+						mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+						mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+						mp.display.fillRect(15, 46, 132, 36, 0xA7FF);
+						mp.display.setCursor(47, 55);
+						mp.display.printCenter("No SD card!");
 						uint32_t tempMillis = millis();
-						while(millis() < tempMillis + 2000)
+						while(millis() < tempMillis + 1500)
 						{
 							mp.update();
 							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
@@ -868,17 +902,7 @@ void clockAlarmEdit(uint8_t index)
 								break;
 							}
 						}
-					}
-					else
-					{
-						// i = audioPlayerMenu("Select alarm:", audioFiles, audioCount);
-						// mp.display.setTextColor(TFT_BLACK);
-						// if (i >= 0)
-						// 	localAlarmTrack = audioFiles[i];
-						// uint16_t start = 0;
-						// while (localAlarmTrack.indexOf("/", start) != -1)
-						// 	start = localAlarmTrack.indexOf("/", start) + 1;
-						// parsedAlarmTrack = localAlarmTrack.substring(start);
+						while(!mp.update());
 					}
 
 				}
@@ -895,7 +919,7 @@ void clockAlarmEdit(uint8_t index)
 			blinkMillis = millis();
 			while(!mp.update());
 		}
-		if (mp.buttons.released(BTN_DOWN) && cursorY < 4 && enabled)
+		if (mp.buttons.released(BTN_DOWN) && cursorY < 3 && enabled)
 		{
 			if (cursorY == 1 && !repeat)
 				cursorY++;
@@ -929,15 +953,15 @@ void clockAlarmEdit(uint8_t index)
 				if(mp.buttons.released(BTN_A))
 				{
 					while(!mp.update());
-					alarmHours[index] = hours;
-					alarmMins[index] = mins;
-					alarmEnabled[index] = enabled;
-					alarmTrack[index] = localAlarmTrack;
+					mp.alarmHours[index] = hours;
+					mp.alarmMins[index] = mins;
+					mp.alarmEnabled[index] = enabled;
+					mp.alarmTrack[index] = localRingtone;
 					for(int i = 0; i < 7; i++)
 					{
-						alarmRepeatDays[index][i] = days[i];
+						mp.alarmRepeatDays[index][i] = days[i];
 					}
-					alarmRepeat[index] = repeat;
+					mp.alarmRepeat[index] = repeat;
 					saveAlarms();
 					//save RTC and exit
 					return;
@@ -1215,17 +1239,17 @@ void saveAlarms()
 		for(int i = 0; i<5;i++)
 		{
 			JsonObject& tempAlarm = jb.createObject();
-			tempAlarm["hours"] = alarmHours[i];
-			tempAlarm["mins"] = alarmMins[i];
-			tempAlarm["enabled"] = alarmEnabled[i];
-			tempAlarm["repeat"] = alarmRepeat[i];
+			tempAlarm["hours"] = mp.alarmHours[i];
+			tempAlarm["mins"] = mp.alarmMins[i];
+			tempAlarm["enabled"] = mp.alarmEnabled[i];
+			tempAlarm["repeat"] = mp.alarmRepeat[i];
 			JsonArray& days = jb.createArray();
 			for(int x = 0; x<7;x++)
 			{
-				days.add(alarmRepeatDays[i][x]);
+				days.add(mp.alarmRepeatDays[i][x]);
 			}
 			tempAlarm["days"] = days;
-			tempAlarm["track"] = alarmTrack[i];		
+			tempAlarm["track"] = mp.alarmTrack[i];		
 			alarms.add(tempAlarm);	
 		}
 
@@ -1249,16 +1273,16 @@ void loadAlarms()
 		int i = 0;
 		for(JsonObject& tempAlarm:alarms)
 		{
-			alarmHours[i] = tempAlarm["hours"];
-			alarmMins[i] = tempAlarm["mins"];
-			alarmEnabled[i] = tempAlarm["enabled"];
-			alarmRepeat[i] = tempAlarm["repeat"];
+			mp.alarmHours[i] = tempAlarm["hours"];
+			mp.alarmMins[i] = tempAlarm["mins"];
+			mp.alarmEnabled[i] = tempAlarm["enabled"];
+			mp.alarmRepeat[i] = tempAlarm["repeat"];
 			JsonArray& days = tempAlarm["days"];
 			for(int x = 0; x<7;x++)
 			{
-				alarmRepeatDays[i][x] = days[x];
+				mp.alarmRepeatDays[i][x] = days[x];
 			}
-			alarmTrack[i] = String(tempAlarm["track"].as<char*>());	
+			mp.alarmTrack[i] = String(tempAlarm["track"].as<char*>());	
 			i++;
 		}
 	}
