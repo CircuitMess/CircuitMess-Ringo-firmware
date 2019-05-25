@@ -5,7 +5,7 @@ void phoneApp() {
 	char key = NO_KEY;
 	mp.display.setTextWrap(0);
 	mp.display.setTextFont(2);
-
+	
 	while (1)
 	{ // za 20 prema gore
 		mp.display.fillScreen(TFT_BLACK);
@@ -22,7 +22,7 @@ void phoneApp() {
 		mp.display.print("Dialer");
 		mp.display.setTextColor(TFT_WHITE);
 
-
+		
 		key = mp.buttons.getKey();
 		if (mp.buttons.released(BTN_FUN_LEFT))
 			callBuffer.remove(callBuffer.length()-1);
@@ -97,7 +97,6 @@ void phoneApp() {
 			mp.display.print(callBuffer);
 		}
 
-
 		if (mp.buttons.released(BTN_A))//initate call
 		{
 			callNumber(callBuffer);
@@ -106,10 +105,8 @@ void phoneApp() {
 		}
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
 			break;
-		if (mp.buttons.released(BTN_B)) //BACK BUTTON
-			break;
-
 		mp.update();
+
 	}
 	while(!mp.update());
 }

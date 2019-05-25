@@ -590,7 +590,8 @@ void contactsAppSD(){
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
-		JsonArray& jarr = jb.parseArray("[{\"name\":\"foo\", \"number\":\"099\"}]");
+		// JsonArray& jarr = jb.parseArray("[{\"name\":\"foo\", \"number\":\"099\"}]");
+		JsonArray& jarr = jb.createArray();
 		delay(10);
 		SDAudioFile file1 = mp.SD.open("/.core/contacts.json", "w");
 		jarr.prettyPrintTo(file1);

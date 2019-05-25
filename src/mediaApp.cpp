@@ -35,6 +35,7 @@ void mediaApp() {
 			else
 			{
 				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
 				mp.display.setCursor(0, mp.display.height()/2 - 16);
 				mp.display.setTextFont(2);
 				mp.display.printCenter(F("No audio files!"));
@@ -117,6 +118,7 @@ void mediaApp() {
 			else
 			{
 				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
 				mp.display.setCursor(0, mp.display.height()/2 - 16);
 				mp.display.setTextFont(2);
 				mp.display.printCenter(F("No photos found!"));
@@ -338,7 +340,6 @@ void audioPlayer(uint16_t index) {
 				Serial.println(F("Stopped"));
 				delay(5);
 				while (!mp.update());
-			
 				out = 1;
 				break;
 			}
@@ -413,20 +414,20 @@ void audioPlayer(uint16_t index) {
 				while (!mp.update());
 			}
 
-			if (mp.buttons.released(BTN_DOWN) && mp.volume > 0) //DOWN
+			if (mp.buttons.released(BTN_DOWN) && mp.volume > 1) //DOWN
 			{
 				
 				mp.volume--;
 				mp3->setVolume(256*14/mp.volume);
 				//prepare for text printing
-				mp.tft.setTextColor(TFT_BLACK);
-				mp.tft.setTextFont(2);
-				mp.tft.setTextSize(1);
-				mp.tft.setTextWrap(0);
-				mp.tft.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextFont(2);
+				mp.display.setTextSize(1);
+				mp.display.setTextWrap(0);
+				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
-				mp.tft.setCursor(4, 2);
-				mp.tft.print(mp.volume);
+				mp.display.setCursor(4, 2);
+				mp.display.print(mp.volume);
 
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
@@ -446,14 +447,14 @@ void audioPlayer(uint16_t index) {
 				mp.volume++;
 				mp3->setVolume(256*14/mp.volume);
 				//prepare for text printing
-				mp.tft.setTextColor(TFT_BLACK);
-				mp.tft.setTextFont(2);
-				mp.tft.setTextSize(1);
-				mp.tft.setTextWrap(0);
-				mp.tft.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextFont(2);
+				mp.display.setTextSize(1);
+				mp.display.setTextWrap(0);
+				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
-				mp.tft.setCursor(4, 2);
-				mp.tft.print(mp.volume);
+				mp.display.setCursor(4, 2);
+				mp.display.print(mp.volume);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -563,7 +564,7 @@ void audioPlayer(uint16_t index) {
 				if(!shuffle)
 					memset(shuffleList, 0, sizeof(shuffleList));
 				shuffle = !shuffle;
-				mp.tft.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
+				mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				shuffleList[index] = 1;
 
@@ -572,7 +573,7 @@ void audioPlayer(uint16_t index) {
 			{
 				while(!mp.update());
 				loop = !loop;
-				mp.tft.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
+				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 			}
 			mp.update();

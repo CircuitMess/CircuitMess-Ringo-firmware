@@ -6,7 +6,7 @@
 extern MAKERphone mp;
 extern int backgroundColors[7];
 extern String backgroundColorsNames[7];
-extern String titles[10];
+extern String titles[9];
 extern Oscillator *osc;
 extern int textPointer;
 extern StaticJsonBuffer<capacity> jb;

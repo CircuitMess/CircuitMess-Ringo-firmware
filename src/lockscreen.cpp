@@ -281,8 +281,8 @@ void lockscreen() {
 					}
 					Serial.println(millis() - buttonHeld);
 					goOut = 1;
-					FastLED.clear();
-					delay(10);
+					// FastLED.clear();
+					// delay(10);
 					break;
 				}
 				mp.update();

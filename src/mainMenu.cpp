@@ -98,7 +98,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	uint16_t index = 0;
 	uint8_t cursorX = 0;
 	uint8_t cursorY = 0;
-	uint8_t elements = 10 + directoryCount; //10 default apps
+	uint8_t elements = 9 + directoryCount; //9 default apps
 	Serial.println(elements);
 	delay(5);
 	uint8_t x_elements = 3;
@@ -163,28 +163,28 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 					case 4:
 						mp.display.drawIcon(bigPhone, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
+					// case 5:
+					// 	mp.display.drawIcon(bigApps, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+					// 	break;
 					case 5:
-						mp.display.drawIcon(bigApps, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
-						break;
-					case 6:
 						mp.display.drawIcon(clock_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
-					case 7:
+					case 6:
 						mp.display.drawIcon(calculator_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
-					case 8:
+					case 7:
 						mp.display.drawIcon(flash_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
-					case 9:
+					case 8:
 						mp.display.drawIcon(calendar_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
 					default:
 						if(pageIndex * 3 + i < elements)
 						{
-							Serial.println(directories[pageIndex * 3 + i - 10]);
+							Serial.println(directories[pageIndex * 3 + i - 9]);
 							delay(5);
-							if(mp.SD.exists(String("/" + directories[pageIndex * 3 + i - 10] + "/icon.bmp")))
-								mp.display.drawBmp(String("/" + directories[pageIndex * 3 + i - 10] + "/icon.bmp"), 4 + tempX * 52, 18 + tempY * 56, 2);
+							if(mp.SD.exists(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp")))
+								mp.display.drawBmp(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp"), 4 + tempX * 52, 18 + tempY * 56, 2);
 							else
 								mp.display.drawIcon(defaultIcon, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 
@@ -207,10 +207,10 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		mp.display.setTextFont(2);
 		mp.display.setCursor(0,-2);
 		mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-		if(index < 10)
+		if(index < 9)
 			mp.display.print(titles[index]);
 		else
-			mp.display.print(directories[index-10]);
+			mp.display.print(directories[index-9]);
 
 		if (millis() - elapsedMillis >= 250) {
 			elapsedMillis = millis();
@@ -384,7 +384,7 @@ void mainMenu()
 		index = scrollingMainMenu(index);
 		Serial.println(index);
 		delay(5);
-		if(index < 10)
+		if(index < 9)
 		{
 			if (titles[index] == "Apps")
 			{
@@ -550,7 +550,7 @@ void mainMenu()
 			mp.display.printCenter(F("LOADING NOW..."));
 			while(!mp.update());
 
-			String foo = directories[index - 10]; //10 is the number of preloaded apps
+			String foo = directories[index - 9]; //9 is the number of preloaded apps
 			initWavLib();
 			mp.updateFromFS(String("/" + foo + "/" + foo + ".bin"));
 		}
