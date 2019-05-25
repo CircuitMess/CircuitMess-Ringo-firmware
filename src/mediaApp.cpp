@@ -35,6 +35,7 @@ void mediaApp() {
 			else
 			{
 				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
 				mp.display.setCursor(0, mp.display.height()/2 - 16);
 				mp.display.setTextFont(2);
 				mp.display.printCenter(F("No audio files!"));
@@ -117,6 +118,7 @@ void mediaApp() {
 			else
 			{
 				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
 				mp.display.setCursor(0, mp.display.height()/2 - 16);
 				mp.display.setTextFont(2);
 				mp.display.printCenter(F("No photos found!"));

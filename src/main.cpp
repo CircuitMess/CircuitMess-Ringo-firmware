@@ -22,13 +22,12 @@ String backgroundColorsNames[7] PROGMEM = {
 	"Orange",
 	"Pink"
 };
-String titles[10] PROGMEM = {
+String titles[9] PROGMEM = {
 	"Messages",
 	"Media",
 	"Contacts",
 	"Settings",
 	"Phone",
-	"Apps",
 	"Clock",
 	"Calculator",
 	"Flashlight",
@@ -1652,13 +1651,11 @@ void setup()
 	osc->setVolume(256);
 	addOscillator(osc);
 	Serial.print("Setup: ");
-	Serial.println(EEPROM.readBool(65));
-	if(!EEPROM.readBool(65))
+	Serial.println(EEPROM.readBool(33));
+	if(EEPROM.readBool(33))
 	{
-		if(startupWizard())
-			EEPROM.writeBool(65, 1);
-		else
-			EEPROM.writeBool(65, 0);
+		startupWizard();
+		EEPROM.writeBool(33, 0);
 		EEPROM.commit();
 	}
 	mp.shutdownPopupEnable(1);
