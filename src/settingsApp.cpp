@@ -509,14 +509,14 @@ void displayMenu() {
 				osc->note(75, 0.05);
 				osc->play();
 				mp.brightness--;
-				// while(!mp.update());
+				while(!mp.update());
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.brightness < 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.brightness++;
-				// while(!mp.update());
+				while(!mp.update());
 			}
 		}
 		if (cursor == 1)
@@ -528,14 +528,14 @@ void displayMenu() {
 				osc->note(75, 0.05);
 				osc->play();
 				mp.pixelsBrightness--;
-				// while(!mp.update());
+				while(!mp.update());
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.pixelsBrightness < 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.pixelsBrightness++;
-				// while(!mp.update());
+				while(!mp.update());
 			}
 		}
 		if (cursor == 2)
@@ -2093,40 +2093,52 @@ void timeMenu()
 				mp.display.drawRect(23, 93, 110, 20, 0xFFED);
 			if(mp.buttons.released(BTN_A))
 			{
-				osc->note(75, 0.05);
-				osc->play();
-				mp.clockYear = 0;
-				previousMillis = millis();
-				while(1)
+				if(mp.simInserted)
 				{
-					mp.display.fillScreen(0xFFED);
-					mp.display.setCursor(0, mp.display.height()/2 - 16);
-					mp.display.printCenter("Fetching time...");
-					if(millis() - previousMillis >= 4000)
+					osc->note(75, 0.05);
+					osc->play();
+					mp.clockYear = 0;
+					previousMillis = millis();
+					while(1)
 					{
-						mp.display.fillScreen(0xFFED);
-						mp.display.setCursor(0, mp.display.height()/2 - 20);
-						mp.display.printCenter("Couldn't fetch time");
-						mp.display.setCursor(0, mp.display.height()/2);
-						mp.display.printCenter("Set it manually");
-						while(!mp.update());
-						delay(2000);
-						break;
-					}
-					mp.updateTimeGSM();
-					if(mp.clockYear < 80 && mp.clockYear >= 19)
-					{
-						delay(200);
 						mp.display.fillScreen(0xFFED);
 						mp.display.setCursor(0, mp.display.height()/2 - 16);
-						mp.display.printCenter("Time fetched over GSM!");
-						while(!mp.update());
-						delay(1500);
-						break;
+						mp.display.printCenter("Fetching time...");
+						if(millis() - previousMillis >= 4000)
+						{
+							mp.display.fillScreen(0xFFED);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.printCenter("Couldn't fetch time");
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter("Set it manually");
+							while(!mp.update());
+							delay(2000);
+							break;
+						}
+						mp.updateTimeGSM();
+						if(mp.clockYear < 80 && mp.clockYear >= 19)
+						{
+							delay(200);
+							mp.display.fillScreen(0xFFED);
+							mp.display.setCursor(0, mp.display.height()/2 - 16);
+							mp.display.printCenter("Time fetched over GSM!");
+							while(!mp.update());
+							delay(1500);
+							break;
+						}
 					}
 				}
-
-
+				else
+				{
+					mp.display.fillScreen(0xFFED);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.printCenter("Couldn't fetch time");
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter("SIM card missing");
+					while(!mp.update());
+					delay(1500);
+				}
+				
 			}
 		}
 
@@ -2679,7 +2691,10 @@ void wifiConnect()
 						
 					}
 					if(mp.buttons.released(BTN_B))
+					{
+						while(!mp.update());
 						break;
+					}
 					mp.update();
 				}
 			}
