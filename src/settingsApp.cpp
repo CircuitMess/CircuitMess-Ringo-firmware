@@ -2532,164 +2532,176 @@ void wifiConnect()
 			Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
 			delay(10);
 		}
-		int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
-		if(selection < 0)
+		while(1)
 		{
-			while(!mp.update());
-			return;
-		}
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(8, 8);
-		mp.display.printCenter(networkNames[selection]);
-		mp.display.setCursor(4, 30);
-		mp.display.printCenter("Enter password:");
-		while (!mp.update());
-		mp.display.setCursor(1, 112);
-		mp.display.print("Erase");
-		mp.display.setCursor(110, 112);
-		mp.display.print("Confirm");
-		if (wifiPasswordNeeded[selection])
-		{
-			while (1)
+			int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
+			if(selection < 0)
 			{
-				if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine 
+				while(!mp.update());
+				return;
+			}
+			mp.display.fillScreen(TFT_BLACK);
+			mp.display.setCursor(8, 8);
+			mp.display.printCenter(networkNames[selection]);
+			mp.display.setCursor(4, 30);
+			mp.display.printCenter("Enter password:");
+			while (!mp.update());
+			mp.display.setCursor(1, 112);
+			mp.display.print("Erase");
+			mp.display.setCursor(110, 112);
+			mp.display.print("Confirm");
+			if (wifiPasswordNeeded[selection])
+			{
+				while (1)
 				{
-					elapsedMillis = millis();
-					blinkState = !blinkState;
-				}
-
-				mp.display.setTextFont(2);
-				mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
-				mp.display.setTextColor(TFT_WHITE);
-				mp.display.setCursor(1, 6);
-				prevContent = content;
-				content = mp.textInput(content, 18);
-				if (prevContent != content)
-				{
-					blinkState = 1;
-					elapsedMillis = millis();
-				}
-
-				mp.display.setTextWrap(1);
-				mp.display.setCursor(1, 56);
-				mp.display.setTextFont(2);
-				mp.display.printCenter(content);
-				if (blinkState == 1)
-					mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
-				
-				if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
-				{
-					content = "MAKERphone!"; //just for debug purposes
-
-					mp.display.setCursor(20, 50);
-					mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
-					mp.display.setCursor(0,40);
-					mp.display.printCenter("Connecting");
-					mp.display.setCursor(60, 60);
-					while (!mp.update());
-
-					char temp[networkNames[selection].length()+1];
-					char temp2[content.length()];
-					networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
-					content.toCharArray(temp2, content.length()+1);
-					WiFi.begin(temp, temp2);
-					uint8_t counter = 0;
-
-					while (WiFi.status() != WL_CONNECTED) 
+					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine 
 					{
-						delay(500);
-						mp.display.print(".");
+						elapsedMillis = millis();
+						blinkState = !blinkState;
+					}
+
+					mp.display.setTextFont(2);
+					mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
+					mp.display.setTextColor(TFT_WHITE);
+					mp.display.setCursor(1, 6);
+					prevContent = content;
+					content = mp.textInput(content, 18);
+					if (prevContent != content)
+					{
+						blinkState = 1;
+						elapsedMillis = millis();
+					}
+
+					mp.display.setTextWrap(1);
+					mp.display.setCursor(1, 56);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(content);
+					if (blinkState == 1)
+						mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
+					
+					if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
+					{
+						content = "MAKERphone!"; //just for debug purposes
+
+						mp.display.setCursor(20, 50);
+						mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+						mp.display.setCursor(0,40);
+						mp.display.printCenter("Connecting");
+						mp.display.setCursor(60, 60);
 						while (!mp.update());
-						counter++;
-						if (counter >= 5)
+
+						char temp[networkNames[selection].length()+1];
+						char temp2[content.length()];
+						networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
+						content.toCharArray(temp2, content.length()+1);
+						WiFi.begin(temp, temp2);
+						uint8_t counter = 0;
+						while (WiFi.status() != WL_CONNECTED) 
 						{
-							mp.display.fillRect(0, 40, mp.display.width(), 20, TFT_BLACK);
-							mp.display.setCursor(0, 45);
-							mp.display.printCenter("Wrong password :(");
-							uint32_t tempMillis = millis();
-							while(millis() < tempMillis + 2000)
+							delay(500);
+							mp.display.print(".");
+							while (!mp.update());
+							counter++;
+							if (counter >= 5)
 							{
-								mp.update();
-								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+								mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+								mp.display.setCursor(0, 45);
+								mp.display.printCenter("Wrong password :(");
+								uint32_t tempMillis = millis();
+								while(millis() < tempMillis + 2000)
 								{
-									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-										mp.update();
-									break;
-								}
-							}
-							while(!mp.update());
-							break;
-						}
-					}
-					if(WiFi.status() != WL_CONNECTED)
-						break;
-
-					int8_t selection = checkForUpdate();
-					if(selection == 1)
-					{
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setCursor(0,mp.display.height() / 2 - 16);
-						mp.display.printCenter(F("Downloading update"));
-						while(!mp.update());
-						fetchUpdate();
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setCursor(0,mp.display.height() / 2 - 16);
-						mp.display.printCenter(F("Installing update"));
-						while(!mp.update());
-						mp.updateFromFS("/.core/LOADER.BIN");
-					}
-
-					else if(selection == 0)
-					{
-						mp.display.fillRect(0, 40, mp.display.width(), 20, TFT_BLACK);
-						mp.display.setCursor(0, 45);
-						mp.display.printCenter("No updates available");
-						uint32_t tempMillis = millis();
-						while(millis() < tempMillis + 2000)
-						{
-							mp.update();
-							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-							{
-								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 									mp.update();
+									if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+									{
+										while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+											mp.update();
+										break;
+									}
+								}
+								while(!mp.update());
 								break;
 							}
 						}
-						while(!mp.update());
-						break;
-					}
+						if(WiFi.status() != WL_CONNECTED || !mp.SDinsertedFlag)
+							break;
+						if(WiFi.status() == WL_CONNECTED)
+						{
+							Serial.println(WiFi.status());
+							mp.display.setCursor(20, 50);
+							mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+							mp.display.setCursor(0,40);
+							mp.display.printCenter("Connected!");
+							mp.display.setCursor(60, 60);
+							while (!mp.update());
+							delay(1000);
+							Serial.println(WiFi.status());
 
-					else
+							int8_t selection = checkForUpdate();
+							Serial.println("OUT");
+							delay(5);
+							if(selection == 1)
+							{
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setCursor(0,mp.display.height() / 2 - 16);
+								mp.display.printCenter(F("Downloading update"));
+								while(!mp.update());
+								fetchUpdate();
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setCursor(0,mp.display.height() / 2 - 16);
+								mp.display.printCenter(F("Installing update"));
+								while(!mp.update());
+								mp.updateFromFS("/.core/LOADER.BIN");
+							}
+
+							else if(selection == 0)
+							{
+								mp.display.fillRect(0, 40, mp.display.width(), 20, TFT_BLACK);
+								mp.display.setCursor(0, 45);
+								mp.display.printCenter("No updates available");
+								uint32_t tempMillis = millis();
+								while(millis() < tempMillis + 2000)
+								{
+									mp.update();
+									if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+									{
+										while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+											mp.update();
+										break;
+									}
+								}
+								while(!mp.update());
+								return;
+							}
+
+							else
+								break;
+						}
+						
+					}
+					if(mp.buttons.released(BTN_B))
 						break;
-					// while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-					// {
-					// 	mp.display.fillScreen(TFT_BLACK);
-					// 	mp.display.setTextFont(2);
-					// 	mp.display.setCursor(70,70);
-					// 	mp.display.printCenter("WIFI success!!!");
-					// 	mp.update();
-					// }
+					mp.update();
 				}
-				if(mp.buttons.released(BTN_B))
-					break;
-				mp.update();
 			}
-		}
-		else
-		{
-			while (WiFi.status() != WL_CONNECTED)
-				mp.update();
-			mp.display.fillScreen(TFT_BLACK);
-			mp.display.setCursor(30, 32);
-			mp.display.printCenter("CONNECTED!");
-			while (!mp.update());
+			else
+			{
+				while (WiFi.status() != WL_CONNECTED)
+					mp.update();
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setCursor(30, 32);
+				mp.display.printCenter("CONNECTED!");
+				while (!mp.update());
+			}
 		}
 	}
 }
 int8_t checkForUpdate()
 {
 	if(WiFi.status() != WL_CONNECTED)
-		return 0;
+	{
+		Serial.println("not connected");
+		return -1;
+	}
 	HTTPClient http;
 	const char* ca = \ 
 	"-----BEGIN CERTIFICATE-----\n" \  
@@ -2714,6 +2726,7 @@ int8_t checkForUpdate()
 	"-----END CERTIFICATE-----\n";
 
 	Serial.print("[HTTP] begin...\n");
+	delay(5);
 	// configure traged server and url
 	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/README.md", ca); //HTTPS
 	//http.begin("http://example.com/index.html"); //HTTP
@@ -2732,12 +2745,9 @@ int8_t checkForUpdate()
 			String payload = http.getString();
 			http.end();
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
-			String foo = mp.readFile("/.core/settings.json");
-			Serial.println(foo);
-			//uint16_t old_version = foo.substring(foo.indexOf("version=") + 8, foo.indexOf("\n")).toInt();
-			Serial.println(version);
 			if (version > mp.firmware_version)
 			{
+				Serial.println("HERE");
 				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
 					+ "." + String(version%10));
 				Serial.println(foo);
