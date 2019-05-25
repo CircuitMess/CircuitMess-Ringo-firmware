@@ -329,7 +329,7 @@ void audioPlayer(uint16_t index) {
 		delay(5);
 		if(playState)
 			mp3->play();
-		mp3->setVolume(256*14/mp.volume);
+		mp3->setVolume(256/14*mp.volume);
 		while (1) 
 		{
 			if (mp.buttons.released(BTN_B))
@@ -418,7 +418,7 @@ void audioPlayer(uint16_t index) {
 			{
 				
 				mp.volume--;
-				mp3->setVolume(256*14/mp.volume);
+				mp3->setVolume(256/14*mp.volume);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -445,7 +445,7 @@ void audioPlayer(uint16_t index) {
 			{
 				
 				mp.volume++;
-				mp3->setVolume(256*14/mp.volume);
+				mp3->setVolume(256/14*mp.volume);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
