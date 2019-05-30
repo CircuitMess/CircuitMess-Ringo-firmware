@@ -1659,10 +1659,18 @@ void setup()
 		EEPROM.commit();
 	}
 	mp.shutdownPopupEnable(1);
+	mp.incomingCall();
 	
 }
 void loop()
 {
+	// digitalWrite(32, HIGH);
+	// Serial.println(digitalRead(32));
+	// Serial.println("TEST");
+	// osc->note(75, 0.05);
+	// osc->play();
+	// delay(500);
+	
 	lockscreen();
 	mainMenu();
 }
