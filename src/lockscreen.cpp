@@ -265,7 +265,7 @@ void lockscreen() {
 					mp.display.setCursor(2, 111);
 					mp.display.setTextFont(2);
 					mp.display.print("Unlocking * * * *");
-					
+
 					// FastLED.show();
 					while(!mp.buttons.released(BTN_A))
 					{

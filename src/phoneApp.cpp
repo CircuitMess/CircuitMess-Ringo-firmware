@@ -5,9 +5,9 @@ void phoneApp() {
 	char key = NO_KEY;
 	mp.display.setTextWrap(0);
 	mp.display.setTextFont(2);
-	
+
 	while (1)
-	{ // za 20 prema gore
+	{
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setTextSize(1);
@@ -22,8 +22,19 @@ void phoneApp() {
 		mp.display.print("Dialer");
 		mp.display.setTextColor(TFT_WHITE);
 
-		
-		key = mp.buttons.getKey();
+		key = NO_KEY;
+		for(int i = 0; i < 11; i++) {
+			if(mp.buttons.released(i) && i != 9) {
+				Serial.println(i);
+				if(i == 10) {
+					key = '0';
+				} else {
+					key = '0' + i + 1;
+				}
+				break;
+			}
+		}
+
 		if (mp.buttons.released(BTN_FUN_LEFT))
 			callBuffer.remove(callBuffer.length()-1);
 		else if (mp.buttons.released(BTN_FUN_RIGHT))
@@ -86,7 +97,7 @@ void phoneApp() {
 			}
 			callBuffer += key;
 		}
-        mp.display.setCursor(0, 76);
+		mp.display.setCursor(0, 76);
 		mp.display.setTextSize(2);
 		mp.display.print(callBuffer);
 
@@ -105,8 +116,8 @@ void phoneApp() {
 		}
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
 			break;
-		mp.update();
 
+		while (!mp.update());
 	}
 	while(!mp.update());
 }

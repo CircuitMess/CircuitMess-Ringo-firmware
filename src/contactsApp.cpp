@@ -39,9 +39,6 @@ uint8_t deleteContact(String contact, String number, String id)
 			mp.display.setCursor(28*2, 103);
 			mp.display.print("DELETE");
 		}
-
-
-
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
@@ -306,20 +303,20 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-		while(!mp.update());// Exit when pressed
+		mp.update();// Exit when pressed
 		break;
 		}
 		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
-		while(!mp.update()); // Delete
+		mp.update(); // Delete
 		return -1000 + cursor;
 		}
 		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
-		while(!mp.update()); // Edit contact
+		mp.update(); // Edit contact
 		return -3000 + cursor;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-		while(!mp.update());
+		mp.update();
 		if (cursor == 0) {
 			cursor = length;
 			if (length > 2) {
@@ -335,7 +332,7 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-		while(!mp.update());
+		mp.update();
 		cursor++;
 		if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
 			cameraY -= (boxHeight+1);
@@ -510,7 +507,7 @@ void contactsApp() {
 					}
 				} else {
 					callNumber(phoneNumber[menuChoice - 1]);
-					while(!mp.update());
+					mp.update();
 				}
 			} else {
 				break;
@@ -559,8 +556,6 @@ uint8_t deleteContactSD(String name, String number)
 			mp.display.print("DELETE");
 		}
 
-
-
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
@@ -607,8 +602,8 @@ void contactsAppSD(){
 	{
 		Serial.println("Error");
 		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
+		mp.display.setCursor(0, mp.display.height()/2 - 16);
+		mp.display.setTextFont(2);
 		mp.display.printCenter("Error loading contacts");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 		while (!mp.update());
@@ -656,7 +651,7 @@ void contactsAppSD(){
 				} else {
 					if(mp.simInserted)
 						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
-					while(!mp.update());
+					mp.update();
 				}
 			} else {
 				break;
@@ -675,19 +670,20 @@ uint8_t newContactSD(String *name, String *number)
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
-	while (1)
-	{
+	while (1) {
+		// Serial.println(mp.buttons.states[BTN_DOWN]);
+
 		mp.display.fillScreen(TFT_BLACK);
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-        mp.display.setTextFont(2);
-        mp.display.setCursor(0,-2);
-        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
-		elapsedMillis = millis();
-		blinkState = !blinkState;
+			elapsedMillis = millis();
+			blinkState = !blinkState;
 		}
 		if (cursor == 0) //inputting the contact number
 		{
@@ -751,19 +747,18 @@ uint8_t newContactSD(String *name, String *number)
 		mp.display.printCenter("SAVE");
 
 		if (mp.buttons.released(BTN_DOWN) == 0 && cursor == 1) { //BUTTON UP
-		while(!mp.update());
-		cursor = 0;
+			mp.update();
+			cursor = 0;
 		}
 
 		if (mp.buttons.released(BTN_UP) == 0 && cursor == 0) { //BUTTON DOWN
-		while(!mp.update());
-		cursor = 1;
+			mp.update();
+			cursor = 1;
 		}
 
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
-		{
-		while (!mp.update());
-		break;
+		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
+			while (!mp.update());
+			break;
 		}
 		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
@@ -774,6 +769,7 @@ uint8_t newContactSD(String *name, String *number)
 				return 1;
 			}
 		}
+
 		mp.update();
 	}
 	return 0;
@@ -784,15 +780,14 @@ int contactsMenuSD(JsonArray *contacts){
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t length = contacts->size();
-    uint8_t offset = 19;
-    uint8_t boxHeight = 28;
+	uint8_t offset = 19;
+	uint8_t boxHeight = 28;
 	while (1) {
-		while (!mp.update());
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
 		if (cameraY_actual - cameraY == 1) {
-		cameraY_actual = cameraY;
+			cameraY_actual = cameraY;
 		}
 
 		contactsMenuNewBox(0, cameraY_actual);
@@ -809,61 +804,61 @@ int contactsMenuSD(JsonArray *contacts){
 		}
 
 		// last draw the top entry thing
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-        mp.display.setTextFont(2);
-        mp.display.setCursor(0,-2);
-        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-		while(!mp.update());// Exit when pressed
-		break;
+			mp.update();// Exit when pressed
+			break;
 		}
 		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
-		while(!mp.update()); // Delete
-		return -1000 + cursor;
+			mp.update(); // Delete
+			return -1000 + cursor;
 		}
 		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
-		while(!mp.update()); // Edit contact
-		return -3000 + cursor;
+			mp.update(); // Edit contact
+			return -3000 + cursor;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-		while(!mp.update());
-		if (cursor == 0) {
-			cursor = length;
-			if (length > 2) {
-			cameraY = -(cursor - 2) * (boxHeight+1);
+			mp.update();
+			if (cursor == 0) {
+				cursor = length;
+				if (length > 2) {
+				cameraY = -(cursor - 2) * (boxHeight+1);
+				}
 			}
-		}
-		else {
-			cursor--;
-			if (cursor > 0 && (cursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
-			cameraY += (boxHeight+1);
+			else {
+				cursor--;
+				if (cursor > 0 && (cursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
+				cameraY += (boxHeight+1);
+				}
 			}
-		}
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-		while(!mp.update());
+			mp.update();
 
-		cursor++;
-		if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
-			cameraY -= (boxHeight+1);
+			cursor++;
+			if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
+				cameraY -= (boxHeight+1);
+			}
+			if (cursor >= length + 1) {
+				cursor = 0;
+				cameraY = 0;
+			}
 		}
-		if (cursor >= length + 1) {
-			cursor = 0;
-			cameraY = 0;
+		if (mp.buttons.released(BTN_B) == 1) {
+			while (!mp.update());
+			return -2;
 		}
 
-		}
-		if (mp.buttons.released(BTN_B) == 1) //BUTTON BACK
-		{
 		while (!mp.update());
-		return -2;
-		}
 	}
 	return cursor;
 }

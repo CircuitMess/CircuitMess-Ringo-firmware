@@ -570,8 +570,8 @@ void callNumber(String number) {
 		{
 			Serial.println("B PRESSED");
 			Serial1.println("ATH");
-			while (readSerial().indexOf(",0,6,") == -1)
-			{
+			long long curr_millis = millis();
+			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
 				Serial1.println("ATH");
 			}
 			mp.display.fillScreen(TFT_WHITE);
@@ -699,7 +699,7 @@ bool startupWizard()
 
 	// Buttons testing
 	bool buttonsArray[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	bool allPressed = 1; 
+	bool allPressed = 1;
 	while(1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -723,19 +723,19 @@ bool startupWizard()
 				switch (i)
 				{
 				case 0:
-					if(mp.buttons.getKey() == 'A')
+					if(mp.buttons.pressed(BTN_FUN_LEFT))
 						buttonsArray[i] = 1;
 					break;
 				case 1:
-					if(mp.buttons.currentKey == 'B')
+					if(mp.buttons.pressed(14))
 						buttonsArray[i] = 1;
 					break;
 				case 2:
-					if(mp.buttons.currentKey == 'C')
+					if(mp.buttons.pressed(13))
 						buttonsArray[i] = 1;
 					break;
 				case 3:
-					if(mp.buttons.getKey() == 'D')
+					if(mp.buttons.pressed(BTN_FUN_RIGHT))
 						buttonsArray[i] = 1;
 					break;
 				case 4:
@@ -747,59 +747,59 @@ bool startupWizard()
 						buttonsArray[i] = 1;
 					break;
 				case 6:
-					if(mp.buttons.getKey() == '1')
+					if(mp.buttons.pressed(BTN_1))
 						buttonsArray[i] = 1;
 					break;
 				case 7:
-					if(mp.buttons.getKey() == '2')
+					if(mp.buttons.pressed(BTN_2))
 						buttonsArray[i] = 1;
 					break;
 				case 8:
-					if(mp.buttons.getKey() == '3')
+					if(mp.buttons.pressed(BTN_3))
 						buttonsArray[i] = 1;
 					break;
 				case 9:
-					if(mp.buttons.getKey() == '4')
+					if(mp.buttons.pressed(BTN_4))
 						buttonsArray[i] = 1;
 					break;
 				case 10:
-					if(mp.buttons.getKey() == '5')
+					if(mp.buttons.pressed(BTN_5))
 						buttonsArray[i] = 1;
 					break;
 				case 11:
-					if(mp.buttons.getKey() == '6')
+					if(mp.buttons.pressed(BTN_6))
 						buttonsArray[i] = 1;
 					break;
 				case 12:
-					if(mp.buttons.getKey() == '7')
+					if(mp.buttons.pressed(BTN_7))
 						buttonsArray[i] = 1;
 					break;
 				case 13:
-					if(mp.buttons.getKey() == '8')
+					if(mp.buttons.pressed(BTN_8))
 						buttonsArray[i] = 1;
 					break;
 				case 14:
-					if(mp.buttons.getKey() == '9')
+					if(mp.buttons.pressed(BTN_9))
 						buttonsArray[i] = 1;
 					break;
 				case 15:
-					if(mp.buttons.getKey() == '*')
+					if(mp.buttons.pressed(BTN_ASTERISK))
 						buttonsArray[i] = 1;
 					break;
 				case 16:
-					if(mp.buttons.getKey() == '0')
+					if(mp.buttons.pressed(BTN_0))
 						buttonsArray[i] = 1;
 					break;
 				case 17:
-					if(mp.buttons.getKey() == '#')
+					if(mp.buttons.pressed(BTN_HASHTAG))
 						buttonsArray[i] = 1;
 					break;
 				}
 			}
 		}
 		mp.display.setCursor(12, 25);
-		mp.display.drawBitmap(33, 27, homeButton);
-		mp.display.drawBitmap(59, 27, powerButton);
+		mp.display.drawBitmap(59, 27, homeButton);
+		mp.display.drawBitmap(33, 27, powerButton);
 		mp.display.print("-            -   A   B");
 		mp.display.setCursor(10, 47);
 		mp.display.print("1   2   3   4   5   6");
@@ -887,7 +887,7 @@ bool startupWizard()
 					case 7:
 						mp.display.drawBitmap(45, 30, joystickArrowUpLeft, TFT_GREEN);
 						break;
-				
+
 				}
 			}
 			else
@@ -927,7 +927,7 @@ bool startupWizard()
 						if(mp.buttons.getJoystickY() < 200 && mp.buttons.getJoystickX() > 900)
 							tested[i] = 1;
 						break;
-				
+
 				}
 			}
 		}
@@ -976,7 +976,7 @@ bool startupWizard()
 		mp.display.printCenter("Startup wizard");
 		mp.display.setCursor(4, 110);
 		mp.display.print("Press A to confirm");
-		
+
 		if(millis() - blinkMillis >= 350)
 		{
 			blinkMillis = millis();
@@ -986,7 +986,7 @@ bool startupWizard()
 		mp.display.printCenter("Press play to test");
 		mp.display.setCursor(0,mp.display.height()/2 - 12);
 		mp.display.printCenter("the speaker");
-		
+
 		mp.display.setCursor(4, 110);
 		mp.display.print("Press A to confirm");
 		if(cursor)
@@ -1016,7 +1016,7 @@ bool startupWizard()
 		{
 			mp.display.setCursor(0,80);
 			mp.display.printCenter("Stop       Skip");
-		}	
+		}
 		else
 		{
 			mp.display.setCursor(0,80);
@@ -1044,7 +1044,7 @@ bool startupWizard()
 		mp.update();
 	}
 	while(!mp.update());
-	
+
 
 	//SIM module testing
 	mp.display.fillScreen(TFT_WHITE);
@@ -1064,7 +1064,7 @@ bool startupWizard()
 	while(millis() < tempMillis + 1500)
 	{
 		Serial1.println("AT");
-	
+
 		reply = Serial1.readString();
 		if(reply.indexOf("OK") != -1)
 		{
@@ -1151,7 +1151,7 @@ bool startupWizard()
 			while(millis() < tempMillis + 1500)
 			{
 				Serial1.println("AT+CSQ");
-			
+
 				reply = Serial1.readString();
 				Serial.println(reply);
 				if(reply.indexOf("+CSQ:") != -1)
@@ -1249,7 +1249,7 @@ bool startupWizard()
 					while(millis() < tempMillis + 4000)
 						mp.update();
 				}
-				
+
 			}
 		}
 		while(1)
@@ -1323,7 +1323,7 @@ bool startupWizard()
 				}
 				if(!cursor)
 				{
-					while(!mp.update());	
+					while(!mp.update());
 					phoneApp();
 				}
 				break;
@@ -1408,9 +1408,9 @@ bool startupWizard()
 					mp.buttons.kpd.pin_mode(2, OUTPUT);
 					mp.buttons.kpd.pin_write(2, 1);
 				}
-				
+
 			}
-			
+
 
 			mp.update();
 		}
@@ -1515,7 +1515,7 @@ bool startupWizard()
 			break;
 		}
 	}
-	
+
 	//Neopixel testing
 	while(1)
 	{
@@ -1652,25 +1652,48 @@ void setup()
 	addOscillator(osc);
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
-	if(EEPROM.readBool(33))
-	{
-		startupWizard();
-		EEPROM.writeBool(33, 0);
-		EEPROM.commit();
-	}
-	mp.shutdownPopupEnable(1);
-	mp.incomingCall();
-	
+	// if(EEPROM.readBool(33))
+	// {
+	// 	startupWizard();
+	// 	EEPROM.writeBool(33, 0);
+	// 	EEPROM.commit();
+	// }
+	// mp.shutdownPopupEnable(1);
+	// mp.incomingCall();
+
 }
 void loop()
 {
+	// startupWizard();
+	// pinMode(soundSwitchPin, HIGH);
+	// Serial.println(digitalRead(soundSwitchPin));
 	// digitalWrite(32, HIGH);
 	// Serial.println(digitalRead(32));
 	// Serial.println("TEST");
 	// osc->note(75, 0.05);
 	// osc->play();
 	// delay(500);
-	
-	lockscreen();
-	mainMenu();
+
+	// lockscreen();
+	// mainMenu();
+
+	phoneApp();
+	// calculatorApp();
+	// contactsAppSD();
+
+	// mp.display.fillScreen(TFT_BLACK);
+	// mp.display.setTextColor(TFT_WHITE);
+	// mp.display.setTextSize(2);
+	// mp.display.setCursor(10, 30);
+	// mp.display.print(mp.buttons.released(BTN_2));
+	// mp.display.setCursor(30, 30);
+	// mp.display.print(mp.buttons.released(BTN_1));
+
+	// for(int i = 0; i < 16; ++i) {
+	// 	Serial.print(mp.buttons.states[i]);
+	// 	Serial.print(" ");
+	// }
+	// Serial.println("");
+
+	// mp.update();
 }

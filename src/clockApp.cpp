@@ -45,7 +45,7 @@ void clockApp()
 					if (mp.clockSecond < 10)
 						temp.concat("0");
 					temp.concat(mp.clockSecond);
-					
+
 					mp.display.printCenter(temp);
 					mp.display.setTextSize(1);
 					mp.display.setCursor(63, 85);
@@ -77,7 +77,7 @@ void clockApp()
 						timer = millis();
 					}
 					mp.update();
-					
+
 				}
 				while(!mp.update());
 			}
@@ -123,8 +123,8 @@ int8_t clockMenu(String* title, uint8_t length) {
 			mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
 			mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
 		}
-		
-		
+
+
 
 		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 1 && mp.buttons.kpd.pin_read(BTN_UP) == 1)
 			pressed = 0;
@@ -195,7 +195,7 @@ void clockMenuDrawBox(String title, uint8_t i, int32_t y) {
 		// mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFC92);
 
 	}
-	else if (title == "Clock") 
+	else if (title == "Clock")
 	{
 		mp.display.drawBitmap(5, y + 2, clockIcon, 0x963F, 2);
 		mp.display.setTextColor(0x963F);
@@ -395,7 +395,7 @@ void clockAlarm()
 					}
 				}
 			}
-			
+
 		}
 		else if(index == -2)
 			break;
@@ -477,7 +477,7 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 				mp.display.setTextSize(3);
 				mp.display.setCursor(0, temp-12);
 				mp.display.printCenter("+");
-				
+
 			}
 			else
 			{
@@ -537,7 +537,7 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 
 			}
 		}
-		
+
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			return -1;
 		if(mp.buttons.released(BTN_FUN_LEFT) && cursor > 0)
@@ -766,7 +766,7 @@ void clockAlarmEdit(uint8_t index)
 						}
 					break;
 				}
-				
+
 				if(mp.buttons.released(BTN_RIGHT) && cursorX < 2)
 				{
 					blinkState = 0;
@@ -792,7 +792,7 @@ void clockAlarmEdit(uint8_t index)
 				if(!blinkState)
 				{
 					if(cursorX == 0)
-						mp.display.fillRect(0, 50, 71, 12, 0xFC92); 
+						mp.display.fillRect(0, 50, 71, 12, 0xFC92);
 					else if(cursorX == 1)
 						mp.display.fillRect(78, 48, 50, 14, 0xFC92);
 				}
@@ -971,7 +971,7 @@ void clockAlarmEdit(uint8_t index)
 		}
 		mp.update();
 	}
-	
+
 }
 void clockTimer()
 {
@@ -1015,7 +1015,7 @@ void clockTimer()
 			blinkState = !blinkState;
 			blinkMillis = millis();
 		}
-		
+
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
 		mp.display.setCursor(123,110);
@@ -1126,7 +1126,7 @@ void clockTimer()
 					}
 				}
 				break;
-			
+
 			case 1:
 				mp.display.print("Pause");
 				mp.display.setCursor(2,110);
@@ -1189,7 +1189,7 @@ void clockTimer()
 					break;
 				}
 				break;
-			
+
 			case 2:
 				// if(!blinkState)
 				// {
@@ -1249,8 +1249,8 @@ void saveAlarms()
 				days.add(mp.alarmRepeatDays[i][x]);
 			}
 			tempAlarm["days"] = days;
-			tempAlarm["track"] = mp.alarmTrack[i];		
-			alarms.add(tempAlarm);	
+			tempAlarm["track"] = mp.alarmTrack[i];
+			alarms.add(tempAlarm);
 		}
 
 		SDAudioFile file1 = mp.SD.open(path, "w");
@@ -1264,11 +1264,11 @@ void saveAlarms()
 void loadAlarms()
 {
 	const char * path = "/.core/alarms.json";
-	Serial.println(""); 
+	Serial.println("");
 	SDAudioFile file = mp.SD.open(path);
 	JsonArray& alarms = mp.jb.parseArray(file);
 	file.close();
-	
+
 	if (alarms.success()) {
 		int i = 0;
 		for(JsonObject& tempAlarm:alarms)
@@ -1282,7 +1282,7 @@ void loadAlarms()
 			{
 				mp.alarmRepeatDays[i][x] = days[x];
 			}
-			mp.alarmTrack[i] = String(tempAlarm["track"].as<char*>());	
+			mp.alarmTrack[i] = String(tempAlarm["track"].as<char*>());
 			i++;
 		}
 	}

@@ -60,18 +60,47 @@ void calculatorApp()
 	mp.display.print("Erase");
 	while(1)
 	{
-		key = mp.buttons.getKey();
-		if(key != NO_KEY && key > 47 && key < 58 && input.length() < 8)
-		{
-			if(clear)
-			{
-				input = "0";
-				clear = 0;
+		// key = mp.buttons.getKey();
+
+		if(input.length() < 8) {
+			for(int i = 0; i < 11; i++) {
+				if(i == 9) {
+					continue;
+				}
+
+				if(mp.buttons.released(i)) {
+					if(i == 10) {
+						key = '0';
+					} else {
+						key = '1' + i;
+					}
+
+					if(clear)	{
+						input = "0";
+						clear = 0;
+					}
+					if(input == "0") {
+						input = "";
+					}
+
+					input.concat(key);
+				}
 			}
-			if(input == "0")
-				input = "";
-			input.concat(key);
 		}
+
+
+		// if(key != NO_KEY && key > 47 && key < 58 && input.length() < 8)
+		// {
+		// 	if(clear)
+		// 	{
+		// 		input = "0";
+		// 		clear = 0;
+		// 	}
+		// 	if(input == "0")
+		// 		input = "";
+		// 	input.concat(key);
+		// }
+
 		if(millis() - blinkMillis > 250)
 		{
 			blinkState = !blinkState;
@@ -223,7 +252,7 @@ void calculatorApp()
 				}
 				else
 					operation = cursor;
-				
+
 			}
 			while(!mp.update());
 		}
@@ -270,7 +299,7 @@ void calculatorApp()
 		}
 		if(mp.buttons.released(BTN_B))
 			break;
-		mp.update();
+		while(!mp.update());
 	}
 	while(!mp.update());
 }

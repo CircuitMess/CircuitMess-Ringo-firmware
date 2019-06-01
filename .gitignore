@@ -2,7 +2,7 @@
 .pioenvs
 .piolibdeps
 .vscode
-lib
 include
 platformio.ini
 .travis.yml
+test
