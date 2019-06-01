@@ -234,7 +234,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 			mp.update();
 			if (cursor == 0) {
 				cursor = length - 1;
-				if (length > 6*scale) {
+				if (length > 6) {
 					cameraY = -(cursor - 5) * (boxHeight + 1) - 1;
 				}
 			}
@@ -272,7 +272,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 }
 void listAudio(const char * dirname, uint8_t levels) {
 	audioCount = 0;
-	while(!mp.SD.begin(5, SPI, 9000000))
+	while(!mp.SD.begin(5, SPI, 8000000))
 		Serial.println(F("SD ERROR"));
 	SDAudioFile root = mp.SD.open(dirname);
 	if (!root) {
@@ -336,6 +336,7 @@ void callNumber(String number) {
 	uint16_t textLength;
 	uint8_t scale;
 	unsigned int tmp_time = 0;
+	uint8_t micGain = 4;
 	String temp;
 	if(mp.resolutionMode)
 	{
@@ -356,18 +357,20 @@ void callNumber(String number) {
 		mp.display.fillScreen(TFT_WHITE);
 		if (Serial1.available())
 			localBuffer = Serial1.readString();
-		// Serial.println(localBuffer);
+		Serial.println(localBuffer);
 		delay(5);
-		if (localBuffer.indexOf("CLCC:") != -1)
+
+
+		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
-			if (localBuffer.indexOf(",0,0,0,0") != -1)
+			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 			{
+				digitalWrite(soundSwitchPin, 1);
 				if (firstPass == 1)
 				{
 					timeOffset = millis();
 					firstPass = 0;
 				}
-
 
 				temp = "";
 				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
@@ -387,25 +390,28 @@ void callNumber(String number) {
 				}
 				mp.display.setCursor(9, 9);
 				mp.display.printCenter(temp);
-				Serial.println("CALL ACTIVE");
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
+				mp.display.setCursor(3, 3);
+				mp.display.print(micGain);
 			}
 
 			else if (localBuffer.indexOf(",0,3,") != -1)
 			{
 				mp.display.setCursor(25, 9);
-				Serial.println("ringing");
 				mp.display.printCenter("Ringing...");
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
 			}
+
 			else if (localBuffer.indexOf(",0,2,") != -1)
 			{
 				mp.display.setCursor(25, 9);
 				mp.display.printCenter("Calling...");
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
 			}
+
 			else if (localBuffer.indexOf(",0,6,") != -1)
 			{
+				digitalWrite(soundSwitchPin, 0);
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
 				if (timeOffset == 0)
@@ -487,24 +493,12 @@ void callNumber(String number) {
 				mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-			if(mp.resolutionMode)
-			{
-				mp.display.setCursor(2, 62);
-				mp.display.print("press");
-				mp.display.drawBitmap(24, 52, letterB, TFT_BLACK);
-				mp.display.setCursor(35, 62);
-				mp.display.print("to hang up");
-			}
-			else
-			{
-				mp.display.setCursor(2, 112);
-				mp.display.print("press");
-				mp.display.drawBitmap(37, 105, letterB, TFT_BLACK, scale);
-				mp.display.setCursor(55, 112);
-				mp.display.print("to hang up");
-			}
+			mp.display.setCursor(100, 109);
+			mp.display.print("Hang up");
 
 		}
+
+
 		else if (localBuffer.indexOf("CLCC:") == -1)
 		{
 			if (localBuffer.indexOf("ERROR") != -1)
@@ -548,25 +542,11 @@ void callNumber(String number) {
 					mp.display.setCursor(11, 28);
 				mp.display.printCenter(number);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				if(mp.resolutionMode)
-				{
-					mp.display.setCursor(2, 62);
-					mp.display.print("press");
-					mp.display.drawBitmap(24, 52, letterB, TFT_BLACK);
-					mp.display.setCursor(35, 62);
-					mp.display.print("to hang up");
-				}
-				else
-				{
-					mp.display.setCursor(2, 112);
-					mp.display.print("press");
-					mp.display.drawBitmap(37, 105, letterB, TFT_BLACK, scale);
-					mp.display.setCursor(55, 112);
-					mp.display.print("to hang up");
-				}
+				mp.display.setCursor(105, 109);
+				mp.display.print("Hang up");
 			}
 		}
-		if (mp.buttons.pressed(BTN_B)) // hanging up
+		if (mp.buttons.pressed(BTN_FUN_RIGHT)) // hanging up
 		{
 			Serial.println("B PRESSED");
 			Serial1.println("ATH");
@@ -574,6 +554,7 @@ void callNumber(String number) {
 			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
 				Serial1.println("ATH");
 			}
+			digitalWrite(soundSwitchPin, 0);
 			mp.display.fillScreen(TFT_WHITE);
 			mp.display.setCursor(32, 9);
 			if (timeOffset == 0)
@@ -643,6 +624,16 @@ void callNumber(String number) {
 			addCall(number, dateTime, tmp_time);
 			delay(1000);
 			break;
+		}
+		if(mp.buttons.released(BTN_UP) && micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		{
+			micGain++;
+			Serial1.printf("AT+CMIC=0,%d", micGain);
+		}
+		if(mp.buttons.released(BTN_DOWN) && micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		{
+			micGain--;
+			Serial1.printf("AT+CMIC=0,%d", micGain);
 		}
 
 		tmp_time = int((millis() - timeOffset) / 1000);
@@ -1405,8 +1396,7 @@ bool startupWizard()
 
 					delay(2500);
 					Serial.println("TURN OFF");
-					mp.buttons.kpd.pin_mode(2, OUTPUT);
-					mp.buttons.kpd.pin_write(2, 1);
+					digitalWrite(OFF_PIN, 1);
 				}
 
 			}
@@ -1675,8 +1665,9 @@ void loop()
 	// delay(500);
 	// messagesApp();
 	lockscreen();
-	mainMenu();
 
+	mainMenu();
+	// mediaApp();
 	// phoneApp();
 	// calculatorApp();
 	// contactsAppSD();

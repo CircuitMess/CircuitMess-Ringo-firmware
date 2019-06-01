@@ -2202,7 +2202,7 @@ bool updateMenu()
 				mp.display.drawRect(20,18,117, 20, 0xFD29);
 			if(mp.buttons.released(BTN_A))
 			{
-				if(mp.wifi)
+				if(!mp.SDinsertedFlag)
 				{
 					mp.display.setTextColor(TFT_BLACK);
 					mp.display.setTextSize(1);
@@ -2211,20 +2211,7 @@ bool updateMenu()
 					mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
 					mp.display.fillRect(5, 50, 150, 26, 0xFD29);
 					mp.display.setCursor(47, 54);
-					mp.display.printCenter("Searching for networks");
-					mp.update();
-					wifiConnect();
-				}
-				else
-				{
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setTextSize(1);
-					mp.display.setTextFont(2);
-					mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-					mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-					mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-					mp.display.setCursor(47, 54);
-					mp.display.printCenter("Wifi turned off!");
+					mp.display.printCenter("SD card missing");
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000)
 					{
@@ -2236,8 +2223,48 @@ bool updateMenu()
 							break;
 						}
 					}
+					break;
 					mp.update();
 				}
+				else
+				{
+					if(mp.wifi)
+					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
+						mp.display.setTextFont(2);
+						mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+						mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+						mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+						mp.display.setCursor(47, 54);
+						mp.display.printCenter("Searching for networks");
+						while(!mp.update());
+						wifiConnect();
+					}
+					else
+					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
+						mp.display.setTextFont(2);
+						mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+						mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+						mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+						mp.display.setCursor(47, 54);
+						mp.display.printCenter("Wifi turned off!");
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000)
+						{
+							mp.update();
+							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+							{
+								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								break;
+							}
+						}
+					}
+				}
+				mp.update();
 			}
 		}
 		else if (cursor == 1)
@@ -2497,7 +2524,7 @@ void wifiConnect()
 	String prevContent = "";
 	delay(1000);
 	int n = WiFi.scanNetworks();
-	delay(1000);
+	// delay(1000);
 	Serial.println("scan done");
 	Serial.println(n);
 	if (n < 1) {
@@ -2546,6 +2573,7 @@ void wifiConnect()
 		}
 		while(1)
 		{
+			
 			int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
 			if(selection < 0)
 			{
@@ -2564,6 +2592,11 @@ void wifiConnect()
 			mp.display.print("Confirm");
 			if (wifiPasswordNeeded[selection])
 			{
+				mp.textInput("");
+				prevContent = "";
+				content = "";
+				mp.textPointer = 0;
+				mp.update();
 				while (1)
 				{
 					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine 
@@ -2593,7 +2626,7 @@ void wifiConnect()
 					
 					if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
 					{
-						content = "MAKERphone!"; //just for debug purposes
+						Serial.println("PRESSED");
 
 						mp.display.setCursor(20, 50);
 						mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
@@ -2634,19 +2667,36 @@ void wifiConnect()
 								break;
 							}
 						}
-						if(WiFi.status() != WL_CONNECTED || !mp.SDinsertedFlag)
+						if(WiFi.status() != WL_CONNECTED)
+						{
+							mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+							mp.display.setCursor(0, 45);
+							mp.display.printCenter("Wrong password :(");
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000)
+							{
+								mp.update();
+								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+								{
+									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+										mp.update();
+									break;
+								}
+							}
+							mp.update();
 							break;
+						}
 						if(WiFi.status() == WL_CONNECTED)
 						{
-							Serial.println(WiFi.status());
-							mp.display.setCursor(20, 50);
-							mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
-							mp.display.setCursor(0,40);
-							mp.display.printCenter("Connected!");
-							mp.display.setCursor(60, 60);
-							mp.update();
-							delay(1000);
-							Serial.println(WiFi.status());
+							// Serial.println(WiFi.status());
+							// mp.display.setCursor(20, 50);
+							// mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+							// mp.display.setCursor(0,40);
+							// mp.display.printCenter("Connected!");
+							// mp.display.setCursor(60, 60);
+							// while(!mp.update());
+							// delay(1000);
+							// Serial.println(WiFi.status());
 
 							int8_t selection = checkForUpdate();
 							Serial.println("OUT");
@@ -2656,39 +2706,41 @@ void wifiConnect()
 								mp.display.fillScreen(TFT_BLACK);
 								mp.display.setCursor(0,mp.display.height() / 2 - 16);
 								mp.display.printCenter(F("Downloading update"));
-								mp.update();
+								while(!mp.update());
 								fetchUpdate();
 								mp.display.fillScreen(TFT_BLACK);
 								mp.display.setCursor(0,mp.display.height() / 2 - 16);
 								mp.display.printCenter(F("Installing update"));
-								mp.update();
+								while(!mp.update());
 								mp.updateFromFS("/.core/LOADER.BIN");
 							}
 
 							else if(selection == 0)
 							{
-								mp.display.fillRect(0, 40, mp.display.width(), 20, TFT_BLACK);
+								mp.display.fillRect(0, 40, mp.display.width(), 50, TFT_BLACK);
 								mp.display.setCursor(0, 45);
 								mp.display.printCenter("No updates available");
-								uint32_t tempMillis = millis();
-								while(millis() < tempMillis + 2000)
-								{
-									mp.update();
-									if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-									{
-										while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-											mp.update();
-										break;
-									}
-								}
-								mp.update();
-								return;
+								mp.display.setCursor(0, 65);
+								mp.display.printCenter("Restarting phone...");
+								while(!mp.update());
+								delay(2000);
+								ESP.restart();
 							}
-
+							else if(selection == -2)
+							{
+								mp.display.fillRect(0, 40, mp.display.width(), 50, TFT_BLACK);
+								mp.display.setCursor(0, 45);
+								mp.display.printCenter("Server error!");
+								mp.display.setCursor(0, 65);
+								mp.display.printCenter("Restarting phone...");
+								while(!mp.update());
+								delay(2000);
+								ESP.restart();
+							}
 							else
 								break;
 						}
-						
+					
 					}
 					if(mp.buttons.released(BTN_B))
 					{
@@ -2749,18 +2801,16 @@ int8_t checkForUpdate()
 	Serial.print("[HTTP] GET...\n");
 	// start connection and send HTTP header
 	int httpCode = http.GET();
-
+	Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 	// httpCode will be negative on error
-	if (httpCode > 0) {
-		// HTTP header has been send and Server response header has been handled
-		Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
+	if (httpCode > 0) {
 		// file found at server
 		if (httpCode == HTTP_CODE_OK) {
 			String payload = http.getString();
 			http.end();
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
-			if (version > mp.firmware_version)
+			if (version > 1)
 			{
 				Serial.println("HERE");
 				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
@@ -2793,6 +2843,8 @@ int8_t checkForUpdate()
 			return 0;
 		}
 	}
+	else
+		return -2;
 }
 bool fetchUpdate()
 {

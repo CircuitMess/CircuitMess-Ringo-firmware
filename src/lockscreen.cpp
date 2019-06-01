@@ -101,7 +101,7 @@ void lockscreen() {
 			mp.display.print("0");
 		mp.display.print(mp.clockMonth);
 		mp.display.setCursor(62*2, 25*2);
-		mp.display.print(2000 + mp.clockYear);
+		mp.display.print(mp.clockYear);
 		/*mp.display.setTextSize(2);
 		mp.display.setCursor(10, 50);
 		mp.display.print("12:00");*/

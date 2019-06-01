@@ -746,12 +746,12 @@ uint8_t newContactSD(String *name, String *number)
 		mp.display.setCursor(31*2, 103);
 		mp.display.printCenter("SAVE");
 
-		if (mp.buttons.released(BTN_DOWN) == 0 && cursor == 1) { //BUTTON UP
+		if (mp.buttons.released(BTN_DOWN) && cursor == 1) { //BUTTON UP
 			mp.update();
 			cursor = 0;
 		}
 
-		if (mp.buttons.released(BTN_UP) == 0 && cursor == 0) { //BUTTON DOWN
+		if (mp.buttons.released(BTN_UP) && cursor == 0) { //BUTTON DOWN
 			mp.update();
 			cursor = 1;
 		}
