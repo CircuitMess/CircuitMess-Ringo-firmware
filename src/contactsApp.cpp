@@ -42,7 +42,7 @@ uint8_t deleteContact(String contact, String number, String id)
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_A)) // DELETE
@@ -52,7 +52,7 @@ uint8_t deleteContact(String contact, String number, String id)
 			mp.display.setTextFont(2);
 			mp.display.setCursor(34, mp.display.height()/2 -16);
 			mp.display.printCenter("Deleting contact...");
-			while (!mp.update());
+			mp.update();
 
 			Serial1.print("AT+CPBW=");
 			Serial1.println(id);
@@ -63,7 +63,7 @@ uint8_t deleteContact(String contact, String number, String id)
 			mp.display.fillScreen(TFT_BLACK);
 			mp.display.printCenter("Contact deleted!");
 			Serial.println("Contact deleted");
-			while (!mp.update());
+			mp.update();
 			delay(1000);
 			return 1;
 		}
@@ -160,18 +160,18 @@ uint8_t newContact()
 		mp.display.printCenter("SAVE");
 
 		if (mp.buttons.released(BTN_DOWN) && cursor == 1) { //BUTTON UP
-		while (!mp.update());
+		mp.update();
 		cursor = 0;
 		}
 
 		if (mp.buttons.released(BTN_UP) && cursor == 0) { //BUTTON DOWN
-		while (!mp.update());
+		mp.update();
 		cursor = 1;
 		}
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-		while (!mp.update());
+		mp.update();
 		break;
 		}
 		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
@@ -184,7 +184,7 @@ uint8_t newContact()
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setCursor(34, mp.display.height()/2 -16);
 				mp.display.printCenter("Inserting contact");
-				while (!mp.update());
+				mp.update();
 
 				Serial1.print("AT+CPBW=,\"");
 				Serial1.print(contact);
@@ -196,7 +196,7 @@ uint8_t newContact()
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setCursor(34, mp.display.height()/2 -16);
 				mp.display.printCenter("Contact inserted");
-				while (!mp.update());
+				mp.update();
 				delay(1000);
 				return 1;
 			}
@@ -273,7 +273,7 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 	uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -345,7 +345,7 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-		while (!mp.update());
+		mp.update();
 		return -2;
 		}
 	}
@@ -371,8 +371,8 @@ void contactsApp() {
         mp.display.setTextFont(2);
 		mp.display.printCenter("No contacts  :(");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-		while (!mp.update());
-		while (!mp.update());
+		mp.update();
+		mp.update();
 	}
 	else
 	{
@@ -418,7 +418,7 @@ void contactsApp() {
 					mp.display.setTextFont(2);
 					mp.display.setCursor(34, mp.display.height()/2 - 16);
 					mp.display.printCenter("Reloading data...");
-					while (!mp.update());
+					mp.update();
 
 					delay(1000);
 
@@ -439,8 +439,8 @@ void contactsApp() {
 						mp.display.setFreeFont(TT1);
 						mp.display.print("No contacts  :(");
 						while (mp.buttons.released(BTN_B) == 0) //BUTTON BACK
-						while (!mp.update());
-						while (!mp.update());
+						mp.update();
+						mp.update();
 						break;
 					}
 				}
@@ -559,7 +559,7 @@ uint8_t deleteContactSD(String name, String number)
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_A)) // DELETE
@@ -569,7 +569,7 @@ uint8_t deleteContactSD(String name, String number)
 			mp.display.setTextFont(2);
 			mp.display.setCursor(34, mp.display.height()/2 -16);
 			mp.display.printCenter("Deleting contact...");
-			while (!mp.update());
+			mp.update();
 			return 1;
 		}
 		mp.update();
@@ -606,8 +606,8 @@ void contactsAppSD(){
 		mp.display.setTextFont(2);
 		mp.display.printCenter("Error loading contacts");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-		while (!mp.update());
-		while (!mp.update());
+		mp.update();
+		mp.update();
 	}
 	else
 	{
@@ -757,7 +757,7 @@ uint8_t newContactSD(String *name, String *number)
 		}
 
 		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
@@ -854,11 +854,11 @@ int contactsMenuSD(JsonArray *contacts){
 			}
 		}
 		if (mp.buttons.released(BTN_B) == 1) {
-			while (!mp.update());
+			mp.update();
 			return -2;
 		}
 
-		while (!mp.update());
+		mp.update();
 	}
 	return cursor;
 }

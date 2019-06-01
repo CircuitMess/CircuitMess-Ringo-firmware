@@ -54,7 +54,7 @@ void messagesApp() {
         mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Messages - loading data");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-		while (!mp.update());
+		mp.update();
 	}
 	else
 	{
@@ -101,10 +101,10 @@ void viewSms(String content, String contact, String date) {
 						y -= 4;
 						break;
 					}
-					while(!mp.update());
+					mp.update();
 				}
 			}
-			while(!mp.update());
+			mp.update();
 		}
 
 		if (mp.buttons.pressed(BTN_UP)) { //BUTTON UP
@@ -123,15 +123,15 @@ void viewSms(String content, String contact, String date) {
 						y += 4;
 						break;
 					}
-					while(!mp.update());
+					mp.update();
 				}
 			}
-			while(!mp.update());
+			mp.update();
 		}
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		//}
@@ -220,7 +220,7 @@ int16_t smsMenu(JsonArray *messages) {
     offset = 19;
     boxHeight = 30;
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -254,7 +254,7 @@ int16_t smsMenu(JsonArray *messages) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());// Exit when pressed
+			mp.update();// Exit when pressed
 			break;
 		}
 
@@ -425,7 +425,7 @@ void composeSMS(JsonArray *messages)
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_A) && contact != "" && content != "") // SEND SMS
@@ -434,7 +434,7 @@ void composeSMS(JsonArray *messages)
             mp.display.setCursor(0, mp.display.height()/2 - 16);
             mp.display.setTextFont(2);
 			mp.display.printCenter("Sending text...");
-			while (!mp.update());
+			mp.update();
 
 			saveMessage(content, contact, messages);
 
@@ -452,7 +452,7 @@ void composeSMS(JsonArray *messages)
 			while (Serial1.readString().indexOf("OK") != -1);
 			mp.display.fillScreen(TFT_BLACK);
 			mp.display.printCenter("Text sent!");
-			while (!mp.update());
+			mp.update();
 			delay(1000);
 			break;
 		}

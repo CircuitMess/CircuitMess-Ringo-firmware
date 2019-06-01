@@ -79,7 +79,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 	int32_t cameraY_actual = 0;
 	uint8_t	boxHeight = 20;
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -99,7 +99,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 			osc->note(75, 0.05);
 			osc->play();
 
-			while (!mp.update());// Exit when pressed
+			mp.update();// Exit when pressed
 			break;
 		}
 
@@ -139,7 +139,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while(!mp.update());
+			mp.update();
 			return -1;
 		}
 	}
@@ -149,7 +149,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 }
 bool settingsApp() {
 	int8_t input = 0;
-	while (!mp.update());
+	mp.update();
 	while (1)
 	{
 		input = settingsMenu(settingsItems, 6, input);
@@ -190,7 +190,7 @@ bool settingsApp() {
 				break;
 			}
 		}
-		while(!mp.update());
+		mp.update();
 	}
 	else
 	{
@@ -210,7 +210,7 @@ bool settingsApp() {
 				break;
 			}
 		}
-		while(!mp.update());
+		mp.update();
 	}
 	return false;
 
@@ -323,7 +323,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.released(BTN_LEFT) && !mp.wifi)
 			{
-				while(!mp.update());
+				mp.update();
 				osc->note(75, 0.05);
 				osc->play();
 				blinkState = 1;
@@ -332,7 +332,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.wifi)
 			{
-				while(!mp.update());
+				mp.update();
 				osc->note(75, 0.05);
 				osc->play();
 				blinkState = 1;
@@ -352,7 +352,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.released(BTN_LEFT) && !mp.bt)
 			{
-				while(!mp.update());
+				mp.update();
 				osc->note(75, 0.05);
 				osc->play();
 				blinkState = 1;
@@ -361,7 +361,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.bt)
 			{
-				while(!mp.update());
+				mp.update();
 				osc->note(75, 0.05);
 				osc->play();
 				blinkState = 1;
@@ -381,7 +381,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
 			{
-				while(!mp.update());
+				mp.update();
 				osc->note(75, 0.05);
 				osc->play();
 				blinkState = 1;
@@ -390,7 +390,7 @@ void networkMenu() {
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode)
 			{
-				while(!mp.update());
+				mp.update();
 				osc->note(75, 0.05);
 				osc->play();
 				blinkState = 1;
@@ -405,7 +405,7 @@ void networkMenu() {
 			osc->play();
 			blinkState = 0;
 			blinkMillis = millis();
-			while (!mp.update());
+			mp.update();
 			if (cursor == 0)
 				cursor = 2;
 			else
@@ -417,7 +417,7 @@ void networkMenu() {
 			osc->play();
 			blinkState = 0;
 			blinkMillis = millis();
-			while (!mp.update());
+			mp.update();
 			if (cursor == 2)
 				cursor = 0;
 			else
@@ -426,7 +426,7 @@ void networkMenu() {
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while(!mp.update());
+			mp.update();
 			break;
 		}
 
@@ -509,14 +509,14 @@ void displayMenu() {
 				osc->note(75, 0.05);
 				osc->play();
 				mp.brightness--;
-				while(!mp.update());
+				mp.update();
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.brightness < 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.brightness++;
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		if (cursor == 1)
@@ -528,14 +528,14 @@ void displayMenu() {
 				osc->note(75, 0.05);
 				osc->play();
 				mp.pixelsBrightness--;
-				while(!mp.update());
+				mp.update();
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.pixelsBrightness < 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.pixelsBrightness++;
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		if (cursor == 2)
@@ -561,14 +561,14 @@ void displayMenu() {
 				osc->note(75, 0.05);
 				osc->play();
 				sleepTimeBuffer--;
-				while(!mp.update());
+				mp.update();
 			}
 			if (mp.buttons.released(BTN_RIGHT) && sleepTimeBuffer!= 5)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				sleepTimeBuffer++;
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		if (cursor == 3)
@@ -605,14 +605,14 @@ void displayMenu() {
 				osc->note(75, 0.05);
 				osc->play();
 				mp.backgroundIndex--;
-				while(!mp.update());
+				mp.update();
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.backgroundIndex != 6)
 			{
 				osc->note(75, 0.05);
 				osc->play();
 				mp.backgroundIndex++;
-				while(!mp.update());
+				mp.update();
 			}
 		}
 
@@ -620,7 +620,7 @@ void displayMenu() {
 		{
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());
+			mp.update();
   			if (cursor == 0)
 				cursor = 3;
 			else
@@ -630,7 +630,7 @@ void displayMenu() {
 		{
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());
+			mp.update();
 			if (cursor == 3)
 				cursor = 0;
 			else
@@ -742,7 +742,7 @@ void soundMenu() {
 				osc->setVolume(256 * mp.volume / 14);
 				osc->note(75, 0.05);
 				osc->play();
-				while(!mp.update());
+				mp.update();
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.volume != 15)
 			{
@@ -750,7 +750,7 @@ void soundMenu() {
 				osc->setVolume(256 * mp.volume / 14);
 				osc->note(75, 0.05);
 				osc->play();
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		if (cursor == 1)
@@ -762,7 +762,7 @@ void soundMenu() {
 
 			if (mp.buttons.released(BTN_A))
 			{
-				while(!mp.update());
+				mp.update();
 				if(mp.SDinsertedFlag)
 				{
 					osc->note(75, 0.05);
@@ -799,7 +799,7 @@ void soundMenu() {
 							break;
 						}
 					}
-					while(!mp.update());
+					mp.update();
 				}
 				
 			}
@@ -813,7 +813,7 @@ void soundMenu() {
 
 			if (mp.buttons.released(BTN_A))
 			{
-				while(!mp.update());
+				mp.update();
 				int8_t temp = notificationsAudioMenu(notificationSounds, 4);
 				if(temp>=0)
 					mp.notification = temp;
@@ -828,7 +828,7 @@ void soundMenu() {
 				cursor = 2;
 			else
 				cursor--;
-			while(!mp.update());
+			mp.update();
 			blinkState = 0;
 			blinkMillis = millis();
 		}
@@ -840,13 +840,13 @@ void soundMenu() {
 				cursor = 0;
 			else
 				cursor++;
-			while(!mp.update());
+			mp.update();
 			blinkState = 0;
 			blinkMillis = millis();
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while(!mp.update());
+			mp.update();
 			break;
 		}
 		mp.update();
@@ -905,7 +905,7 @@ void securityMenu() {
 	mp.display.setTextColor(TFT_WHITE);
 	mp.display.fillScreen(TFT_BLACK);
 	mp.display.printCenter("Loading SIM card...");
-	while(!mp.update());
+	mp.update();
 	while (reply.indexOf("+SPIC:") == -1)
 	{
 		mp.update();
@@ -1029,19 +1029,19 @@ void securityMenu() {
 							if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
 							{
 								pinBuffer = "";
-								while(!mp.update());
+								mp.update();
 							}
 							else if (mp.buttons.released(BTN_FUN_LEFT) && pinBuffer != "")
 							{
 								pinBuffer.remove(pinBuffer.length() - 1);
-								while(!mp.update());
+								mp.update();
 							}
 							if (key != NO_KEY && isDigit(key) && pinBuffer.length() != 4)
 								pinBuffer += key;
 
 							if (mp.buttons.released(BTN_A))//enter PIN
 							{
-								while(!mp.update());
+								mp.update();
 								reply = "";
 								Serial1.print(F("AT+CLCK=\"SC\", 0, \""));
 								Serial1.print(pinBuffer);
@@ -1055,7 +1055,7 @@ void securityMenu() {
 								if (reply.indexOf("OK", reply.indexOf("AT+CLCK")) != -1)
 								{
 									mp.display.printCenter("PIN OK :)");
-									while (!mp.update());
+									mp.update();
 									delay(1000);
 									pinLock = 0;
 									pinLockBuffer = 0;
@@ -1085,7 +1085,7 @@ void securityMenu() {
 									}
 									else
 										mp.display.printCenter("Invalid PIN");
-									while (!mp.update());
+									mp.update();
 									delay(1000);
 								}
 								pinBuffer = "";
@@ -1095,7 +1095,7 @@ void securityMenu() {
 							if (mp.buttons.released(BTN_B))
 							{
 								pinLockBuffer = 1;
-								while (!mp.update());
+								mp.update();
 								break;
 							}
 
@@ -1113,12 +1113,12 @@ void securityMenu() {
 				if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
 				{
 					pinBuffer = "";
-					while(!mp.update());
+					mp.update();
 				}
 				else if (mp.buttons.released(BTN_FUN_LEFT))
 				{
 					pinBuffer.remove(pinBuffer.length() - 1);
-					while(!mp.update());
+					mp.update();
 				}
 				if (key != NO_KEY && isdigit(key) && pinBuffer.length() < 4)
 					pinBuffer += key;
@@ -1132,7 +1132,7 @@ void securityMenu() {
 					osc->note(75, 0.05);
 					osc->play();
 
-					while (!mp.update());
+					mp.update();
 					pinNumber = pinBuffer.toInt();
 
 					reply = "";
@@ -1165,19 +1165,19 @@ void securityMenu() {
 						if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
 						{
 							oldPin = "";
-							while(!mp.update());
+							mp.update();
 						}
 						else if (mp.buttons.released(BTN_FUN_LEFT))
 						{
 							oldPin.remove(oldPin.length() - 1);
-							while(!mp.update());
+							mp.update();
 						}
 						if (key != NO_KEY && isDigit(key) && oldPin.length() != 4)
 							oldPin += key;
 
 						if ((mp.buttons.released(BTN_A) || mp.released(BTN_FUN_RIGHT)) && oldPin.length() == 4)//enter PIN
 						{
-							while(!mp.update());
+							mp.update();
 							if (pinLock)
 							{
 								reply = "";
@@ -1222,7 +1222,7 @@ void securityMenu() {
 									}
 									else
 										mp.display.printCenter("Invalid PIN");
-									while (!mp.update());
+									mp.update();
 									delay(1000);
 								}
 							}
@@ -1267,7 +1267,7 @@ void securityMenu() {
 									else if (reply.indexOf("ERROR", reply.indexOf("AT+CPWD")) != -1)
 									{
 										oldPin = "";
-										while (!mp.update());
+										mp.update();
 										timesRemaining--;
 										saved = 0;
 										if (timesRemaining == 0)
@@ -1290,7 +1290,7 @@ void securityMenu() {
 									}
 									else
 										mp.display.printCenter("Invalid PIN");
-									while (!mp.update());
+									mp.update();
 									delay(1000);
 									Serial.println(timesRemaining);
 									delay(5);
@@ -1304,7 +1304,7 @@ void securityMenu() {
 						if (mp.buttons.released(BTN_B))
 						{
 							saved = 0;
-							while (!mp.update());
+							mp.update();
 							break;
 						}
 						if (timesRemaining == 0)
@@ -1337,7 +1337,7 @@ void securityMenu() {
 				{
 					osc->note(75, 0.05);
 					osc->play();
-					while (!mp.update());
+					mp.update();
 					mp.display.setCursor(2, 111);
 					mp.display.print("Pin must have 4+ digits");
 					elapsedMillis = millis();
@@ -1372,7 +1372,7 @@ void securityMenu() {
 			{
 				osc->note(75, 0.05);
 				osc->play();
-				while (!mp.update());
+				mp.update();
 				if (cursor == 0 && pinLockBuffer == 1)
 					cursor = 1;
 				else if (pinLockBuffer == 1 && cursor == 1)
@@ -1382,7 +1382,7 @@ void securityMenu() {
 			{
 				osc->note(75, 0.05);
 				osc->play();
-				while (!mp.update());
+				mp.update();
 				if (cursor == 1)
 					cursor = 0;
 				else if (pinLockBuffer == 1 && cursor == 0)
@@ -1456,7 +1456,7 @@ void timeMenu()
 			{
 				osc->note(75, 0.05);
 				osc->play();
-				while(!mp.update());
+				mp.update();
 				String inputBuffer;
 				if(mp.clockHour == 0)
 					inputBuffer = "";
@@ -1676,12 +1676,12 @@ void timeMenu()
 					if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
 					{
 						inputBuffer = "";
-						while(!mp.update());
+						mp.update();
 					}
 					else if (mp.buttons.released(BTN_FUN_LEFT))
 					{
 						inputBuffer.remove(inputBuffer.length() - 1);
-						while(!mp.update());
+						mp.update();
 					}
 					if (key != NO_KEY && isdigit(key) && inputBuffer.length() < 2)
 						inputBuffer += key;
@@ -1695,7 +1695,7 @@ void timeMenu()
 					{
 						blinkState = 1;
 						previousMillis = millis();
-						while(!mp.update());
+						mp.update();
 						if(inputBuffer == "")
 						{
 							switch (editCursor)
@@ -1782,7 +1782,7 @@ void timeMenu()
 					}
 					if(mp.buttons.released(BTN_LEFT) && editCursor > 0) //LEFT
 					{
-						while(!mp.update());
+						mp.update();
 						blinkState = 1;
 						previousMillis = millis();
 						if(inputBuffer == "")
@@ -1872,7 +1872,7 @@ void timeMenu()
 
 					if(mp.buttons.released(BTN_UP) && editCursor > 2) //UP
 					{
-						while(!mp.update());
+						mp.update();
 						blinkState = 1;
 						previousMillis = millis();
 						if(inputBuffer == "")
@@ -1948,7 +1948,7 @@ void timeMenu()
 					}
 					if(mp.buttons.released(BTN_DOWN) && editCursor < 3) //DOWN
 					{
-						while(!mp.update());
+						mp.update();
 						blinkState = 1;
 						previousMillis = millis();
 						if(inputBuffer == "")
@@ -2084,7 +2084,7 @@ void timeMenu()
 						break;
 
 				}
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		else if(cursor == 1)
@@ -2111,7 +2111,7 @@ void timeMenu()
 							mp.display.printCenter("Couldn't fetch time");
 							mp.display.setCursor(0, mp.display.height()/2);
 							mp.display.printCenter("Set it manually");
-							while(!mp.update());
+							mp.update();
 							delay(2000);
 							break;
 						}
@@ -2122,7 +2122,7 @@ void timeMenu()
 							mp.display.fillScreen(0xFFED);
 							mp.display.setCursor(0, mp.display.height()/2 - 16);
 							mp.display.printCenter("Time fetched over GSM!");
-							while(!mp.update());
+							mp.update();
 							delay(1500);
 							break;
 						}
@@ -2135,7 +2135,7 @@ void timeMenu()
 					mp.display.printCenter("Couldn't fetch time");
 					mp.display.setCursor(0, mp.display.height()/2);
 					mp.display.printCenter("SIM card missing");
-					while(!mp.update());
+					mp.update();
 					delay(1500);
 				}
 				
@@ -2155,7 +2155,7 @@ void timeMenu()
 			osc->play();
 			blinkState = 1;
 			previousMillis = millis() + 400;
-			while (!mp.update());
+			mp.update();
 			cursor--;
 		}
 		if (mp.buttons.released(BTN_DOWN) && cursor < 1)
@@ -2164,7 +2164,7 @@ void timeMenu()
 			osc->play();
 			blinkState = 1;
 			previousMillis = millis() + 400;
-			while (!mp.update());
+			mp.update();
 			cursor++;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
@@ -2212,7 +2212,7 @@ bool updateMenu()
 					mp.display.fillRect(5, 50, 150, 26, 0xFD29);
 					mp.display.setCursor(47, 54);
 					mp.display.printCenter("Searching for networks");
-					while(!mp.update());
+					mp.update();
 					wifiConnect();
 				}
 				else
@@ -2236,7 +2236,7 @@ bool updateMenu()
 							break;
 						}
 					}
-					while(!mp.update());
+					mp.update();
 				}
 			}
 		}
@@ -2248,14 +2248,14 @@ bool updateMenu()
 				mp.display.drawRect(30, 48, 96, 20, 0xFD29);
 			if(mp.buttons.released(BTN_A))
 			{
-				while(!mp.update());
+				mp.update();
 				if(mp.SDinsertedFlag)
 				{
 					mp.display.fillScreen(0xFD29);
 					mp.display.setTextColor(TFT_BLACK);
 					mp.display.setCursor(10, 20);
 					mp.display.printCenter("Erasing in progress...");
-					while(!mp.update());
+					mp.update();
 
 					String contacts_default = "[{\"name\":\"Foobar\", \"number\":\"099123123\"}]";
 					String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" }";
@@ -2337,7 +2337,7 @@ bool updateMenu()
 			osc->play();
 			blinkState = 1;
 			previousMillis = millis();
-			while (!mp.update());
+			mp.update();
 			cursor--;
 		}
 		if (mp.buttons.released(BTN_DOWN) && cursor < 1)
@@ -2346,14 +2346,14 @@ bool updateMenu()
 			osc->play();
 			blinkState = 1;
 			previousMillis = millis();
-			while (!mp.update());
+			mp.update();
 			cursor++;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			break;
 		mp.update();
 	}
-	while(!mp.update());
+	mp.update();
 	return false;
 }
 int8_t notificationsAudioMenu(String* items, uint8_t length) {
@@ -2391,17 +2391,17 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		mp.display.print("Play");
 		if(mp.released(BTN_FUN_RIGHT))
 		{
-			while(!mp.update());
+			mp.update();
 			mp.playNotificationSound(cursor);
 		}
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 
-			while (!mp.update());
+			mp.update();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6*scale) {
@@ -2418,7 +2418,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			while (!mp.update());
+			mp.update();
 			cursor++;
 			if ((cursor * (boxHeight + 2) + cameraY + offset) > 54*scale) {
 				cameraY -= (boxHeight + 2);
@@ -2432,7 +2432,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			return -1;
 		}
 		mp.update();
@@ -2489,7 +2489,7 @@ void wifiConnect()
 				break;
 			}
 		}
-		while(!mp.update());
+		mp.update();
 	}
 	bool blinkState = 1;
 	unsigned long elapsedMillis = millis();
@@ -2520,7 +2520,7 @@ void wifiConnect()
 				break;
 			}
 		}
-		while(!mp.update());
+		mp.update();
 
 	}
 	else 
@@ -2549,7 +2549,7 @@ void wifiConnect()
 			int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
 			if(selection < 0)
 			{
-				while(!mp.update());
+				mp.update();
 				return;
 			}
 			mp.display.fillScreen(TFT_BLACK);
@@ -2557,7 +2557,7 @@ void wifiConnect()
 			mp.display.printCenter(networkNames[selection]);
 			mp.display.setCursor(4, 30);
 			mp.display.printCenter("Enter password:");
-			while (!mp.update());
+			mp.update();
 			mp.display.setCursor(1, 112);
 			mp.display.print("Erase");
 			mp.display.setCursor(110, 112);
@@ -2600,7 +2600,7 @@ void wifiConnect()
 						mp.display.setCursor(0,40);
 						mp.display.printCenter("Connecting");
 						mp.display.setCursor(60, 60);
-						while (!mp.update());
+						mp.update();
 
 						char temp[networkNames[selection].length()+1];
 						char temp2[content.length()];
@@ -2612,7 +2612,7 @@ void wifiConnect()
 						{
 							delay(500);
 							mp.display.print(".");
-							while (!mp.update());
+							mp.update();
 							counter++;
 							if (counter >= 5)
 							{
@@ -2630,7 +2630,7 @@ void wifiConnect()
 										break;
 									}
 								}
-								while(!mp.update());
+								mp.update();
 								break;
 							}
 						}
@@ -2644,7 +2644,7 @@ void wifiConnect()
 							mp.display.setCursor(0,40);
 							mp.display.printCenter("Connected!");
 							mp.display.setCursor(60, 60);
-							while (!mp.update());
+							mp.update();
 							delay(1000);
 							Serial.println(WiFi.status());
 
@@ -2656,12 +2656,12 @@ void wifiConnect()
 								mp.display.fillScreen(TFT_BLACK);
 								mp.display.setCursor(0,mp.display.height() / 2 - 16);
 								mp.display.printCenter(F("Downloading update"));
-								while(!mp.update());
+								mp.update();
 								fetchUpdate();
 								mp.display.fillScreen(TFT_BLACK);
 								mp.display.setCursor(0,mp.display.height() / 2 - 16);
 								mp.display.printCenter(F("Installing update"));
-								while(!mp.update());
+								mp.update();
 								mp.updateFromFS("/.core/LOADER.BIN");
 							}
 
@@ -2681,7 +2681,7 @@ void wifiConnect()
 										break;
 									}
 								}
-								while(!mp.update());
+								mp.update();
 								return;
 							}
 
@@ -2692,7 +2692,7 @@ void wifiConnect()
 					}
 					if(mp.buttons.released(BTN_B))
 					{
-						while(!mp.update());
+						mp.update();
 						break;
 					}
 					mp.update();
@@ -2705,7 +2705,7 @@ void wifiConnect()
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setCursor(30, 32);
 				mp.display.printCenter("CONNECTED!");
-				while (!mp.update());
+				mp.update();
 			}
 		}
 	}
@@ -2781,7 +2781,7 @@ int8_t checkForUpdate()
 					mp.display.print("Press A to start update");
 					if(mp.buttons.released(BTN_B))
 					{
-						while(!mp.update());
+						mp.update();
 						return -1;
 					}
 					mp.update();
@@ -2881,17 +2881,17 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		mp.display.print("Networks");
 		if(mp.released(BTN_FUN_RIGHT))
 		{
-			while(!mp.update());
+			mp.update();
 			mp.playNotificationSound(cursor);
 		}
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 
-			while (!mp.update());
+			mp.update();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 4) {
@@ -2908,7 +2908,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			while (!mp.update());
+			mp.update();
 			cursor++;
 			if ((cursor * (boxHeight + 2) + cameraY + offset) > 100) {
 				cameraY -= (boxHeight + 2);
@@ -2922,7 +2922,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			return -1;
 		}
 		mp.update();

@@ -160,7 +160,7 @@ void calendarApp()
 		} 
 		 if(mp.buttons.released(BTN_LEFT))
 		{
-			while(!mp.update());
+			mp.update();
 			if(month > 1)
 				month--;
 			else
@@ -171,7 +171,7 @@ void calendarApp()
 		}
 		if(mp.buttons.released(BTN_RIGHT))
 		{
-			while(!mp.update());
+			mp.update();
 			if(month < 12)
 				month++;
 			else
@@ -182,5 +182,5 @@ void calendarApp()
 		}
 		mp.update();
 	}
-	while(!mp.update());
+	mp.update();
 }

@@ -111,15 +111,15 @@ void phoneApp() {
 		if (mp.buttons.released(BTN_A))//initate call
 		{
 			callNumber(callBuffer);
-			while (!mp.update());
+			mp.update();
 			callBuffer = "";
 		}
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
 			break;
 
-		while (!mp.update());
+		mp.update();
 	}
-	while(!mp.update());
+	mp.update();
 }
 
 void addCall(String number, String dateTime, int duration){
@@ -182,7 +182,7 @@ void callLog() {
         mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Call log - loading data");
 		while (!mp.buttons.released(BTN_B))//BUTTON BACK
-		while (!mp.update());
+		mp.update();
 	}
 	else
 	{
@@ -205,7 +205,7 @@ void callLog() {
 						file.close();
 					}
 				}
-				while(!mp.update());
+				mp.update();
 			}
 			else
 			{
@@ -224,7 +224,7 @@ int callLogMenu(JsonArray *call_log){
     uint8_t boxHeight = 28;
 
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
@@ -254,12 +254,12 @@ int callLogMenu(JsonArray *call_log){
 			callLogMenuDrawCursor(cursor, cameraY_actual);
 
 			if (mp.buttons.released(BTN_A)) {
-				while (!mp.update());
+				mp.update();
 				break;
 			}
 			if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 			{
-				while (!mp.update());
+				mp.update();
 				call_log->remove(cursor);
 				SDAudioFile file = mp.SD.open("/call_log.json", "w");
 				call_log->prettyPrintTo(file);
@@ -268,7 +268,7 @@ int callLogMenu(JsonArray *call_log){
 			}
 
 			if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-				while (!mp.update());
+				mp.update();
 				if (cursor == 0) {
 					cursor = length - 1;
 					if (length > 2) {
@@ -283,7 +283,7 @@ int callLogMenu(JsonArray *call_log){
 				}
 			}
 			if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-				while (!mp.update());
+				mp.update();
 				cursor++;
 				if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
 					cameraY -= (boxHeight+1);
@@ -297,7 +297,7 @@ int callLogMenu(JsonArray *call_log){
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			return -2;
 		}
 	}
@@ -370,19 +370,19 @@ uint8_t showCall(int id, String number, String dateTime, String duration)
 
 		if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			return 1;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 		if (mp.buttons.released(BTN_A)) // Call
 		{
 			callNumber(number);
-			while(!mp.update());
+			mp.update();
 			return 0;
 		}
 

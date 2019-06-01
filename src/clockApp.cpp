@@ -79,7 +79,7 @@ void clockApp()
 					mp.update();
 
 				}
-				while(!mp.update());
+				mp.update();
 			}
 			break;
 
@@ -103,7 +103,7 @@ int8_t clockMenu(String* title, uint8_t length) {
 	mp.dataRefreshFlag = 0;
 	uint8_t boxHeight = 30; //actually 2 less than that
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -132,7 +132,7 @@ int8_t clockMenu(String* title, uint8_t length) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());// Exit when pressed
+			mp.update();// Exit when pressed
 			break;
 		}
 
@@ -284,7 +284,7 @@ void clockStopwatch()
 				blinkMills = millis();
 				running = 1;
 				timeMillis = millis() - timeActual;
-				while(!mp.update());
+				mp.update();
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT))
 			{
@@ -306,7 +306,7 @@ void clockStopwatch()
 			{
 				running = 0;
 				timeMillis = millis();
-				while(!mp.update());
+				mp.update();
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT))
 			{
@@ -317,7 +317,7 @@ void clockStopwatch()
 		}
 		mp.update();
 	}
-	while(!mp.update());
+	mp.update();
 }
 
 void clockAlarm()
@@ -458,7 +458,7 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 	uint8_t boxHeight;
 	boxHeight = 28; //actually 2 less than that
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(0xFC92);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -503,7 +503,7 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());// Exit when pressed
+			mp.update();// Exit when pressed
 			break;
 		}
 
@@ -542,7 +542,7 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 			return -1;
 		if(mp.buttons.released(BTN_FUN_LEFT) && cursor > 0)
 		{
-			while(!mp.update());
+			mp.update();
 			return -(cursor + 2);
 		}
 	}
@@ -732,7 +732,7 @@ void clockAlarmEdit(uint8_t index)
 					case 0:
 						if(mp.buttons.released(BTN_FUN_LEFT))
 						{
-							while(!mp.update());
+							mp.update();
 							hours /= 10;
 						}
 						else if (isdigit(key) && hours < 10)
@@ -743,7 +743,7 @@ void clockAlarmEdit(uint8_t index)
 					case 1:
 						if(mp.buttons.released(BTN_FUN_LEFT))
 						{
-							while(!mp.update());
+							mp.update();
 							mins /= 10;
 						}
 						else if (isdigit(key) && mins < 10)
@@ -759,7 +759,7 @@ void clockAlarmEdit(uint8_t index)
 						}
 						if(mp.buttons.released(BTN_A))
 						{
-							while(!mp.update());
+							mp.update();
 							enabled = !enabled;
 							blinkState = 1;
 							blinkMillis = millis();
@@ -774,7 +774,7 @@ void clockAlarmEdit(uint8_t index)
 					cursorX++;
 					mins %= 60;
 					hours %= 24;
-					while(!mp.update());
+					mp.update();
 				}
 				if(mp.buttons.released(BTN_LEFT) && cursorX > 0)
 				{
@@ -783,7 +783,7 @@ void clockAlarmEdit(uint8_t index)
 					cursorX--;
 					mins %= 60;
 					hours %= 24;
-					while(!mp.update());
+					mp.update();
 				}
 			break;
 
@@ -801,14 +801,14 @@ void clockAlarmEdit(uint8_t index)
 					blinkState = 0;
 					blinkMillis = millis();
 					repeat = 1;
-					while(!mp.update());
+					mp.update();
 				}
 				if(mp.buttons.released(BTN_LEFT) && cursorX > 0)
 				{
 					blinkState = 0;
 					blinkMillis = millis();
 					repeat = 0;
-					while(!mp.update());
+					mp.update();
 				}
 			break;
 
@@ -820,21 +820,21 @@ void clockAlarmEdit(uint8_t index)
 					cursorX++;
 					blinkState = 0;
 					blinkMillis = millis();
-					while(!mp.update());
+					mp.update();
 				}
 				if(mp.buttons.released(BTN_LEFT) && cursorX > 0)
 				{
 					cursorX--;
 					blinkState = 0;
 					blinkMillis = millis();
-					while(!mp.update());
+					mp.update();
 				}
 				if(mp.buttons.released(BTN_A))
 				{
 					days[cursorX] = !days[cursorX];
 					blinkState = 1;
 					blinkMillis = millis();
-					while(!mp.update());
+					mp.update();
 				}
 			break;
 
@@ -848,7 +848,7 @@ void clockAlarmEdit(uint8_t index)
 				{
 					if(mp.SDinsertedFlag)
 					{
-						while(!mp.update());
+						mp.update();
 						if(audioCount == 0)
 						{
 							mp.display.fillScreen(0xFC92);
@@ -902,7 +902,7 @@ void clockAlarmEdit(uint8_t index)
 								break;
 							}
 						}
-						while(!mp.update());
+						mp.update();
 					}
 
 				}
@@ -917,7 +917,7 @@ void clockAlarmEdit(uint8_t index)
 			cursorX = 0;
 			blinkState = 0;
 			blinkMillis = millis();
-			while(!mp.update());
+			mp.update();
 		}
 		if (mp.buttons.released(BTN_DOWN) && cursorY < 3 && enabled)
 		{
@@ -927,12 +927,12 @@ void clockAlarmEdit(uint8_t index)
 			cursorX = 0;
 			blinkState = 0;
 			blinkMillis = millis();
-			while(!mp.update());
+			mp.update();
 
 		}
 		if(mp.buttons.released(BTN_B))
 		{
-			while(!mp.update());
+			mp.update();
 			mp.display.setTextColor(TFT_BLACK);
 			mp.display.setTextSize(1);
 			mp.display.setTextFont(2);
@@ -947,12 +947,12 @@ void clockAlarmEdit(uint8_t index)
 			{
 				if(mp.buttons.released(BTN_B))
 				{
-					while(!mp.update());
+					mp.update();
 					break;
 				}
 				if(mp.buttons.released(BTN_A))
 				{
-					while(!mp.update());
+					mp.update();
 					mp.alarmHours[index] = hours;
 					mp.alarmMins[index] = mins;
 					mp.alarmEnabled[index] = enabled;
@@ -966,7 +966,7 @@ void clockAlarmEdit(uint8_t index)
 					//save RTC and exit
 					return;
 				}
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		mp.update();
@@ -1026,7 +1026,7 @@ void clockTimer()
 				{
 					if(mp.buttons.released(BTN_FUN_RIGHT) && (secs > 0 || mins > 0 || hours > 0))
 					{
-						while(!mp.update());
+						mp.update();
 						if(secs > 59)
 						{
 							secs %= 60;
@@ -1049,7 +1049,7 @@ void clockTimer()
 							if(mp.buttons.released(BTN_FUN_LEFT))
 							{
 								secs /= 10;
-								while(!mp.update());
+								mp.update();
 							}
 							else if (isdigit(key) && secs < 10)
 								secs = secs * 10 + key - 48;
@@ -1058,7 +1058,7 @@ void clockTimer()
 							if(mp.buttons.released(BTN_FUN_LEFT))
 							{
 								mins /= 10;
-								while(!mp.update());
+								mp.update();
 							}
 							else if (isdigit(key) && mins < 10)
 								mins = mins * 10 + key - 48;
@@ -1067,7 +1067,7 @@ void clockTimer()
 							if(mp.buttons.released(BTN_FUN_LEFT))
 							{
 								hours /= 10;
-								while(!mp.update());
+								mp.update();
 							}
 							else if (isdigit(key) && hours < 10)
 								hours = hours * 10 + key - 48;
@@ -1083,14 +1083,14 @@ void clockTimer()
 					blinkState = 0;
 					blinkMillis = millis();
 					cursor++;
-					while(!mp.update());
+					mp.update();
 				}
 				if(mp.buttons.released(BTN_RIGHT) && cursor > 0)
 				{
 					blinkState = 0;
 					blinkMillis = millis();
 					cursor--;
-					while(!mp.update());
+					mp.update();
 				}
 				if(mp.buttons.released(BTN_A) && (secs > 0 || mins > 0 || hours > 0))
 				{
@@ -1105,7 +1105,7 @@ void clockTimer()
 						hours++;
 					}
 					state = 1;
-					while(!mp.update());
+					mp.update();
 					break;
 				}
 				if(!blinkState)
@@ -1156,7 +1156,7 @@ void clockTimer()
 								mp.update();
 							}
 							osc->stop();
-							while(!mp.update());
+							mp.update();
 							state = 0;
 							break;
 						}
@@ -1176,7 +1176,7 @@ void clockTimer()
 				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 				{
 					state = 2;
-					while(!mp.update());
+					mp.update();
 					break;
 				}
 				if(mp.buttons.released(BTN_FUN_LEFT))
@@ -1185,7 +1185,7 @@ void clockTimer()
 					secs = 0;
 					mins = 0;
 					hours = 0;
-					while(!mp.update());
+					mp.update();
 					break;
 				}
 				break;
@@ -1205,7 +1205,7 @@ void clockTimer()
 					mp.display.print("Pause");
 					mp.display.setCursor(2,110);
 					mp.display.print("Reset");
-					while(!mp.update());
+					mp.update();
 					break;
 				}
 				if(mp.buttons.released(BTN_FUN_LEFT))
@@ -1214,7 +1214,7 @@ void clockTimer()
 					secs = 0;
 					mins = 0;
 					hours = 0;
-					while(!mp.update());
+					mp.update();
 					break;
 				}
 				mp.display.setCursor(70, 75);

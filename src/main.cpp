@@ -83,7 +83,7 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		boxHeight = 15;
 	}
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -116,7 +116,7 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());// Exit when pressed
+			mp.update();// Exit when pressed
 			break;
 		}
 		if (mp.buttons.released(BTN_B))   //BUTTON BACK
@@ -127,7 +127,7 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			osc->play();
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
-			while(!mp.update());
+			mp.update();
 
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -148,7 +148,7 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			osc->play();
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
-			while (!mp.update());
+			mp.update();
 
 
 			cursor++;
@@ -225,13 +225,13 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			while (!mp.update());
+			mp.update();
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 
-			while (!mp.update());
+			mp.update();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6*scale) {
@@ -248,7 +248,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			while (!mp.update());
+			mp.update();
 			cursor++;
 			if ((cursor * (boxHeight + 1) + cameraY + offset) > 54*scale) {
 				cameraY -= (boxHeight + 1);
@@ -262,7 +262,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while (!mp.update());
+			mp.update();
 			return -1;
 		}
 		mp.update();
@@ -444,7 +444,7 @@ void callNumber(String number) {
 					mp.display.setCursor(2, 112);
 				mp.display.print("Call ended");
 				Serial.println("ENDED");
-				while (!mp.update());
+				mp.update();
 
 				mp.updateTimeRTC();
 				// 2019-04-18 12:00:00
@@ -609,7 +609,7 @@ void callNumber(String number) {
 			mp.display.setCursor(2, 112);
 			mp.display.print("Call ended");
 			Serial.println("ENDED");
-			while (!mp.update());
+			mp.update();
 			mp.updateTimeRTC();
 			// 2019-04-18 12:00:00
 			String dateTime = String(mp.clockYear);
@@ -687,14 +687,14 @@ bool startupWizard()
 					break;
 				}
 			}
-			while(!mp.update());
+			mp.update();
 			break;
 		}
 		else
 			Serial.println(mp.batteryVoltage);
 		mp.update();
 	}
-	while(!mp.update());
+	mp.update();
 
 
 	// Buttons testing
@@ -828,7 +828,7 @@ bool startupWizard()
 					break;
 				}
 			}
-			while(!mp.update());
+			mp.update();
 			break;
 		}
 	}
@@ -952,7 +952,7 @@ bool startupWizard()
 					break;
 				}
 			}
-			while(!mp.update());
+			mp.update();
 			break;
 		}
 		mp.update();
@@ -1037,13 +1037,13 @@ bool startupWizard()
 			break;
 		else if(mp.buttons.released(BTN_A) && !cursor)
 		{
-			while(!mp.update());
+			mp.update();
 			playing = !playing;
 		}
 
 		mp.update();
 	}
-	while(!mp.update());
+	mp.update();
 
 
 	//SIM module testing
@@ -1057,7 +1057,7 @@ bool startupWizard()
 	mp.display.printCenter("SIM functionality test");
 	mp.display.setCursor(0,mp.display.height()/2 - 2);
 	mp.display.printCenter("Performing test 1/3");
-	while(!mp.update());
+	mp.update();
 	uint32_t tempMillis = millis();
 	String reply = "";
 	bool response = 0;
@@ -1144,7 +1144,7 @@ bool startupWizard()
 			mp.display.printCenter("SIM functionality test");
 			mp.display.setCursor(0,mp.display.height()/2 - 2);
 			mp.display.printCenter("Performing test 2/3");
-			while(!mp.update());
+			mp.update();
 			tempMillis = millis();
 			response = 0;
 			reply = "";
@@ -1264,7 +1264,7 @@ bool startupWizard()
 			mp.display.printCenter("SIM functionality test");
 			mp.display.setCursor(0,mp.display.height()/2 - 2);
 			mp.display.printCenter("Performing test 3/3");
-			while(!mp.update());
+			mp.update();
 			mp.checkSim();
 			if(mp.simInserted)
 			{
@@ -1323,7 +1323,7 @@ bool startupWizard()
 				}
 				if(!cursor)
 				{
-					while(!mp.update());
+					mp.update();
 					phoneApp();
 				}
 				break;
@@ -1427,7 +1427,7 @@ bool startupWizard()
 		mp.display.printCenter("Startup wizard");
 		mp.display.setCursor(0,mp.display.height()/2 - 16);
 		mp.display.printCenter("SD card test");
-		while(!mp.update());
+		mp.update();
 		delay(500);
 		mp.SDinsertedFlag = 1;
 		uint32_t tempMillis = millis();
@@ -1527,7 +1527,7 @@ bool startupWizard()
 		mp.display.printCenter("Startup wizard");
 		mp.display.setCursor(0,mp.display.height()/2 - 14);
 		mp.display.printCenter("Neopixel testing...");
-		while(!mp.update());
+		mp.update();
 		for (uint8_t i = 0; i < NUMPIXELS; i++) {
 			for (uint8_t x = 0; x <= 128; x += 2) {
 				mp.leds[i] = CRGB(x, 0, 0);
@@ -1618,7 +1618,7 @@ bool startupWizard()
 		if(cursor)
 			break;
 	}
-	while(!mp.update());
+	mp.update();
 
 	// Wifi testing
 	if(!mp.wifi)
@@ -1636,7 +1636,7 @@ bool startupWizard()
 	mp.display.printCenter("Startup wizard");
 	mp.display.setCursor(0,mp.display.height()/2 - 14);
 	mp.display.printCenter("Searching Wifi networks");
-	while(!mp.update());
+	mp.update();
 	wifiConnect();
 	return 1;
 }
@@ -1648,7 +1648,7 @@ void setup()
 	mp.begin(0);
 	mp.homePopupEnable(0);
 	osc = new Oscillator();
-	osc->setVolume(256);
+	osc->setVolume(30);
 	addOscillator(osc);
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
@@ -1673,11 +1673,11 @@ void loop()
 	// osc->note(75, 0.05);
 	// osc->play();
 	// delay(500);
+	// messagesApp();
+	lockscreen();
+	mainMenu();
 
-	// lockscreen();
-	// mainMenu();
-
-	phoneApp();
+	// phoneApp();
 	// calculatorApp();
 	// contactsAppSD();
 

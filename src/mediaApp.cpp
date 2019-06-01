@@ -50,7 +50,7 @@ void mediaApp() {
 						break;
 					}
 				}
-				while(!mp.update());
+				mp.update();
 			}
 		}
 		else if(input == 1) //photos
@@ -63,7 +63,7 @@ void mediaApp() {
 			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
 			mp.display.setCursor(47, 55);
 			mp.display.printCenter(F("Loading photos"));
-			while(!mp.update());
+			mp.update();
 			listPhotos("/Images", 0);
 			if(photoCount > 0)
 			{
@@ -79,7 +79,7 @@ void mediaApp() {
 					else
 						mp.drawJpeg(photoFiles[index], 0, 0);
 					Serial.println(index);
-					while(!mp.update());
+					mp.update();
 					while(1)
 					{
 						
@@ -95,7 +95,7 @@ void mediaApp() {
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
 								mp.drawJpeg(photoFiles[index], 0, 0);
-							while(!mp.update());
+							mp.update();
 						}
 						if(mp.buttons.released(BTN_RIGHT))
 						{
@@ -107,12 +107,12 @@ void mediaApp() {
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
 								mp.drawJpeg(photoFiles[index], 0, 0);
-							while(!mp.update());
+							mp.update();
 						}
 						mp.update();
 					}
 					Serial.println(F("out"));
-					while(!mp.update());
+					mp.update();
 				} 
 			}
 			else
@@ -133,9 +133,9 @@ void mediaApp() {
 						break;
 					}
 				}
-				while(!mp.update());
+				mp.update();
 			}
-			while(!mp.update());
+			mp.update();
 		}
 		else if(input == -1)
 			break;
@@ -151,7 +151,7 @@ int8_t mediaMenu(String* title, uint8_t length) {
 	uint8_t boxHeight;
 	boxHeight = 54; //actually 2 less than that
 	while (1) {
-		while (!mp.update());
+		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
@@ -170,7 +170,7 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
 			osc->play();
-			while (!mp.update());// Exit when pressed
+			mp.update();// Exit when pressed
 			break;
 		}
 
@@ -320,7 +320,7 @@ void audioPlayer(uint16_t index) {
 		mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 
-		while(!mp.update());
+		mp.update();
 		mp3 = trackArray[index];
 		if(addTrack(mp3))
 			Serial.println("OK");
@@ -339,7 +339,7 @@ void audioPlayer(uint16_t index) {
 				removeTrack(mp3);
 				Serial.println(F("Stopped"));
 				delay(5);
-				while (!mp.update());
+				mp.update();
 				out = 1;
 				break;
 			}
@@ -407,11 +407,11 @@ void audioPlayer(uint16_t index) {
 					mp.display.print(mp.volume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
-					while(!mp.update());
+					mp.update();
 					mp3->resume();
 				}
 				playState = !playState;
-				while (!mp.update());
+				mp.update();
 			}
 
 			if (mp.buttons.released(BTN_DOWN) && mp.volume > 1) //DOWN
@@ -438,7 +438,7 @@ void audioPlayer(uint16_t index) {
 				//drawtext
 				mp.display.setCursor(4, 2);
 				mp.display.print(mp.volume);
-				while (!mp.update());
+				mp.update();
 			}
 
 			if (mp.buttons.released(BTN_UP) && mp.volume < 14) //UP
@@ -464,7 +464,7 @@ void audioPlayer(uint16_t index) {
 				//drawtext
 				mp.display.setCursor(4, 2);
 				mp.display.print(mp.volume);
-				while (!mp.update());
+				mp.update();
 			}
 			if(mp.buttons.released(BTN_LEFT)) //previous
 			{
@@ -508,7 +508,7 @@ void audioPlayer(uint16_t index) {
 					playState = 0;
 				mp3->stop();
 				removeTrack(mp3);
-				while(!mp.update());
+				mp.update();
 				break;
 			}
 			if(mp.buttons.released(BTN_RIGHT)) //next
@@ -555,12 +555,12 @@ void audioPlayer(uint16_t index) {
 					playState = 0;
 				mp3->stop();
 				removeTrack(mp3);
-				while(!mp.update());
+				mp.update();
 				break;
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT)) //shuffle button
 			{
-				while(!mp.update());
+				mp.update();
 				if(!shuffle)
 					memset(shuffleList, 0, sizeof(shuffleList));
 				shuffle = !shuffle;
@@ -571,7 +571,7 @@ void audioPlayer(uint16_t index) {
 			}
 			if(mp.buttons.released(BTN_FUN_LEFT)) //loop button
 			{
-				while(!mp.update());
+				mp.update();
 				loop = !loop;
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);

@@ -55,7 +55,7 @@ void flashlightApp()
 			state = !state;
 			Serial.println(state);
 			delay(5);
-			while(!mp.update());
+			mp.update();
 		}
 		if(mp.buttons.released(BTN_B))
 			break;
@@ -97,18 +97,18 @@ void flashlightApp()
 					osc->note(75, 0.05);
 					osc->play();
 					color--;
-					while(!mp.update());
+					mp.update();
 				}
 				if (mp.buttons.released(BTN_RIGHT) && color < 6)
 				{
 					osc->note(75, 0.05);
 					osc->play();
 					color++;
-					while(!mp.update());
+					mp.update();
 				}
 				mp.update();
 			}
-			while(!mp.update());
+			mp.update();
 		}
 		mp.update();
 	}

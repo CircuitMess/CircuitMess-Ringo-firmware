@@ -124,7 +124,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	uint32_t elapsedMillis2 = millis();
 	bool newScreen = 1;
 	mp.display.fillScreen(TFT_BLACK);
-	while(!mp.update());
+	mp.update();
 	while (1)
 	{
 
@@ -235,7 +235,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			// osc->note(75, 0.05);
 			// osc->play();
-			while (!mp.update());
+			mp.update();
 			return cursorY * x_elements + cursorX;  //returns index of selected icon
 		}
 		if (mp.buttons.released(BTN_UP)) //UP
@@ -249,7 +249,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
 			FastLED.clear();
-			while (!mp.update());
+			mp.update();
 
 			if (cursorY == 0)
 			{
@@ -288,7 +288,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
 			FastLED.clear();
-			while (!mp.update());
+			mp.update();
 
 			if (cursorY == y_elements - 1)
 			{
@@ -324,7 +324,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[6] = CRGB::Blue;
 			mp.leds[5] = CRGB::Blue;
 			FastLED.clear();
-			while (!mp.update());
+			mp.update();
 
 			if (cursorX == 0) {
 				cursorX = x_elements - 1;
@@ -345,7 +345,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[1] = CRGB::Blue;
 			mp.leds[2] = CRGB::Blue;
 			FastLED.clear();
-			while (!mp.update());
+			mp.update();
 
 			if (cursorX == x_elements - 1) {
 				cursorX = 0;
@@ -362,7 +362,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[7] = CRGB::Red;
 			FastLED.show();
 			FastLED.clear();
-			while(!mp.update());
+			mp.update();
 			pageIndex = 0;
 			cameraY = 0;
 			return -2;
@@ -397,7 +397,7 @@ void mainMenu()
 				uint32_t tempMillis = millis();
 				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 					mp.update();
-				while(!mp.update());
+				mp.update();
 			}
 
 			if (titles[index] == "Messages")
@@ -408,7 +408,7 @@ void mainMenu()
 				{
 					mp.display.setCursor(0, mp.display.height()/2 - 16);
 					mp.display.printCenter(F("Loading messages..."));
-					while(!mp.update());
+					mp.update();
 					messagesApp();
 				}
 				else if(!mp.simInserted)
@@ -421,7 +421,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 				else if(mp.airplaneMode)
 				{
@@ -433,7 +433,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 
 			}
@@ -454,7 +454,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 			}
 
@@ -474,7 +474,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 				else if(mp.airplaneMode)
 				{
@@ -486,7 +486,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 			}
 
@@ -510,7 +510,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 				else if(mp.airplaneMode)
 				{
@@ -522,7 +522,7 @@ void mainMenu()
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					mp.update();
 				}
 			}
 
@@ -548,7 +548,7 @@ void mainMenu()
 			mp.display.fillScreen(TFT_BLACK);
 			mp.display.setCursor(0,mp.display.height() / 2 - 16);
 			mp.display.printCenter(F("LOADING NOW..."));
-			while(!mp.update());
+			mp.update();
 
 			String foo = directories[index - 9]; //9 is the number of preloaded apps
 			initWavLib();
