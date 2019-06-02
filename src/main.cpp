@@ -195,7 +195,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 	uint8_t boxHeight = 15;
 	uint16_t start = 0;
 	int16_t cursor = index;
-	if (length > 12) {
+	if (length > 6) {
 		cameraY = -cursor * (boxHeight + 1) - 1;
 	}
 	while (1) {
@@ -1664,13 +1664,13 @@ void loop()
 	// osc->play();
 	// delay(500);
 	// messagesApp();
-	lockscreen();
+	// lockscreen();
 
-	mainMenu();
+	// mainMenu();
 	// mediaApp();
 	// phoneApp();
 	// calculatorApp();
-	// contactsAppSD();
+	contactsAppSD();
 
 	// mp.display.fillScreen(TFT_BLACK);
 	// mp.display.setTextColor(TFT_WHITE);

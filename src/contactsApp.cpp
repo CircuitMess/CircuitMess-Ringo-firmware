@@ -635,15 +635,41 @@ void contactsAppSD(){
 						newContact["name"] = name;
 						newContact["number"] = number;
 						jarr.add(newContact);
-						SDAudioFile file = mp.SD.open("/.core/contacts.json");
+						SDAudioFile file = mp.SD.open("/.core/contacts.json", "w");
 						jarr.prettyPrintTo(file);
+						jarr.prettyPrintTo(Serial);
 						file.close();
 					}
-				} else if (menuChoice < -10){
+				}
+				else if(menuChoice < -2000)
+				{
+					int id = menuChoice + 3000 - 1;
+					String name, number;
+					name = jarr[id]["name"].as<String>();
+					number = jarr[id]["number"].as<String>();
+
+					if(newContactSD(&name, &number)){
+						JsonObject& newContact = jb.createObject();
+						newContact["name"] = name;
+						newContact["number"] = number;
+						jarr[id] = newContact;
+						SDAudioFile file = mp.SD.open("/.core/contacts.json", "w");
+						jarr.prettyPrintTo(file);
+						jarr.prettyPrintTo(Serial);
+						file.close();
+					}
+					// if(deleteContactSD(jarr[id]["name"], jarr[id]["number"])){
+					// 	jarr.remove(id);
+					// 	SDAudioFile file = mp.SD.open("/.core/contacts.json", "w");
+					// 	jarr.prettyPrintTo(file);
+					// 	file.close();
+					// }
+				}
+				else if (menuChoice < -10){
 					int id = menuChoice + 1000 - 1;
 					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"])){
 						jarr.remove(id);
-						SDAudioFile file = mp.SD.open("/.core/contacts.json");
+						SDAudioFile file = mp.SD.open("/.core/contacts.json", "w");
 						jarr.prettyPrintTo(file);
 						file.close();
 					}
@@ -651,6 +677,30 @@ void contactsAppSD(){
 				} else {
 					if(mp.simInserted)
 						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
+					else
+					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
+						mp.display.setTextFont(2);
+						mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+						mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+						mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+						mp.display.setCursor(47, 55);
+						mp.display.printCenter(F("SIM card missing!"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000)
+						{
+							mp.update();
+							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+							{
+								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								break;
+							}
+						}
+						mp.update();
+					}
+					
 					mp.update();
 				}
 			} else {
@@ -662,16 +712,16 @@ void contactsAppSD(){
 
 uint8_t newContactSD(String *name, String *number)
 {
-	textPointer = 0;
-	String content = "";
-	String contact = "";
+	mp.textInput("");
+	mp.textPointer = 0;
+	String content = *name;
+	String contact = *number;
 	String prevContent = "";
 	char key = NO_KEY;
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	while (1) {
-		// Serial.println(mp.buttons.states[BTN_DOWN]);
 
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
@@ -762,6 +812,7 @@ uint8_t newContactSD(String *name, String *number)
 		}
 		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
+			mp.update();
 			if(contact != "" && content != "")
 			{
 				*name = contact;
@@ -769,7 +820,6 @@ uint8_t newContactSD(String *name, String *number)
 				return 1;
 			}
 		}
-
 		mp.update();
 	}
 	return 0;
@@ -811,16 +861,19 @@ int contactsMenuSD(JsonArray *contacts){
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
+		mp.display.fillRect(0, 103, 160, 28, TFT_BLACK);
+		mp.display.setCursor(110, 110);
+		mp.display.printCenter("Delete              Edit");
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			mp.update();// Exit when pressed
 			break;
 		}
-		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
+		if (mp.buttons.released(BTN_FUN_LEFT) && cursor != 0) {
 			mp.update(); // Delete
 			return -1000 + cursor;
 		}
-		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
+		if (mp.buttons.released(BTN_FUN_RIGHT) && cursor != 0) {
 			mp.update(); // Edit contact
 			return -3000 + cursor;
 		}

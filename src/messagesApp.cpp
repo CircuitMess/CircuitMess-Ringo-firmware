@@ -434,7 +434,7 @@ void composeSMS(JsonArray *messages)
             mp.display.setCursor(0, mp.display.height()/2 - 16);
             mp.display.setTextFont(2);
 			mp.display.printCenter("Sending text...");
-			mp.update();
+			while(!mp.update());
 
 			saveMessage(content, contact, messages);
 

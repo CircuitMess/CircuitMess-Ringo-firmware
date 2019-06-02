@@ -367,8 +367,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			cameraY = 0;
 			return -2;
 		}
-		if (passcode == "UPUPDOWNDOWNLEFTRIGHTLEFTRIGHT")
-			return -3;
+		// if (passcode == "UPUPDOWNDOWNLEFTRIžGHTLEFTRIGHT")
+		// 	return -3;
 		mp.update();
 
 	}

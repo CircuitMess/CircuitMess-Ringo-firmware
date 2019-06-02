@@ -29,7 +29,8 @@ void mediaApp() {
 					if (index == -1)
 						break;
 					mp.display.fillScreen(TFT_LIGHTGREY);
-					audioPlayer(index);
+					index = audioPlayer(index);
+					Serial.println(index);
 				} 
 			}
 			else
@@ -63,7 +64,7 @@ void mediaApp() {
 			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
 			mp.display.setCursor(47, 55);
 			mp.display.printCenter(F("Loading photos"));
-			mp.update();
+			while(!mp.update());
 			listPhotos("/Images", 0);
 			if(photoCount > 0)
 			{
@@ -78,7 +79,6 @@ void mediaApp() {
 						mp.display.drawBmp(photoFiles[index], 0,0);
 					else
 						mp.drawJpeg(photoFiles[index], 0, 0);
-					Serial.println(index);
 					mp.update();
 					while(1)
 					{
@@ -264,7 +264,7 @@ void mediaMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 
 
 
-void audioPlayer(uint16_t index) {
+int16_t audioPlayer(uint16_t index) {
 	uint8_t scale= 2;
 	bool out = 0;
 	char c = NO_KEY;
@@ -341,7 +341,7 @@ void audioPlayer(uint16_t index) {
 				delay(5);
 				mp.update();
 				out = 1;
-				break;
+				return index;
 			}
 
 			if (mp.buttons.released(BTN_A)) //PLAY/PAUSE BUTTON
