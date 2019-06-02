@@ -37,7 +37,7 @@ void phoneApp() {
 
 		if (mp.buttons.released(BTN_FUN_LEFT))
 			callBuffer.remove(callBuffer.length()-1);
-		else if (mp.buttons.released(BTN_FUN_RIGHT))
+		else if (mp.buttons.released(BTN_FUN_RIGHT) && mp.SDinsertedFlag)
 			callLog();
 		else if (key != NO_KEY && isdigit(key))
 		{

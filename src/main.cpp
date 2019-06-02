@@ -481,16 +481,13 @@ void callNumber(String number) {
 					dateTime += "0";
 				}
 				dateTime += String(mp.clockSecond);
-
-				addCall(number, dateTime, tmp_time);
+				if(mp.SDinsertedFlag)
+					addCall(number, dateTime, tmp_time);
 
 				delay(1000);
 				break;
 			}
-			if(mp.resolutionMode)
-					mp.display.setCursor(11, 20);
-			else
-				mp.display.setCursor(11, 28);
+			mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 			mp.display.setCursor(100, 109);
@@ -620,8 +617,8 @@ void callNumber(String number) {
 				dateTime += "0";
 			}
 			dateTime += String(mp.clockSecond);
-
-			addCall(number, dateTime, tmp_time);
+			if(mp.SDinsertedFlag)
+					addCall(number, dateTime, tmp_time);
 			delay(1000);
 			break;
 		}
@@ -678,14 +675,14 @@ bool startupWizard()
 					break;
 				}
 			}
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		else
 			Serial.println(mp.batteryVoltage);
 		mp.update();
 	}
-	mp.update();
+	while(!mp.update());
 
 
 	// Buttons testing
@@ -819,7 +816,7 @@ bool startupWizard()
 					break;
 				}
 			}
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 	}
@@ -943,7 +940,7 @@ bool startupWizard()
 					break;
 				}
 			}
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		mp.update();
@@ -1048,7 +1045,7 @@ bool startupWizard()
 	mp.display.printCenter("SIM functionality test");
 	mp.display.setCursor(0,mp.display.height()/2 - 2);
 	mp.display.printCenter("Performing test 1/3");
-	mp.update();
+	while(!mp.update());
 	uint32_t tempMillis = millis();
 	String reply = "";
 	bool response = 0;
@@ -1057,6 +1054,7 @@ bool startupWizard()
 		Serial1.println("AT");
 
 		reply = Serial1.readString();
+		Serial.println(reply);
 		if(reply.indexOf("OK") != -1)
 		{
 			response = 1;
@@ -1135,7 +1133,7 @@ bool startupWizard()
 			mp.display.printCenter("SIM functionality test");
 			mp.display.setCursor(0,mp.display.height()/2 - 2);
 			mp.display.printCenter("Performing test 2/3");
-			mp.update();
+			while(!mp.update());
 			tempMillis = millis();
 			response = 0;
 			reply = "";
@@ -1255,7 +1253,7 @@ bool startupWizard()
 			mp.display.printCenter("SIM functionality test");
 			mp.display.setCursor(0,mp.display.height()/2 - 2);
 			mp.display.printCenter("Performing test 3/3");
-			mp.update();
+			while(!mp.update());
 			mp.checkSim();
 			if(mp.simInserted)
 			{
@@ -1417,7 +1415,7 @@ bool startupWizard()
 		mp.display.printCenter("Startup wizard");
 		mp.display.setCursor(0,mp.display.height()/2 - 16);
 		mp.display.printCenter("SD card test");
-		mp.update();
+		while(!mp.update());
 		delay(500);
 		mp.SDinsertedFlag = 1;
 		uint32_t tempMillis = millis();
@@ -1517,7 +1515,7 @@ bool startupWizard()
 		mp.display.printCenter("Startup wizard");
 		mp.display.setCursor(0,mp.display.height()/2 - 14);
 		mp.display.printCenter("Neopixel testing...");
-		mp.update();
+		while(!mp.update());
 		for (uint8_t i = 0; i < NUMPIXELS; i++) {
 			for (uint8_t x = 0; x <= 128; x += 2) {
 				mp.leds[i] = CRGB(x, 0, 0);
@@ -1626,7 +1624,7 @@ bool startupWizard()
 	mp.display.printCenter("Startup wizard");
 	mp.display.setCursor(0,mp.display.height()/2 - 14);
 	mp.display.printCenter("Searching Wifi networks");
-	mp.update();
+	while(!mp.update());
 	wifiConnect();
 	return 1;
 }
@@ -1638,19 +1636,17 @@ void setup()
 	mp.begin(0);
 	mp.homePopupEnable(0);
 	osc = new Oscillator();
-	osc->setVolume(30);
+	osc->setVolume(256*mp.volume/14);
 	addOscillator(osc);
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
-	// if(EEPROM.readBool(33))
-	// {
-	// 	startupWizard();
-	// 	EEPROM.writeBool(33, 0);
-	// 	EEPROM.commit();
-	// }
-	// mp.shutdownPopupEnable(1);
-	// mp.incomingCall();
-
+	if(EEPROM.readBool(33))
+	{
+		startupWizard();
+		EEPROM.writeBool(33, 0);
+		EEPROM.commit();
+	}
+	mp.shutdownPopupEnable(1);
 }
 void loop()
 {
@@ -1664,13 +1660,12 @@ void loop()
 	// osc->play();
 	// delay(500);
 	// messagesApp();
-	// lockscreen();
-
-	// mainMenu();
+	lockscreen();
+	mainMenu();
 	// mediaApp();
 	// phoneApp();
 	// calculatorApp();
-	contactsAppSD();
+	// contactsAppSD();
 
 	// mp.display.fillScreen(TFT_BLACK);
 	// mp.display.setTextColor(TFT_WHITE);

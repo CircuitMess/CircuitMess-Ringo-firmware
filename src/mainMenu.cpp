@@ -99,8 +99,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	uint8_t cursorX = 0;
 	uint8_t cursorY = 0;
 	uint8_t elements = 9 + directoryCount; //9 default apps
-	Serial.println(elements);
-	delay(5);
 	uint8_t x_elements = 3;
 	uint8_t y_elements = ceil((float)elements/x_elements);
 
@@ -111,12 +109,9 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 
 		pageNumber = ceil((float)(elements - 6)/3);
 
-	Serial.println(pageNumber);
-	Serial.println(y_elements);
-	delay(5);
 	cursorY = int(_cursor / x_elements);
 	cursorX = _cursor % x_elements;
-	
+	Serial.println(cursorY);
 	String appNames[] = {"Clock", "Calculator", "Flashlight", "Calendar", "Invaders"};
 	String passcode = "";
 	uint32_t passcodeMillis = millis();
@@ -127,7 +122,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	mp.update();
 	while (1)
 	{
-
 		mp.display.fillRect(0,0,mp.display.width(), 14, TFT_BLACK);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
@@ -528,7 +522,11 @@ void mainMenu()
 
 			if (titles[index] == "Settings")
 				if(settingsApp())
+				{
+					pageIndex = 0;
+					cameraY = 0;
 					return;
+				}
 			if(titles[index] == "Clock")
 				clockApp();
 			if(titles[index] == "Calculator")

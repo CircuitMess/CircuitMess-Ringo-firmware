@@ -143,8 +143,8 @@ void lockscreen() {
 		}
 		else
 		{
-			mp.display.drawBitmap(helper * 2, 2, airplaneModeIcon, TFT_BLACK, 2);
-			helper += 10;
+			helper-=10;
+			mp.display.drawBitmap(helper*2, 2, airplaneModeIcon, TFT_BLACK, 2);
 		}
 
 		if(!mp.SDinsertedFlag)
@@ -181,7 +181,7 @@ void lockscreen() {
 		if (millis() - elapsedMillis >= 500) {
 			elapsedMillis = millis();
 			blinkState = !blinkState;
-			if (mp.clockYear != 4 && mp.clockYear != 80)
+			if (mp.clockYear%100 != 4 && mp.clockYear%100 != 80)
 				mp.updateTimeRTC();
 		}
 		if (blinkState == 1)

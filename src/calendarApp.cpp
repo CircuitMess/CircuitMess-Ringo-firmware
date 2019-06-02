@@ -17,7 +17,7 @@ void calendarApp()
 	uint8_t offset = 7;
 	mp.updateTimeRTC();
 	uint8_t month = mp.clockMonth;
-	uint16_t year = mp.clockYear + 2000;
+	uint16_t year = mp.clockYear;
 
 	while(!mp.buttons.released(BTN_B))
 	{	
@@ -139,7 +139,7 @@ void calendarApp()
 				for(int x = 0; x<7;x++)
 				{
 					mp.display.drawFastVLine(2 + 22 * x, 18, 90, TFT_BLACK);
-					if(month == mp.clockMonth && days[y][x] == mp.clockDay && year == mp.clockYear + 2000 && millis()%500 >= 250)
+					if(month == mp.clockMonth && days[y][x] == mp.clockDay && year == mp.clockYear && millis()%500 >= 250)
 						mp.display.fillRect(3 + 22 * x, 19 + 15 * y, 21, 14, TFT_RED);
 					mp.display.setCursor(6 + 22 * x, 18 + 15 * y);
 					if(days[y][x] < 10)

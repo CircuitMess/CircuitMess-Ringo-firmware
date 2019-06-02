@@ -1439,7 +1439,7 @@ void timeMenu()
 			mp.display.print("0");
 		mp.display.print(mp.clockMonth);
 		mp.display.print("/");
-		mp.display.print(2000 + mp.clockYear);
+		mp.display.print(mp.clockYear);
 
 		mp.display.setCursor( 0, 65);
 		mp.display.printCenter("Edit time");
@@ -1503,7 +1503,7 @@ void timeMenu()
 								mp.display.print("0");
 							mp.display.print(mp.clockMonth);
 							mp.display.print("/");
-							mp.display.print(2000 + mp.clockYear);
+							mp.display.print(mp.clockYear);
 							break;
 
 						case 1:
@@ -1536,7 +1536,7 @@ void timeMenu()
 								mp.display.print("0");
 							mp.display.print(mp.clockMonth);
 							mp.display.print("/");
-							mp.display.print(2000 + mp.clockYear);
+							mp.display.print(mp.clockYear);
 							break;
 
 						case 2:
@@ -1569,7 +1569,7 @@ void timeMenu()
 								mp.display.print("0");
 							mp.display.print(mp.clockMonth);
 							mp.display.print("/");
-							mp.display.print(2000 + mp.clockYear);
+							mp.display.print(mp.clockYear);
 							break;
 
 						case 3:
@@ -1603,7 +1603,7 @@ void timeMenu()
 								mp.display.print("0");
 							mp.display.print(mp.clockMonth);
 							mp.display.print("/");
-							mp.display.print(2000 + mp.clockYear);
+							mp.display.print(mp.clockYear);
 							break;
 
 						case 4:
@@ -1637,7 +1637,7 @@ void timeMenu()
 								mp.display.drawFastVLine(mp.display.getCursorX() - 1, mp.display.getCursorY() + 3, 11, TFT_BLACK);
 
 							mp.display.print("/");
-							mp.display.print(2000 + mp.clockYear);
+							mp.display.print(mp.clockYear);
 							break;
 
 						case 5:
@@ -2116,7 +2116,7 @@ void timeMenu()
 							break;
 						}
 						mp.updateTimeGSM();
-						if(mp.clockYear < 80 && mp.clockYear >= 19)
+						if(mp.clockYear % 100 < 80 && mp.clockYear % 100 >= 19)
 						{
 							delay(200);
 							mp.display.fillScreen(0xFFED);
@@ -2284,7 +2284,7 @@ bool updateMenu()
 					mp.display.printCenter("Erasing in progress...");
 					mp.update();
 
-					String contacts_default = "[{\"name\":\"Foobar\", \"number\":\"099123123\"}]";
+					String contacts_default = "[]";
 					String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" }";
 
 					const char contacts_path[] = "/.core/contacts.json";

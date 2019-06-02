@@ -68,7 +68,7 @@ void clockApp()
 
 					mp.display.printCenter(temp);
 					mp.display.setCursor(0,100);
-					mp.display.printCenter(2000 + mp.clockYear);
+					mp.display.printCenter(mp.clockYear);
 
 
 					if(millis()-timer >= 1000)
