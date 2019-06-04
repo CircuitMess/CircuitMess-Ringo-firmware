@@ -585,6 +585,7 @@ void contactsAppSD(){
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
+		jb.clear();
 		// JsonArray& jarr = jb.parseArray("[{\"name\":\"foo\", \"number\":\"099\"}]");
 		JsonArray& jarr = jb.createArray();
 		delay(10);
@@ -596,7 +597,9 @@ void contactsAppSD(){
 			Serial.println("CONTACTS ERROR");
 	}
 
+	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
+	file.close();
 
 	if(!jarr.success())
 	{
@@ -700,7 +703,7 @@ void contactsAppSD(){
 						}
 						mp.update();
 					}
-					
+
 					mp.update();
 				}
 			} else {

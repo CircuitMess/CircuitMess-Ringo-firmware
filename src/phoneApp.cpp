@@ -128,6 +128,7 @@ void addCall(String number, String dateTime, int duration){
 	if(file.size() < 2){
 		Serial.println("Override");
 		file.close();
+		jb.clear();
 		JsonArray& jarr = jb.parseArray("[]");
 		delay(10);
 		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
@@ -138,6 +139,7 @@ void addCall(String number, String dateTime, int duration){
 			Serial.println("CONTACTS ERROR");
 	}
 
+	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
 	file.close();
 
@@ -162,6 +164,7 @@ void callLog() {
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
+		jb.clear();
 		JsonArray& jarr = jb.parseArray("[{\"dateTime\":\"2019-04-18 12:00:00\", \"number\":\"911\", \"duration\":\"124\"}]");
 		delay(10);
 		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
@@ -172,7 +175,9 @@ void callLog() {
 			Serial.println("CONTACTS ERROR");
 	}
 
+	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
+	file.close();
 
 	if(!jarr.success())
 	{

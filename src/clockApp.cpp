@@ -1266,6 +1266,7 @@ void loadAlarms()
 	const char * path = "/.core/alarms.json";
 	Serial.println("");
 	SDAudioFile file = mp.SD.open(path);
+	mp.jb.clear();
 	JsonArray& alarms = mp.jb.parseArray(file);
 	file.close();
 

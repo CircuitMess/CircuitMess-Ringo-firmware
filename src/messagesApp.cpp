@@ -26,12 +26,15 @@ String buffer;
 
 //Messages app
 void messagesApp() {
+	Serial.println("Load messages app");
+
 	mp.dataRefreshFlag = 0;
 	SDAudioFile file = mp.SD.open("/messages.json", "r");
 
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
+		jb.clear();
 		// JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}]");
 		// JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}, {\"number\":\"09123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"Some other text\"}, {\"number\":\"911\", \"dateTime\":\"2018-03-12 12:12:12\", \"text\":\"Help\"}]");
 		JsonArray& jarr = jb.createArray();
@@ -40,18 +43,21 @@ void messagesApp() {
 		jarr.prettyPrintTo(file1);
 		file1.close();
 		file = mp.SD.open("/messages.json", "r");
-		while(!file)
+		while(!file.available())
 			Serial.println("Messages ERROR");
+
+		Serial.println(file.size());
 	}
 
+	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
 
 	if(!jarr.success())
 	{
 		Serial.println("Error");
 		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
+		mp.display.setCursor(0, mp.display.height()/2 - 16);
+		mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Messages - loading data");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 		mp.update();
@@ -145,20 +151,20 @@ void viewSms(String content, String contact, String date) {
 		if (blinkState == 1)
 		{
 			mp.display.setTextColor(TFT_WHITE);
-            mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-            mp.display.setTextFont(2);
-            mp.display.setCursor(2,-1);
-            mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+			mp.display.setTextFont(2);
+			mp.display.setCursor(2,-1);
+			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 			mp.display.print("From: ");
 			mp.display.print(contact);
 		}
 		else
 		{
 			mp.display.setTextColor(TFT_WHITE);
-            mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-            mp.display.setTextFont(2);
-            mp.display.setCursor(2,-1);
-            mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+			mp.display.setTextFont(2);
+			mp.display.setCursor(2,-1);
+			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 			mp.display.print(date);
 		}
 
@@ -171,11 +177,11 @@ void smsMenuDrawBox(String contact, String date, String content, uint8_t sms_day
 	uint8_t boxHeight;
 	uint8_t composeHeight;
 	mp.display.setTextSize(1);
-    scale = 2;
-    offset = 19;
-    composeHeight=21;
-    boxHeight = 30;
-    mp.display.setTextFont(2);
+	scale = 2;
+	offset = 19;
+	composeHeight=21;
+	boxHeight = 30;
+	mp.display.setTextFont(2);
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	if (y < 0 || y > mp.display.height()) {
 		return;
@@ -198,10 +204,10 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	uint8_t offset;
 	uint8_t boxHeight;
 	uint8_t composeHeight;
-    offset = 19;
-    composeHeight=21;
-    boxHeight = 30;
-    mp.display.setTextSize(2);
+	offset = 19;
+	composeHeight=21;
+	boxHeight = 30;
+	mp.display.setTextSize(2);
 	if (millis() % 500 <= 250) {
 		return;
 	}
@@ -216,9 +222,9 @@ int16_t smsMenu(JsonArray *messages) {
 	uint8_t offset;
 	uint8_t boxHeight;
 	int length = messages->size();
-    scale = 2;
-    offset = 19;
-    boxHeight = 30;
+	scale = 2;
+	offset = 19;
+	boxHeight = 30;
 	while (1) {
 		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
@@ -243,10 +249,10 @@ int16_t smsMenu(JsonArray *messages) {
 		else
 			smsMenuDrawCursor(cursor, cameraY_actual);
 
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-        mp.display.setTextFont(2);
-        mp.display.setCursor(1,-2);
-        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(1,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Messages");
