@@ -1824,6 +1824,32 @@ const byte joystickArrowUpRight[] PROGMEM = {
 	B11100000,B00000000,B00000000,
 	B11000000,B00000000,B00000000,
 };
+
+//call log
+const byte incomingCallIcon[] PROGMEM = {
+	8,8,
+	B00000001,
+	B00001010,
+	B00001100,
+	B00001110,
+	B00000000,
+	B01111110,
+	B11111111,
+	B11000011,
+};
+
+const byte outgoingCallIcon[] PROGMEM = {
+	8,8,
+	B00000111,
+	B00000011,
+	B00000101,
+	B00001000,
+	B00000000,
+	B01111110,
+	B11111111,
+	B11000011,
+};
+
 #endif
 
 

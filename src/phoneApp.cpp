@@ -37,8 +37,24 @@ void phoneApp() {
 
 		if (mp.buttons.released(BTN_FUN_LEFT))
 			callBuffer.remove(callBuffer.length()-1);
-		else if (mp.buttons.released(BTN_FUN_RIGHT) && mp.SDinsertedFlag)
-			callLog();
+		else if (mp.buttons.released(BTN_FUN_RIGHT))
+		{
+			if(!mp.SDinsertedFlag)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("No SD card inserted!"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Can't open call log"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				mp.update();
+			}
+			else
+				callLog();
+		}
 		else if (key != NO_KEY && isdigit(key))
 		{
 			switch (key)
@@ -122,52 +138,22 @@ void phoneApp() {
 	mp.update();
 }
 
-void addCall(String number, String dateTime, int duration){
-	SDAudioFile file = mp.SD.open("/call_log.json", "r");
-
-	if(file.size() < 2){
-		Serial.println("Override");
-		file.close();
-		JsonArray& jarr = jb.parseArray("[]");
-		delay(10);
-		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
-		jarr.prettyPrintTo(file1);
-		file1.close();
-		file = mp.SD.open("/call_log.json", "r");
-		while(!file)
-			Serial.println("CONTACTS ERROR");
-	}
-
-	JsonArray& jarr = jb.parseArray(file);
-	file.close();
-
-	JsonObject& new_item = jb.createObject();
-	new_item["number"] = number;
-	new_item["dateTime"] = dateTime;
-	new_item["duration"] = duration;
-	jarr.add(new_item);
-
-	SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
-	jarr.prettyPrintTo(file1);
-	file1.close();
-}
-
 void callLog() {
 	mp.dataRefreshFlag = 0;
 	mp.display.setTextWrap(0);
     mp.display.setTextFont(2);
 
-	SDAudioFile file = mp.SD.open("/call_log.json", "r");
+	SDAudioFile file = mp.SD.open("/.core/call_log.json", "r");
 
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
-		JsonArray& jarr = jb.parseArray("[{\"dateTime\":\"2019-04-18 12:00:00\", \"number\":\"911\", \"duration\":\"124\"}]");
+		JsonArray& jarr = jb.createArray();
 		delay(10);
-		SDAudioFile file1 = mp.SD.open("/call_log.json", "w");
+		SDAudioFile file1 = mp.SD.open("/.core/call_log.json", "w");
 		jarr.prettyPrintTo(file1);
 		file1.close();
-		file = mp.SD.open("/call_log.json", "r");
+		file = mp.SD.open("/.core/call_log.json", "r");
 		while(!file)
 			Serial.println("CONTACTS ERROR");
 	}
@@ -182,7 +168,7 @@ void callLog() {
         mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Call log - loading data");
 		while (!mp.buttons.released(BTN_B))//BUTTON BACK
-		mp.update();
+			mp.update();
 	}
 	else
 	{
@@ -200,7 +186,7 @@ void callLog() {
 				{
 					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"], jarr[menuChoice]["duration"])){
 						jarr.remove(menuChoice);
-						SDAudioFile file = mp.SD.open("/call_log.json", "w");
+						SDAudioFile file = mp.SD.open("/.core/call_log.json", "w");
 						jarr.prettyPrintTo(file);
 						file.close();
 					}
@@ -234,10 +220,12 @@ int callLogMenu(JsonArray *call_log){
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Call log");
+		mp.display.setCursor(5, 110);
+		mp.display.println("Erase");
 
 		if(call_log->size() == 0){
 			mp.display.setTextSize(2);
-			mp.display.setCursor(0, 16);
+			mp.display.setCursor(0, 40);
 			mp.display.setTextColor(TFT_WHITE);
 			mp.display.printCenter("No calls");
 		} else {
@@ -248,7 +236,7 @@ int callLogMenu(JsonArray *call_log){
 
 			int i = 0;
 			for (JsonObject& elem : *call_log) {
-				callLogDrawBoxSD(elem["number"].as<char*>(), elem["dateTime"].as<char*>(), i, cameraY_actual);
+				callLogDrawBoxSD(elem, i, cameraY_actual);
 				i++;
 			}
 			callLogMenuDrawCursor(cursor, cameraY_actual);
@@ -257,11 +245,11 @@ int callLogMenu(JsonArray *call_log){
 				mp.update();
 				break;
 			}
-			if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
+			if (mp.buttons.released(BTN_FUN_LEFT)) //delete call log entry
 			{
 				mp.update();
 				call_log->remove(cursor);
-				SDAudioFile file = mp.SD.open("/call_log.json", "w");
+				SDAudioFile file = mp.SD.open("/.core/call_log.json", "w");
 				call_log->prettyPrintTo(file);
 				file.close();
 				return -10;
@@ -304,7 +292,7 @@ int callLogMenu(JsonArray *call_log){
 	return cursor;
 }
 
-void callLogDrawBoxSD(String number, String dateTime, uint8_t i, int32_t y) {
+void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
     uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
@@ -316,8 +304,23 @@ void callLogDrawBoxSD(String number, String dateTime, uint8_t i, int32_t y) {
     mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
     mp.display.setTextColor(TFT_WHITE);
     mp.display.setCursor(2, y + 2);
-    mp.display.drawString(dateTime, 4, y);
-    mp.display.drawString(number, 4, y + 12);
+    mp.display.drawString(object["dateTime"].as<char*>(), 27, y);
+    mp.display.drawString(object["number"].as<char*>(), 27, y + 12);
+	switch (object["direction"].as<uint8_t>())
+	{
+	case 0:
+		mp.display.drawBitmap(5, y + 6, missedCallIcon, TFT_RED, 2);
+		break;
+	case 1:
+		mp.display.drawBitmap(5, y + 6, outgoingCallIcon, TFT_GREEN, 2);
+		break;
+	case 2:
+		mp.display.drawBitmap(5, y + 6, incomingCallIcon, TFT_BLUE, 2);
+		break;
+	
+	default:
+		break;
+	}
 }
 
 void callLogMenuDrawCursor(uint8_t i, int32_t y) {
@@ -360,13 +363,13 @@ uint8_t showCall(int id, String number, String dateTime, String duration)
 			mp.display.print("0");
 		mp.display.print(seconds);
 
-		mp.display.fillRect(105, 102, 30*2, 9*2, TFT_GREENYELLOW);
-		mp.display.fillRect(5, 102, 30*2, 9*2, TFT_RED);
+		mp.display.fillRect(110, 102, 45, 9*2, TFT_GREENYELLOW);
+		mp.display.fillRect(5, 102, 45, 9*2, TFT_RED);
 		mp.display.setTextColor(TFT_BLACK);
-		mp.display.setCursor(10, 103);
-		mp.display.print("C Delete");
-		mp.display.setCursor(115, 103);
-		mp.display.print("A Call");
+		mp.display.setCursor(9, 103);
+		mp.display.print("Delete");
+		mp.display.setCursor(122, 103);
+		mp.display.print("Call");
 
 		if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
