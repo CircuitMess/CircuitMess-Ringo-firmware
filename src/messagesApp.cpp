@@ -348,7 +348,8 @@ void smsMenuComposeBox(uint8_t i, int32_t y) {
 }
 void composeSMS(JsonArray *messages)
 {
-	textPointer = 0;
+	mp.textInput("");
+	mp.textPointer = 0;
     y = 16; //beginning point
 	String content = "";
 	String contact = "";

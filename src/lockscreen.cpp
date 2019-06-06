@@ -3,10 +3,10 @@ String monthsList[] PROGMEM = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", 
 void drawNotificationWindow(uint8_t y, uint8_t index) {
 	mp.display.setTextFont(2);
 	mp.display.setTextSize(1);
-	mp.display.setCursor(30, y + 2);
+	mp.display.setCursor(27, y + 2);
 	mp.display.fillRoundRect(2, y + 2, 154, 20, 2, TFT_DARKGREY);
 	mp.display.fillRoundRect(4, y, 154, 20, 2, TFT_WHITE);
-	mp.display.print(mp.notificationDescriprionList[index]);
+	mp.display.print(mp.notificationDescriptionList[index]);
 	switch (mp.notificationTypeList[index])
 	{
 		case 1:
@@ -168,11 +168,15 @@ void lockscreen() {
 		{
 			if(mp.notificationTypeList[i] != 0)
 			{
-				temp++;
-				if(temp == 1)
+				if(temp == 0)
+				{
 					drawNotificationWindow(64,i);
-				else if(temp == 2)
+				}
+				else if(temp == 1)
+				{
 					drawNotificationWindow(88,i);
+				}
+				temp++;
 			}
 		}
 
@@ -289,7 +293,13 @@ void lockscreen() {
 			}
 		}
 		if (mp.buttons.released(BTN_B)) {
-			mp.sleep();
+			// mp.sleep();
+			for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
+			{
+				mp.notificationTypeList[i] = 0;
+				mp.notificationDescriptionList[i] = "";
+
+			}
 		}
 
 		if (goOut == 1 && mp.buttons.released(BTN_A))
