@@ -29,7 +29,7 @@ void messagesApp() {
 	Serial.println("Load messages app");
 
 	mp.dataRefreshFlag = 0;
-	SDAudioFile file = mp.SD.open("/messages.json", "r");
+	SDAudioFile file = mp.SD.open("/.core/messagesjson", "r");
 
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
@@ -39,10 +39,10 @@ void messagesApp() {
 		// JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}, {\"number\":\"09123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"Some other text\"}, {\"number\":\"911\", \"dateTime\":\"2018-03-12 12:12:12\", \"text\":\"Help\"}]");
 		JsonArray& jarr = jb.createArray();
 		delay(10);
-		SDAudioFile file1 = mp.SD.open("/messages.json", "w");
+		SDAudioFile file1 = mp.SD.open("/.core/messagesjson", "w");
 		jarr.prettyPrintTo(file1);
 		file1.close();
-		file = mp.SD.open("/messages.json", "r");
+		file = mp.SD.open("/.core/messagesjson", "r");
 		while(!file.available())
 			Serial.println("Messages ERROR");
 
@@ -479,7 +479,7 @@ void saveMessage(String text, String number, JsonArray *messages){
 	new_item["dateTime"] = mp.currentDateTime();
 
 	messages->add(new_item);
-	SDAudioFile file1 = mp.SD.open("/messages.json", "w");
+	SDAudioFile file1 = mp.SD.open("/.core/messagesjson", "w");
 	messages->prettyPrintTo(file1);
 	file1.close();
 }
