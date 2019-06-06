@@ -171,20 +171,16 @@ void lockscreen() {
 		uint8_t temp = 0;
 		for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
 		{
-			if(mp.notificationTypeList[i] != 0)
+			if(mp.notificationTypeList[i] == 0)
 			{
-				if(temp == 0)
-				{
-					drawNotificationWindow(64,i);
-				}
-				else if(temp == 1)
-				{
-					drawNotificationWindow(88,i);
-				}
-				temp++;
+				temp = i;
+				break;
 			}
 		}
-
+		if(temp > 0)
+			drawNotificationWindow(64,temp-1);
+		if(temp > 1)
+			drawNotificationWindow(88,temp-2);
 		mp.display.setFreeFont(TT1);
 		mp.display.setTextSize(4);
 		if (millis() - elapsedMillis >= 500) {
