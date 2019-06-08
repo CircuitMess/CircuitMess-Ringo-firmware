@@ -629,7 +629,7 @@ void contactsAppSD(){
 			menuChoice = contactsMenuSD(&jarr);
 
 			mp.update();
-			if (menuChoice != -2)
+			if (menuChoice != -2) //creating new contact
 			{
 				if (menuChoice == 0){
 					String name, number;
@@ -644,7 +644,7 @@ void contactsAppSD(){
 						file.close();
 					}
 				}
-				else if(menuChoice < -2000)
+				else if(menuChoice < -2000) // editing contact
 				{
 					int id = menuChoice + 3000 - 1;
 					String name, number;

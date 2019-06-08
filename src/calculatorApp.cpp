@@ -50,14 +50,15 @@ void calculatorApp()
 			}
 		}
 	}
-	mp.display.drawRect(119, 103, 33, 23, TFT_BLACK);
-	mp.display.fillRect(120, 104, 31, 21, 0x4D42);
-	mp.display.drawBitmap(128, 110, calculatorEquals);
-	mp.display.setCursor(5, 113);
+	// mp.display.drawRect(119, 103, 33, 23, TFT_BLACK);
+	// mp.display.fillRect(120, 104, 31, 21, 0x4D42);
+	mp.display.setCursor(7, 110);
 	mp.display.setTextFont(2);
 	mp.display.setTextSize(1);
 	mp.display.setTextColor(TFT_BLACK);
 	mp.display.print("Erase");
+	mp.display.setCursor(110, 110);
+	mp.display.println("Equals");
 	while(1)
 	{
 		// key = mp.buttons.getKey();

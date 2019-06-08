@@ -475,13 +475,8 @@ void callNumber(String number) {
 					dateTime += "0";
 				}
 				dateTime += String(mp.clockMinute);
-				dateTime += ":";
-				if(mp.clockSecond < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockSecond);
 				if(mp.SDinsertedFlag)
-					addCall(number, dateTime, tmp_time);
+					mp.addCall(number, dateTime, tmp_time, 1);
 
 				delay(1000);
 				break;
@@ -611,13 +606,8 @@ void callNumber(String number) {
 				dateTime += "0";
 			}
 			dateTime += String(mp.clockMinute);
-			dateTime += ":";
-			if(mp.clockSecond < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockSecond);
 			if(mp.SDinsertedFlag)
-					addCall(number, dateTime, tmp_time);
+					mp.addCall(number, dateTime, tmp_time, 1);
 			delay(1000);
 			break;
 		}
