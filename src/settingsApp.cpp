@@ -2811,7 +2811,7 @@ int8_t checkForUpdate()
 			String payload = http.getString();
 			http.end();
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
-			if (version > 1)
+			if (version > mp.firmware_version)
 			{
 				Serial.println("HERE");
 				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
