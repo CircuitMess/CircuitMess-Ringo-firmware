@@ -3,38 +3,43 @@ String monthsList[] PROGMEM = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", 
 void drawNotificationWindow(uint8_t y, uint8_t index) {
 	mp.display.setTextFont(2);
 	mp.display.setTextSize(1);
-	mp.display.setCursor(30, y + 2);
+	mp.display.setCursor(22, y + 2);
 	mp.display.fillRoundRect(2, y + 2, 154, 20, 2, TFT_DARKGREY);
 	mp.display.fillRoundRect(4, y, 154, 20, 2, TFT_WHITE);
-	mp.display.print(mp.notificationDescriprionList[index]);
+	mp.display.print(mp.notificationDescriptionList[index]);
 	switch (mp.notificationTypeList[index])
 	{
 		case 1:
-			mp.display.drawBitmap(7, y + 2, missedCallIcon, TFT_RED, 2);
+			mp.display.drawBitmap(5, y + 2, missedCallIcon, TFT_RED, 2);
 			break;
 		case 2:
-			mp.display.drawBitmap(7, y + 2, newMessageIcon, TFT_BLACK, 2);
+			mp.display.drawBitmap(5, y + 2, newMessageIcon, TFT_BLACK, 2);
 			break;
 		case 3:
-			mp.display.drawBitmap(7, y + 2, systemNotification, TFT_RED, 2);
+			mp.display.drawBitmap(5, y + 2, systemNotification, TFT_RED, 2);
 			break;
 	}
 	mp.display.setTextFont(1);
-	mp.display.setCursor(120, y + 2);
+	mp.display.setCursor(129, y + 2);
 	String temp = "";
 	DateTime now = mp.notificationTimeList[index];
 	if (now.hour() < 10)
 		temp.concat("0");
 	temp.concat(now.hour());
-	temp.concat(":");
+	mp.display.print(temp);
+	mp.display.setCursor(mp.display.cursor_x - 2, mp.display.cursor_y);
+	mp.display.print(":");
+	mp.display.setCursor(mp.display.cursor_x - 2, mp.display.cursor_y);
+	temp = "";
 	if (now.minute() < 10)
 		temp.concat("0");
 	temp.concat(now.minute());
 	mp.display.print(temp);
-	mp.display.setCursor(119, y + 11);
+	mp.display.setCursor(125, y + 11);
 	temp = "";
-	temp.concat(monthsList[now.month() - 1]);
-	temp.concat(" ");
+	mp.display.print(monthsList[now.month() - 1]);
+	mp.display.setCursor(mp.display.cursor_x + 2, mp.display.cursor_y);
+	// temp.concat(monthsList[now.month() - 1]);
 	if (now.day() < 10)
 		temp.concat("0");
 	temp.concat(now.day());
@@ -166,16 +171,16 @@ void lockscreen() {
 		uint8_t temp = 0;
 		for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
 		{
-			if(mp.notificationTypeList[i] != 0)
+			if(mp.notificationTypeList[i] == 0)
 			{
-				temp++;
-				if(temp == 1)
-					drawNotificationWindow(64,i);
-				else if(temp == 2)
-					drawNotificationWindow(88,i);
+				temp = i;
+				break;
 			}
 		}
-
+		if(temp > 0)
+			drawNotificationWindow(64,temp-1);
+		if(temp > 1)
+			drawNotificationWindow(88,temp-2);
 		mp.display.setFreeFont(TT1);
 		mp.display.setTextSize(4);
 		if (millis() - elapsedMillis >= 500) {
@@ -289,7 +294,14 @@ void lockscreen() {
 			}
 		}
 		if (mp.buttons.released(BTN_B)) {
-			mp.sleep();
+			// mp.sleep();
+			for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
+			{
+				mp.notificationTypeList[i] = 0;
+				mp.notificationDescriptionList[i] = "";
+				mp.saveNotifications();
+			}
+			mp.update();
 		}
 
 		if (goOut == 1 && mp.buttons.released(BTN_A))

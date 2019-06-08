@@ -26,32 +26,38 @@ String buffer;
 
 //Messages app
 void messagesApp() {
+	Serial.println("Load messages app");
+
 	mp.dataRefreshFlag = 0;
-	SDAudioFile file = mp.SD.open("/messages.json", "r");
+	SDAudioFile file = mp.SD.open("/.core/messages.json", "r");
 
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
+		jb.clear();
 		// JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}]");
 		// JsonArray& jarr = jb.parseArray("[{\"number\":\"123123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"asd asd asd asd\"}, {\"number\":\"09123\", \"dateTime\":\"2018-12-12 12:12:12\", \"text\":\"Some other text\"}, {\"number\":\"911\", \"dateTime\":\"2018-03-12 12:12:12\", \"text\":\"Help\"}]");
 		JsonArray& jarr = jb.createArray();
 		delay(10);
-		SDAudioFile file1 = mp.SD.open("/messages.json", "w");
+		SDAudioFile file1 = mp.SD.open("/.core/messages.json", "w");
 		jarr.prettyPrintTo(file1);
 		file1.close();
-		file = mp.SD.open("/messages.json", "r");
-		while(!file)
+		file = mp.SD.open("/.core/messages.json", "r");
+		while(!file.available())
 			Serial.println("Messages ERROR");
+
+		Serial.println(file.size());
 	}
 
+	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
 
 	if(!jarr.success())
 	{
 		Serial.println("Error");
 		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
+		mp.display.setCursor(0, mp.display.height()/2 - 16);
+		mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Messages - loading data");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 		mp.update();
@@ -67,16 +73,25 @@ void messagesApp() {
 			else if (menuChoice == 0)
 				composeSMS(&jarr);
 			else
-				viewSms(jarr[menuChoice-1]["text"].as<char*>(), jarr[menuChoice-1]["number"].as<char*>(), jarr[menuChoice-1]["dateTime"].as<char*>());
+				viewSms(jarr[menuChoice-1]["text"].as<char*>(), jarr[menuChoice-1]["number"].as<char*>(), jarr[menuChoice-1]["dateTime"].as<uint32_t>());
 		}
 	}
 }
 
-void viewSms(String content, String contact, String date) {
+void viewSms(String content, String contact, uint32_t date) {
 	y = 14;  //Beggining point
 	unsigned long buttonHeld = millis();
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
+	DateTime time = DateTime(date);
+	for(int i = 0; i < 10; i ++)
+	{
+		if(mp.notificationTypeList[i] == 2 && mp.notificationDescriptionList[i] == contact && mp.notificationTimeList[i] == DateTime(date))
+		{
+			mp.removeNotification(i);
+			break;
+		}
+	}
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
@@ -145,37 +160,41 @@ void viewSms(String content, String contact, String date) {
 		if (blinkState == 1)
 		{
 			mp.display.setTextColor(TFT_WHITE);
-            mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-            mp.display.setTextFont(2);
-            mp.display.setCursor(2,-1);
-            mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+			mp.display.setTextFont(2);
+			mp.display.setCursor(2,-1);
+			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 			mp.display.print("From: ");
 			mp.display.print(contact);
 		}
 		else
 		{
 			mp.display.setTextColor(TFT_WHITE);
-            mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-            mp.display.setTextFont(2);
-            mp.display.setCursor(2,-1);
-            mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-			mp.display.print(date);
+			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+			mp.display.setTextFont(2);
+			mp.display.setCursor(2,-1);
+			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+			char buf[100];
+			strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
+			mp.display.print(time.format(buf));
 		}
 
 		mp.update();
 	}
 }
-void smsMenuDrawBox(String contact, String date, String content, uint8_t sms_day, uint8_t sms_month, uint8_t i, int32_t y) {
+void smsMenuDrawBox(String contact, DateTime date, String content, uint8_t i, int32_t y) {
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
 	uint8_t composeHeight;
+	int sms_day = date.day();
+	int sms_month = date.month();
 	mp.display.setTextSize(1);
-    scale = 2;
-    offset = 19;
-    composeHeight=21;
-    boxHeight = 30;
-    mp.display.setTextFont(2);
+	scale = 2;
+	offset = 19;
+	composeHeight=21;
+	boxHeight = 30;
+	mp.display.setTextFont(2);
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	if (y < 0 || y > mp.display.height()) {
 		return;
@@ -198,10 +217,10 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	uint8_t offset;
 	uint8_t boxHeight;
 	uint8_t composeHeight;
-    offset = 19;
-    composeHeight=21;
-    boxHeight = 30;
-    mp.display.setTextSize(2);
+	offset = 19;
+	composeHeight=21;
+	boxHeight = 30;
+	mp.display.setTextSize(2);
 	if (millis() % 500 <= 250) {
 		return;
 	}
@@ -216,9 +235,9 @@ int16_t smsMenu(JsonArray *messages) {
 	uint8_t offset;
 	uint8_t boxHeight;
 	int length = messages->size();
-    scale = 2;
-    offset = 19;
-    boxHeight = 30;
+	scale = 2;
+	offset = 19;
+	boxHeight = 30;
 	while (1) {
 		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
@@ -232,10 +251,9 @@ int16_t smsMenu(JsonArray *messages) {
 
 		smsMenuComposeBox(i, cameraY_actual);
 		for (JsonObject& elem : *messages) {
-			String date = elem["dateTime"];
-			int day = date.substring(8, 10).toInt();
-			int month = date.substring(5, 7).toInt();
-			smsMenuDrawBox(elem["number"].as<char*>(), elem["dateTime"].as<char*>(), elem["text"].as<char*>(), day, month, i+1, cameraY_actual);
+			DateTime date = DateTime(elem["dateTime"].as<uint32_t>());
+
+			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), i+1, cameraY_actual);
 			i++;
 		}
 		if (cursor == 0)
@@ -243,10 +261,10 @@ int16_t smsMenu(JsonArray *messages) {
 		else
 			smsMenuDrawCursor(cursor, cameraY_actual);
 
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-        mp.display.setTextFont(2);
-        mp.display.setCursor(1,-2);
-        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(1,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Messages");
@@ -342,7 +360,8 @@ void smsMenuComposeBox(uint8_t i, int32_t y) {
 }
 void composeSMS(JsonArray *messages)
 {
-	textPointer = 0;
+	mp.textInput("");
+	mp.textPointer = 0;
     y = 16; //beginning point
 	String content = "";
 	String contact = "";
@@ -466,13 +485,13 @@ void composeSMS(JsonArray *messages)
 
 void saveMessage(String text, String number, JsonArray *messages){
 	JsonObject& new_item = jb.createObject();
-
+	mp.updateTimeRTC();
 	new_item["number"] = number;
 	new_item["text"] = text;
-	new_item["dateTime"] = mp.currentDateTime();
+	new_item["dateTime"] = mp.RTC.now().unixtime();
 
 	messages->add(new_item);
-	SDAudioFile file1 = mp.SD.open("/messages.json", "w");
+	SDAudioFile file1 = mp.SD.open("/.core/messages.json", "w");
 	messages->prettyPrintTo(file1);
 	file1.close();
 }

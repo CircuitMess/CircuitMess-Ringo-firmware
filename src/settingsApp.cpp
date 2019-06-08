@@ -11,8 +11,8 @@ String settingsItems[6] PROGMEM = {
 };
 String notificationSounds[4] PROGMEM = {
 	"Oxygen",
-	"Resonance", 
-	"Mayday", 
+	"Resonance",
+	"Mayday",
 	"Buzzer"
 };
 
@@ -801,7 +801,7 @@ void soundMenu() {
 					}
 					mp.update();
 				}
-				
+
 			}
 		}
 		if (cursor == 2)
@@ -2073,7 +2073,7 @@ void timeMenu()
 									break;
 							}
 						}
-						DateTime now = DateTime(mp.clockYear, mp.clockMonth, mp.clockDay, 
+						DateTime now = DateTime(mp.clockYear, mp.clockMonth, mp.clockDay,
 							mp.clockHour, mp.clockMinute, mp.clockSecond);
 						mp.RTC.adjust(now);
 						break;
@@ -2138,7 +2138,7 @@ void timeMenu()
 					mp.update();
 					delay(1500);
 				}
-				
+
 			}
 		}
 
@@ -2290,6 +2290,7 @@ bool updateMenu()
 					const char contacts_path[] = "/.core/contacts.json";
 					const char settings_path[] = "/.core/settings.json";
 
+					mp.jb.clear();
 					JsonArray& contacts = mp.jb.parseArray(contacts_default);
 					JsonObject& settings = mp.jb.parseObject(settings_default);
 
@@ -2550,7 +2551,7 @@ void wifiConnect()
 		mp.update();
 
 	}
-	else 
+	else
 	{
 		String networkNames[n];
 		String wifiSignalStrengths[n];
@@ -2573,7 +2574,7 @@ void wifiConnect()
 		}
 		while(1)
 		{
-			
+
 			int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
 			if(selection < 0)
 			{
@@ -2599,7 +2600,7 @@ void wifiConnect()
 				mp.update();
 				while (1)
 				{
-					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine 
+					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 					{
 						elapsedMillis = millis();
 						blinkState = !blinkState;
@@ -2623,7 +2624,7 @@ void wifiConnect()
 					mp.display.printCenter(content);
 					if (blinkState == 1)
 						mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
-					
+
 					if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
 					{
 						Serial.println("PRESSED");
@@ -2641,7 +2642,7 @@ void wifiConnect()
 						content.toCharArray(temp2, content.length()+1);
 						WiFi.begin(temp, temp2);
 						uint8_t counter = 0;
-						while (WiFi.status() != WL_CONNECTED) 
+						while (WiFi.status() != WL_CONNECTED)
 						{
 							delay(500);
 							mp.display.print(".");
@@ -2740,7 +2741,7 @@ void wifiConnect()
 							else
 								break;
 						}
-					
+
 					}
 					if(mp.buttons.released(BTN_B))
 					{
@@ -2770,11 +2771,11 @@ int8_t checkForUpdate()
 		return -1;
 	}
 	HTTPClient http;
-	const char* ca = \ 
-	"-----BEGIN CERTIFICATE-----\n" \  
-	"MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \  
-	"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \  
-	"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n" \  
+	const char* ca = \
+	"-----BEGIN CERTIFICATE-----\n" \
+	"MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \
+	"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \
+	"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n" \
 	"PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD\n" \
 	"Ew5EU1QgUm9vdCBDQSBYMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" \
 	"AN+v6ZdQCINXtMxiZfaQguzH0yxrMMpb7NnDfcdAwRgUi+DoM3ZJKuM/IUmTrE4O\n" \
@@ -2851,11 +2852,11 @@ bool fetchUpdate()
 	if(WiFi.status() != WL_CONNECTED)
 		return 0;
 	HTTPClient http;
-	const char* ca = \ 
-	"-----BEGIN CERTIFICATE-----\n" \  
-	"MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \  
-	"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \  
-	"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n" \  
+	const char* ca = \
+	"-----BEGIN CERTIFICATE-----\n" \
+	"MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \
+	"MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \
+	"DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow\n" \
 	"PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD\n" \
 	"Ew5EU1QgUm9vdCBDQSBYMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" \
 	"AN+v6ZdQCINXtMxiZfaQguzH0yxrMMpb7NnDfcdAwRgUi+DoM3ZJKuM/IUmTrE4O\n" \
@@ -2889,7 +2890,7 @@ bool fetchUpdate()
 		Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
 		// file found at server
-		if (httpCode == HTTP_CODE_OK) 
+		if (httpCode == HTTP_CODE_OK)
 		{
 			http.writeToStream(&file);  //for large files
 			http.end();

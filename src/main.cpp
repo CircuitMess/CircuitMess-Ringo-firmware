@@ -33,7 +33,6 @@ String titles[9] PROGMEM = {
 	"Flashlight",
 	"Calendar"
 };
-int textPointer = 0;
 StaticJsonBuffer<capacity> jb;
 uint8_t audioCount = 0;
 String audioFiles[100];
@@ -1628,7 +1627,72 @@ bool startupWizard()
 	wifiConnect();
 	return 1;
 }
+void controlTry() //for debug purposes
+{
+	mp.textInput("");
+	mp.textPointer = 0;
+    y = 16; //beginning point
+	String content = "";
+	String prevContent = "";
+	unsigned long elapsedMillis = millis();
+	bool blinkState = 1;
+	uint8_t scale;
+	String updateBuffer = "";
 
+	// mp.dataRefreshFlag = 1;
+	while (1)
+	{
+		mp.display.fillScreen(TFT_DARKGREY);
+
+		mp.display.setTextColor(TFT_WHITE);
+        scale = 2;
+        mp.display.setTextFont(2);
+
+		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
+		{
+			elapsedMillis = millis();
+			blinkState = !blinkState;
+		}
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(2, -1);
+		prevContent = content;
+		content = mp.textInput(content, -1);
+		if (prevContent != content)
+		{
+			blinkState = 1;
+			elapsedMillis = millis();
+		}
+		mp.display.setTextWrap(1);
+		mp.display.setCursor(1*scale, y);
+		mp.display.print(content);
+		if(blinkState == 1)
+			mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
+
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			mp.update();
+			break;
+		}
+		if (mp.buttons.released(BTN_A) && content != "") // SEND SMS
+		{
+			Serial1.println(content);
+			content = "";
+			prevContent = "";
+			mp.textInput("");
+			mp.textPointer = 0;
+		}
+		if(Serial1.available())
+		{
+			updateBuffer+=(char)Serial1.read();
+			Serial.println(updateBuffer);
+		}
+		if(Serial.available())
+		{
+			Serial1.println(Serial.readString());
+		}
+		mp.update();
+	}
+}
 void setup()
 {
 	Serial.begin(115200);
@@ -1647,6 +1711,7 @@ void setup()
 		EEPROM.commit();
 	}
 	mp.shutdownPopupEnable(1);
+	// controlTry();
 }
 void loop()
 {
