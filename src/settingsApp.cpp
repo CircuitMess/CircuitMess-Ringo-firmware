@@ -2505,7 +2505,7 @@ void wifiConnect()
 		mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
 		mp.display.fillRect(5, 50, 150, 26, 0xFD29);
 		mp.display.setCursor(47, 54);
-		mp.display.printCenter("No networks found!");
+		mp.display.printCenter("WiFi turned off!");
 		uint32_t tempMillis = millis();
 		while(millis() < tempMillis + 2000)
 		{
@@ -2537,7 +2537,12 @@ void wifiConnect()
 		mp.display.fillRect(5, 50, 150, 26, 0xFD29);
 		mp.display.setCursor(47, 54);
 		mp.display.printCenter("No networks found!");
+		WiFi.scanDelete();
+		WiFi.disconnect(true); delay(10); // disable WIFI altogether
+		WiFi.mode(WIFI_MODE_NULL); delay(10);
+		while(!mp.update());
 		uint32_t tempMillis = millis();
+		WiFi.begin();
 		while(millis() < tempMillis + 2000)
 		{
 			mp.update();
@@ -2581,16 +2586,7 @@ void wifiConnect()
 				mp.update();
 				return;
 			}
-			mp.display.fillScreen(TFT_BLACK);
-			mp.display.setCursor(8, 8);
-			mp.display.printCenter(networkNames[selection]);
-			mp.display.setCursor(4, 30);
-			mp.display.printCenter("Enter password:");
-			mp.update();
-			mp.display.setCursor(1, 112);
-			mp.display.print("Erase");
-			mp.display.setCursor(110, 112);
-			mp.display.print("Confirm");
+			
 			if (wifiPasswordNeeded[selection])
 			{
 				mp.textInput("");
@@ -2600,6 +2596,15 @@ void wifiConnect()
 				mp.update();
 				while (1)
 				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setCursor(8, 8);
+					mp.display.printCenter(networkNames[selection]);
+					mp.display.setCursor(4, 30);
+					mp.display.printCenter("Enter password:");
+					mp.display.setCursor(1, 112);
+					mp.display.print("Erase");
+					mp.display.setCursor(110, 112);
+					mp.display.print("Confirm");
 					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 					{
 						elapsedMillis = millis();
@@ -2628,13 +2633,13 @@ void wifiConnect()
 					if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
 					{
 						Serial.println("PRESSED");
-
+						content = "MAKERphone!";
 						mp.display.setCursor(20, 50);
 						mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
 						mp.display.setCursor(0,40);
 						mp.display.printCenter("Connecting");
 						mp.display.setCursor(60, 60);
-						mp.update();
+						while(!mp.update());
 
 						char temp[networkNames[selection].length()+1];
 						char temp2[content.length()];
@@ -2698,48 +2703,74 @@ void wifiConnect()
 							// while(!mp.update());
 							// delay(1000);
 							// Serial.println(WiFi.status());
-
+							// mp.deallocateAudio();
+							mp.display.deleteSprite();
+							Serial.println("FREE HEAP:");
+							Serial.println(ESP.getFreeHeap());
 							int8_t selection = checkForUpdate();
 							Serial.println("OUT");
 							delay(5);
 							if(selection == 1)
 							{
-								mp.display.fillScreen(TFT_BLACK);
-								mp.display.setCursor(0,mp.display.height() / 2 - 16);
-								mp.display.printCenter(F("Downloading update"));
-								while(!mp.update());
-								fetchUpdate();
-								mp.display.fillScreen(TFT_BLACK);
-								mp.display.setCursor(0,mp.display.height() / 2 - 16);
-								mp.display.printCenter(F("Installing update"));
-								while(!mp.update());
-								mp.updateFromFS("/.core/LOADER.BIN");
+								EEPROM.writeBool(34, 1);
+								EEPROM.writeString(35, temp);
+								EEPROM.writeString(100, temp2);
+								EEPROM.commit();
+								mp.tft.fillRect(0,0,160,128,TFT_BLACK);
+								mp.tft.setCursor(22,mp.tft.height()/2 - 26);
+								mp.tft.print("Updating software...");
+								mp.tft.setCursor(32,mp.tft.height()/2 - 5);
+								mp.tft.print("Don't turn off!");
+								delay(1000);
+
+								ESP.restart();
+								// mp.tft.fillRect(0,0,160,128, TFT_BLACK);
+								// mp.tft.setCursor(0,mp.tft.height() / 2 - 16);
+								// mp.tft.printCenter(F("Downloading update"));
+								// // while(!mp.update());
+								// Serial.println("FREE HEAP:");
+								// Serial.println(ESP.getFreeHeap());
+								// fetchUpdate();
+								// mp.tft.fillRect(0,0,160,128, TFT_BLACK);
+								// mp.tft.setCursor(0,mp.tft.height() / 2 - 16);
+								// mp.tft.printCenter(F("Installing update"));
+								// // while(!mp.update());
+								// Serial.println("FREE HEAP:");
+								// Serial.println(ESP.getFreeHeap());
+								// mp.updateFromFS("/.core/LOADER.BIN");
 							}
 
 							else if(selection == 0)
 							{
-								mp.display.fillRect(0, 40, mp.display.width(), 50, TFT_BLACK);
-								mp.display.setCursor(0, 45);
-								mp.display.printCenter("No updates available");
-								mp.display.setCursor(0, 65);
-								mp.display.printCenter("Restarting phone...");
-								while(!mp.update());
+								mp.tft.fillRect(0, 40, mp.tft.width(), 50, TFT_BLACK);
+								mp.tft.setCursor(30, 45);
+								mp.tft.print("No updates available");
+								mp.tft.setCursor(30, 65);
+								mp.tft.print("Restarting phone...");
+								// while(!mp.update());
 								delay(2000);
 								ESP.restart();
 							}
 							else if(selection == -2)
 							{
-								mp.display.fillRect(0, 40, mp.display.width(), 50, TFT_BLACK);
-								mp.display.setCursor(0, 45);
-								mp.display.printCenter("Server error!");
-								mp.display.setCursor(0, 65);
-								mp.display.printCenter("Restarting phone...");
-								while(!mp.update());
+								mp.tft.fillRect(0, 40, mp.tft.width(), 50, TFT_BLACK);
+								mp.tft.setCursor(30, 45);
+								mp.tft.print("Server error!");
+								mp.tft.setCursor(30, 65);
+								mp.tft.print("Restarting phone...");
+								// while(!mp.update());
 								delay(2000);
 								ESP.restart();
 							}
 							else
-								break;
+							{
+								mp.tft.fillRect(0,0,160,128, TFT_BLACK);
+								mp.tft.setCursor(30,mp.tft.height() / 2 - 16);
+								mp.tft.print(F("Restarting phone"));
+								// while(!mp.update());
+								delay(750);
+								ESP.restart();
+							}
 						}
 
 					}
@@ -2765,6 +2796,7 @@ void wifiConnect()
 }
 int8_t checkForUpdate()
 {
+	
 	if(WiFi.status() != WL_CONNECTED)
 	{
 		Serial.println("not connected");
@@ -2773,24 +2805,27 @@ int8_t checkForUpdate()
 	HTTPClient http;
 	const char* ca = \
 	"-----BEGIN CERTIFICATE-----\n" \
-	"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\n" \
+	"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\n" \
+	"+OkuE6N36B9K\n" \
 	"-----END CERTIFICATE-----\n";
 
 	Serial.print("[HTTP] begin...\n");
@@ -2803,6 +2838,7 @@ int8_t checkForUpdate()
 	// start connection and send HTTP header
 	int httpCode = http.GET();
 	Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+	delay(5);
 	// httpCode will be negative on error
 
 	if (httpCode > 0) {
@@ -2811,25 +2847,25 @@ int8_t checkForUpdate()
 			String payload = http.getString();
 			http.end();
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
-			if (version > mp.firmware_version)
+			// if (version > mp.firmware_version)
+			if(version > 0)
 			{
 				Serial.println("HERE");
 				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
 					+ "." + String(version%10));
 				Serial.println(foo);
+				mp.tft.fillRect(0,0,160,128,TFT_BLACK);
+				mp.tft.setTextFont(2);
+				mp.tft.setTextSize(1);
+				mp.tft.setTextColor(TFT_WHITE);
+				mp.tft.setCursor(21,mp.tft.height()/2 - 26);
+				mp.tft.print("UPDATE AVAILABLE!");
+				mp.tft.setCursor(30, 70);
+				mp.tft.print(foo);
+				mp.tft.setCursor(4,110);
+				mp.tft.print("Press A to start update");
 				while(!mp.buttons.released(BTN_A))
 				{
-					mp.display.fillScreen(TFT_BLACK);
-					mp.display.setTextFont(2);
-					mp.display.setTextSize(1);
-					mp.display.setTextColor(TFT_WHITE);
-					mp.display.setCursor(0,mp.display.height()/2 - 26);
-					if(millis() % 1000 <= 500)
-						mp.display.printCenter("UPDATE AVAILABLE!");
-					mp.display.setCursor(70, 70);
-					mp.display.printCenter(foo);
-					mp.display.setCursor(4,110);
-					mp.display.print("Press A to start update");
 					if(mp.buttons.released(BTN_B))
 					{
 						mp.update();
@@ -2854,24 +2890,27 @@ bool fetchUpdate()
 	HTTPClient http;
 	const char* ca = \
 	"-----BEGIN CERTIFICATE-----\n" \
-	"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\n" \
+	"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\n" \
+	"+OkuE6N36B9K\n" \
 	"-----END CERTIFICATE-----\n";
 	mp.SD.remove("/.core/LOADER.BIN");
 	SDAudioFile file = mp.SD.open("/.core/LOADER.BIN", "w");

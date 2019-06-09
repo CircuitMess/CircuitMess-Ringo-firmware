@@ -294,14 +294,14 @@ void lockscreen() {
 			}
 		}
 		if (mp.buttons.released(BTN_B)) {
-			// mp.sleep();
-			for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
-			{
-				mp.notificationTypeList[i] = 0;
-				mp.notificationDescriptionList[i] = "";
-				mp.saveNotifications();
-			}
-			mp.update();
+			mp.sleep();
+			// for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
+			// {
+			// 	mp.notificationTypeList[i] = 0;
+			// 	mp.notificationDescriptionList[i] = "";
+			// 	mp.saveNotifications();
+			// }
+			// mp.update();
 		}
 
 		if (goOut == 1 && mp.buttons.released(BTN_A))

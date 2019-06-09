@@ -332,7 +332,6 @@ void callNumber(String number) {
 	mp.display.setTextColor(TFT_BLACK);
 	bool firstPass = 1;
 	uint32_t timeOffset = 0;
-	uint16_t textLength;
 	uint8_t scale;
 	unsigned int tmp_time = 0;
 	uint8_t micGain = 4;
@@ -348,9 +347,9 @@ void callNumber(String number) {
 		mp.display.setTextFont(2);
 	}
 	mp.display.setTextSize(1);
+	digitalWrite(soundSwitchPin, 1);
 
 	mp.display.printCenter(number);
-	textLength = mp.display.cursor_x - textLength;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -364,7 +363,6 @@ void callNumber(String number) {
 		{
 			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 			{
-				digitalWrite(soundSwitchPin, 1);
 				if (firstPass == 1)
 				{
 					timeOffset = millis();
@@ -1660,6 +1658,7 @@ void controlTry() //for debug purposes
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
+			Serial.println("B pressed");
 			mp.update();
 			break;
 		}
@@ -1685,7 +1684,29 @@ void controlTry() //for debug purposes
 }
 void setup()
 {
-	Serial.begin(115200);
+	Serial.begin(115200);	
+	EEPROM.begin(256);
+	if(EEPROM.readBool(34))
+	{
+		EEPROM.writeBool(34, 0);
+		EEPROM.commit();
+		mp.SD.begin(5, SPI, 8000000);
+		Serial.println(EEPROM.readString(35).c_str());
+		Serial.println(EEPROM.readString(100).c_str());
+		delay(1000);
+		WiFi.begin(EEPROM.readString(35).c_str(), EEPROM.readString(100).c_str());
+		delay(1000);
+		Serial.print("Connected: ");
+		Serial.println(WiFi.status() == WL_CONNECTED);
+		Serial.println("FREE HEAP:");
+		Serial.println(ESP.getFreeHeap());
+		delay(5);
+		if(!fetchUpdate())
+			ESP.restart();
+		mp.updateFromFS("/.core/LOADER.BIN");
+		ESP.restart();
+	}
+
 	mp.inAlarmPopup = 1;
 	mp.begin(0);
 	mp.homePopupEnable(0);
