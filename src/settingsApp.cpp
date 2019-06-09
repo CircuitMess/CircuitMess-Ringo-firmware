@@ -2633,7 +2633,6 @@ void wifiConnect()
 					if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
 					{
 						Serial.println("PRESSED");
-						content = "MAKERphone!";
 						mp.display.setCursor(20, 50);
 						mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
 						mp.display.setCursor(0,40);
@@ -2847,7 +2846,7 @@ int8_t checkForUpdate()
 			String payload = http.getString();
 			http.end();
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
-			// if (version > mp.firmware_version)
+			// if (version > mp.firmware_version) //TO-DO
 			if(version > 0)
 			{
 				Serial.println("HERE");
