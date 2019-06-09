@@ -9,6 +9,9 @@ String mediaItems[3] PROGMEM = {
 };
 String photoFiles[100];
 uint8_t photoCount = 0;
+MPTrack* trackArray[100];
+bool firstPass = 0;
+
 //Media app
 
 void mediaApp() {
@@ -19,6 +22,7 @@ void mediaApp() {
 
 		if(input == 0) //music
 		{
+			
 			listAudio("/Music", 0);
 			String tempList[audioCount];
 			uint16_t tempCount = audioCount;
@@ -28,6 +32,7 @@ void mediaApp() {
 			for (int i = 0; i < tempCount;i++)
 				audioFiles[i + audioCount] = tempList[i];
 			audioCount += tempCount;
+			
 			if(audioCount > 0)
 			{
 				int16_t index =0;
@@ -37,8 +42,13 @@ void mediaApp() {
 					if (index == -1)
 						break;
 					mp.display.fillScreen(TFT_LIGHTGREY);
+					Serial.print("before audio player: ");
+					Serial.println(ESP.getFreeHeap());
+					delay(5);
 					index = audioPlayer(index);
-					Serial.println(index);
+					Serial.print("after audio player: ");
+					Serial.println(ESP.getFreeHeap());
+					delay(5);
 				} 
 			}
 			else
@@ -274,7 +284,6 @@ void mediaMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 
 int16_t audioPlayer(uint16_t index) {
 	uint8_t scale= 2;
-	bool out = 0;
 	char c = NO_KEY;
 	bool playState = 1;
 	bool loop = 0;
@@ -282,16 +291,19 @@ int16_t audioPlayer(uint16_t index) {
 	bool allTrue = 0;
 	bool shuffle = 0;
 	bool shuffleList[audioCount];
-	MPTrack* trackArray[audioCount];
 	MPTrack* mp3;
-	for(int i = 0; i < audioCount;i++)
+	if(!firstPass)
 	{
-		String songName = audioFiles[i];
-		char test[songName.length() + 1];
-		songName.toCharArray(test, songName.length() + 1);
-		Serial.println(test);
-		delay(5);
-		trackArray[i] = new MPTrack(test);
+		for(int i = 0; i < audioCount;i++)
+		{
+			String songName = audioFiles[i];
+			char test[songName.length() + 1];
+			songName.toCharArray(test, songName.length() + 1);
+			Serial.println(test);
+			delay(5);
+			trackArray[i] = new MPTrack(test);
+		}
+		firstPass = 1;
 	}
 	while(1)
 	{
@@ -329,6 +341,7 @@ int16_t audioPlayer(uint16_t index) {
 		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 
 		mp.update();
+		removeTrack(mp3);
 		mp3 = trackArray[index];
 		if(addTrack(mp3))
 			Serial.println("OK");
@@ -348,13 +361,12 @@ int16_t audioPlayer(uint16_t index) {
 				Serial.println(F("Stopped"));
 				delay(5);
 				mp.update();
-				out = 1;
+
 				return index;
 			}
 
 			if (mp.buttons.released(BTN_A)) //PLAY/PAUSE BUTTON
 			{
-				
 				if(playState)
 				{
 					mp3->pause();
@@ -625,14 +637,12 @@ int16_t audioPlayer(uint16_t index) {
 				break;
 			}
 		}
-		if(out)
-			break;
 	}
-	for(int i = 0; i < audioCount;i++)
-	{
-		removeTrack(trackArray[i]);
-		delete trackArray[i];
-	}
+	// for(int i = 0; i < audioCount;i++)
+	// {
+	// 	removeTrack(trackArray[i]);
+	// 	delete trackArray[i];
+	// }
 }
 void listPhotos(const char * dirname, uint8_t levels) {
 	photoCount = 0;

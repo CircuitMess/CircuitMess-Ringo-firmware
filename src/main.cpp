@@ -239,7 +239,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 			}
 			else {
 				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
-					cameraY += (boxHeight + 1);
+					cameraY += (boxHeight + 2);
 				}
 				cursor--;
 			}
@@ -408,7 +408,6 @@ void callNumber(String number) {
 
 			else if (localBuffer.indexOf(",0,6,") != -1)
 			{
-				digitalWrite(soundSwitchPin, 0);
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
 				if (timeOffset == 0)
@@ -543,7 +542,6 @@ void callNumber(String number) {
 			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
 				Serial1.println("ATH");
 			}
-			digitalWrite(soundSwitchPin, 0);
 			mp.display.fillScreen(TFT_WHITE);
 			mp.display.setCursor(32, 9);
 			if (timeOffset == 0)
@@ -623,6 +621,8 @@ void callNumber(String number) {
 		tmp_time = int((millis() - timeOffset) / 1000);
 		mp.update();
 	}
+	digitalWrite(soundSwitchPin, 0);
+
 }
 bool startupWizard()
 {
@@ -1727,14 +1727,6 @@ void setup()
 void loop()
 {
 	// startupWizard();
-	// pinMode(soundSwitchPin, HIGH);
-	// Serial.println(digitalRead(soundSwitchPin));
-	// digitalWrite(32, HIGH);
-	// Serial.println(digitalRead(32));
-	// Serial.println("TEST");
-	// osc->note(75, 0.05);
-	// osc->play();
-	// delay(500);
 	// messagesApp();
 	lockscreen();
 	mainMenu();

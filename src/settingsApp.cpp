@@ -2846,8 +2846,8 @@ int8_t checkForUpdate()
 			String payload = http.getString();
 			http.end();
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
-			// if (version > mp.firmware_version) //TO-DO
-			if(version > 0)
+			if (version > mp.firmware_version) //TO-DO
+			// if(version > 0)
 			{
 				Serial.println("HERE");
 				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
@@ -2981,16 +2981,15 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-
 			mp.update();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 4) {
-					cameraY = -(cursor - 5) * (boxHeight + 2) - 1;
+					cameraY = -(cursor - 3) * (boxHeight + 1) - 1;
 				}
 			}
 			else {
-				if (cursor > 0 && (cursor * (boxHeight + 2) - 1 + cameraY + offset) <= boxHeight) {
+				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
 					cameraY += (boxHeight + 2);
 				}
 				cursor--;
@@ -3001,8 +3000,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
 			mp.update();
 			cursor++;
-			if ((cursor * (boxHeight + 2) + cameraY + offset) > 100) {
-				cameraY -= (boxHeight + 2);
+			if ((cursor * (boxHeight + 1) + cameraY + offset) > 100) {
+				cameraY -= (boxHeight + 1);
 			}
 			if (cursor >= length) {
 				cursor = 0;

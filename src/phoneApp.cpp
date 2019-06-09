@@ -142,9 +142,16 @@ void callLog() {
 	mp.dataRefreshFlag = 0;
 	mp.display.setTextWrap(0);
     mp.display.setTextFont(2);
-
+	for(int i = 0; i < sizeof(mp.notificationTypeList); i++)
+	{
+		if(mp.notificationTypeList[i] == 1)
+		{
+			mp.notificationTypeList[i] = 0;
+			mp.notificationDescriptionList[i] = "";
+			mp.notificationTimeList[i] = DateTime((uint32_t)0);
+		}
+	}
 	SDAudioFile file = mp.SD.open("/.core/call_log.json", "r");
-
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
