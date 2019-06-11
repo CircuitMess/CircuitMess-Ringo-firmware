@@ -370,35 +370,60 @@ void composeSMS(JsonArray *messages)
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
-	uint8_t scale;
-
+	uint8_t scale = 2;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
-
-		mp.display.setTextColor(TFT_WHITE);
-        scale = 2;
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-        mp.display.setTextFont(2);
-        mp.display.setCursor(2,-1);
-        mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-		mp.display.print("To: ");
 
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
 			blinkState = !blinkState;
 		}
+		
+		if(cursor == 1) //inputting the text content
+		{
+			mp.display.setTextColor(TFT_WHITE);
+            mp.display.setCursor(2, -1);
+			mp.display.print("To: ");
+			prevContent = content;
+			content = mp.textInput(content, 160);
+			if (prevContent != content)
+			{
+				blinkState = 1;
+				elapsedMillis = millis();
+			}
+			mp.display.setTextWrap(1);
+			mp.display.setCursor(1*scale, y);
+			for(int i = 0; i < content.length();i++)
+			{
+				mp.display.print(content[i]);
+				if(mp.display.getCursorX() > 150)
+					mp.display.print("\n");
+			}
+			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+
+
+			if(mp.display.getCursorY() > 120)
+				y -= mp.display.getCursorY() - 120 + 8;
+			if(y < 16 && mp.display.getCursorY() < 100)
+				y += 120 - mp.display.getCursorY() + 8;
+			if(blinkState == 1)	
+                mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
+
+		}
+	
 		if (cursor == 0) //inputting the contact number
 		{
 			key = mp.buttons.getKey();
-			if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
-				contact = "";
-			else if (mp.buttons.released(BTN_FUN_LEFT))
+			// if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
+				// contact = "";
+			if (mp.buttons.released(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
-			if (key != NO_KEY && isdigit(key))
+			if (key != NO_KEY && isdigit(key) && contact.length() < 16)
 				contact += key;
 			mp.display.setTextWrap(1);
+			
 			mp.display.setCursor(1*scale, y);
 			if (content == "")
 			{
@@ -407,32 +432,20 @@ void composeSMS(JsonArray *messages)
 				mp.display.setTextColor(TFT_WHITE);
 			}
 			else
-				mp.display.print(content);
+			{
+				for(int i = 0; i < content.length();i++)
+				{
+					mp.display.print(content[i]);
+					if(mp.display.getCursorX() > 150)
+						mp.display.print("\n");
+				}
+        		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+			}
             mp.display.setCursor(27, -1);
 
 			mp.display.print(contact);
 			if (blinkState == 1)
                 mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
-		}
-		else //inputting the text content
-		{
-			mp.display.setTextColor(TFT_WHITE);
-            mp.display.setCursor(2, -1);
-			mp.display.print("To: ");
-			mp.display.print(contact);
-			prevContent = content;
-			content = mp.textInput(content, -1);
-			if (prevContent != content)
-			{
-				blinkState = 1;
-				elapsedMillis = millis();
-			}
-			mp.display.setTextWrap(1);
-			mp.display.setCursor(1*scale, y);
-			mp.display.print(content);
-			if(blinkState == 1)
-                mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
-
 		}
 		if (mp.buttons.released(BTN_UP) && cursor == 1) { //BUTTON UP
 			cursor = 0;
@@ -475,7 +488,12 @@ void composeSMS(JsonArray *messages)
 			delay(1000);
 			break;
 		}
-
+		mp.display.setTextColor(TFT_WHITE);
+        mp.display.setTextFont(2);
+        mp.display.setCursor(2,-1);
+        mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+		mp.display.print("To: ");
+		mp.display.print(contact);
 
 
 

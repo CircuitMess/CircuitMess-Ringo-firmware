@@ -518,8 +518,8 @@ void contactsApp() {
 
 uint8_t deleteContactSD(String name, String number)
 {
-	unsigned long elapsedMillis = millis();
-	bool blinkState = 1;
+	// unsigned long elapsedMillis = millis();
+	// bool blinkState = 1;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_BLACK);
@@ -530,10 +530,10 @@ uint8_t deleteContactSD(String name, String number)
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Delete contact");
 
-		if (millis() - elapsedMillis >= multi_tap_threshold) {
-		elapsedMillis = millis();
-		blinkState = !blinkState;
-		}
+		// if (millis() - elapsedMillis >= multi_tap_threshold) {
+		// elapsedMillis = millis();
+		// blinkState = !blinkState;
+		// }
 
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setCursor(4, 17);
@@ -542,19 +542,20 @@ uint8_t deleteContactSD(String name, String number)
 		mp.display.print(name);
 		mp.display.setCursor(4, 49);
 		mp.display.print(number);
-
-		if (blinkState){
-			mp.display.drawRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
-			mp.display.setTextColor(TFT_RED);
-			mp.display.setCursor(28*2, 103);
-			mp.display.printCenter("DELETE");
-		}
-		else {
-			mp.display.fillRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
-			mp.display.setTextColor(TFT_WHITE);
-			mp.display.setCursor(28*2, 103);
-			mp.display.print("DELETE");
-		}
+		mp.display.setCursor(110, 110);
+		mp.display.print("Confirm");
+		// if (blinkState){
+		// 	mp.display.drawRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
+		// 	mp.display.setTextColor(TFT_RED);
+		// 	mp.display.setCursor(28*2, 103);
+		// 	mp.display.printCenter("DELETE");
+		// }
+		// else {
+		// 	mp.display.fillRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
+		// 	mp.display.setTextColor(TFT_WHITE);
+		// 	mp.display.setCursor(28*2, 103);
+		// 	mp.display.print("DELETE");
+		// }
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
@@ -562,14 +563,14 @@ uint8_t deleteContactSD(String name, String number)
 			mp.update();
 			break;
 		}
-		if (mp.buttons.released(BTN_A)) // DELETE
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // DELETE
 		{
-			Serial.println("DElete");
-			mp.display.fillScreen(TFT_BLACK);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(34, mp.display.height()/2 -16);
-			mp.display.printCenter("Deleting contact...");
-			mp.update();
+			// Serial.println("Delete");
+			// mp.display.fillScreen(TFT_BLACK);
+			// mp.display.setTextFont(2);
+			// mp.display.setCursor(34, mp.display.height()/2 -16);
+			// mp.display.printCenter("Deleting contact...");
+			// mp.update();
 			return 1;
 		}
 		mp.update();
@@ -793,11 +794,16 @@ uint8_t newContactSD(String *name, String *number)
 			if(blinkState == 1)
 				mp.display.drawFastVLine(mp.display.getCursorX() + 1, mp.display.getCursorY() + 3, 11, TFT_WHITE);
 		}
-
-		mp.display.fillRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_GREENYELLOW);
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(31*2, 103);
-		mp.display.printCenter("SAVE");
+		mp.display.setCursor(125, 110);
+		mp.display.print("Save");
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(4, 110);
+		mp.display.print("Erase");
+		// mp.display.fillRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_GREENYELLOW);
+		// mp.display.setTextColor(TFT_WHITE);
+		// mp.display.setCursor(31*2, 103);
+		// mp.display.printCenter("SAVE");
 
 		if (mp.buttons.released(BTN_DOWN) && cursor == 1) { //BUTTON UP
 			mp.update();
@@ -813,13 +819,13 @@ uint8_t newContactSD(String *name, String *number)
 			mp.update();
 			break;
 		}
-		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
+		if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
 			mp.update();
 			if(contact != "" && content != "")
 			{
-				*name = contact;
-				*number = content;
+				*name = content;
+				*number = contact;
 				return 1;
 			}
 		}
@@ -866,7 +872,7 @@ int contactsMenuSD(JsonArray *contacts){
 		mp.display.print("Contacts");
 		mp.display.fillRect(0, 103, 160, 28, TFT_BLACK);
 		mp.display.setCursor(110, 110);
-		mp.display.printCenter("Delete              Edit");
+		mp.display.printCenter("Delete               Edit");
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			mp.update();// Exit when pressed
