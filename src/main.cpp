@@ -1707,7 +1707,6 @@ void setup()
 		ESP.restart();
 	}
 
-	mp.inAlarmPopup = 1;
 	mp.begin(0);
 	mp.homePopupEnable(0);
 	osc = new Oscillator();
