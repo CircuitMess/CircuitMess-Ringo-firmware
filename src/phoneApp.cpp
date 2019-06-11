@@ -151,16 +151,16 @@ void callLog() {
 			mp.notificationTimeList[i] = DateTime((uint32_t)0);
 		}
 	}
-	SDAudioFile file = mp.SD.open("/.core/call_log.json", "r");
+	File file = SD.open("/.core/call_log.json", "r");
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
 		JsonArray& jarr = jb.createArray();
 		delay(10);
-		SDAudioFile file1 = mp.SD.open("/.core/call_log.json", "w");
+		File file1 = SD.open("/.core/call_log.json", "w");
 		jarr.prettyPrintTo(file1);
 		file1.close();
-		file = mp.SD.open("/.core/call_log.json", "r");
+		file = SD.open("/.core/call_log.json", "r");
 		while(!file)
 			Serial.println("CONTACTS ERROR");
 	}
@@ -195,7 +195,7 @@ void callLog() {
 				{
 					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"], jarr[menuChoice]["duration"])){
 						jarr.remove(menuChoice);
-						SDAudioFile file = mp.SD.open("/.core/call_log.json", "w");
+						File file = SD.open("/.core/call_log.json", "w");
 						jarr.prettyPrintTo(file);
 						file.close();
 					}
@@ -258,7 +258,7 @@ int callLogMenu(JsonArray *call_log){
 			{
 				mp.update();
 				call_log->remove(cursor);
-				SDAudioFile file = mp.SD.open("/.core/call_log.json", "w");
+				File file = SD.open("/.core/call_log.json", "w");
 				call_log->prettyPrintTo(file);
 				file.close();
 				return -10;
@@ -391,7 +391,7 @@ uint8_t showCall(int id, String number, String dateTime, String duration)
 			mp.update();
 			break;
 		}
-		if (mp.buttons.released(BTN_A)) // Call
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // Call
 		{
 			callNumber(number);
 			mp.update();

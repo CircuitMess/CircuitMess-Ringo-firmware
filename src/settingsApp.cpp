@@ -2294,14 +2294,14 @@ bool updateMenu()
 					JsonArray& contacts = mp.jb.parseArray(contacts_default);
 					JsonObject& settings = mp.jb.parseObject(settings_default);
 
-					mp.SD.remove(contacts_path);
-					mp.SD.remove(settings_path);
+					SD.remove(contacts_path);
+					SD.remove(settings_path);
 
-					SDAudioFile contacts_file = mp.SD.open(contacts_path, "w");
+					File contacts_file = SD.open(contacts_path, "w");
 					contacts.prettyPrintTo(contacts_file);
 					contacts_file.close();
 
-					SDAudioFile settings_file = mp.SD.open(settings_path, "w");
+					File settings_file = SD.open(settings_path, "w");
 					settings.prettyPrintTo(settings_file);
 					settings_file.close();
 
@@ -2911,8 +2911,8 @@ bool fetchUpdate()
 	"vEsXCS+0yx5DaMkHJ8HSXPfqIbloEpw8nL+e/IBcm2PN7EeqJSdnoDfzAIJ9VNep\n" \
 	"+OkuE6N36B9K\n" \
 	"-----END CERTIFICATE-----\n";
-	mp.SD.remove("/.core/LOADER.BIN");
-	SDAudioFile file = mp.SD.open("/.core/LOADER.BIN", "w");
+	SD.remove("/.core/LOADER.BIN");
+	File file = SD.open("/.core/LOADER.BIN", "w");
 	Serial.print("[HTTP] begin...\n");
 	// configure traged server and url
 	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/firmware.bin", ca); //HTTPS

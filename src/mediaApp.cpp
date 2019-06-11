@@ -648,7 +648,7 @@ void listPhotos(const char * dirname, uint8_t levels) {
 	photoCount = 0;
 	
 	Serial.printf("Listing directory: %s\n", dirname);
-	SDAudioFile root = mp.SD.open(dirname);
+	File root = SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
 		return;
@@ -659,7 +659,7 @@ void listPhotos(const char * dirname, uint8_t levels) {
 	}
 	int counter = 1;
 	uint8_t start = 0;
-	SDAudioFile file = root.openNextFile();
+	File file = root.openNextFile();
 	while (file) {
 		char temp[100];
 		// file.getName(temp, 100);

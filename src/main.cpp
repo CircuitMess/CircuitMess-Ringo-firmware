@@ -271,9 +271,9 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 }
 void listAudio(const char * dirname, uint8_t levels) {
 	audioCount = 0;
-	while(!mp.SD.begin(5, SPI, 8000000))
+	while(!SD.begin(5, SPI, 8000000))
 		Serial.println(F("SD ERROR"));
-	SDAudioFile root = mp.SD.open(dirname);
+	File root = SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
 		return;
@@ -284,7 +284,7 @@ void listAudio(const char * dirname, uint8_t levels) {
 	}
 	int counter = 1;
 	uint8_t start = 0;
-	SDAudioFile file = root.openNextFile();
+	File file = root.openNextFile();
 	while (file) {
 		String Name(file.name());
 		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3"))
@@ -1406,7 +1406,7 @@ bool startupWizard()
 		delay(500);
 		mp.SDinsertedFlag = 1;
 		uint32_t tempMillis = millis();
-		while (!mp.SD.begin(5, SPI, 8000000))
+		while (!SD.begin(5, SPI, 8000000))
 		{
 			Serial.println("SD ERROR");
 			if(millis()-tempMillis > 5)
@@ -1417,7 +1417,7 @@ bool startupWizard()
 		}
 		if(!mp.SDinsertedFlag)
 		{
-			mp.SD.end();
+			SD.end();
 			mp.display.setTextColor(TFT_BLACK);
 			mp.display.setTextSize(1);
 			mp.display.setTextFont(2);
@@ -1690,7 +1690,7 @@ void setup()
 	{
 		EEPROM.writeBool(34, 0);
 		EEPROM.commit();
-		mp.SD.begin(5, SPI, 8000000);
+		SD.begin(5, SPI, 8000000);
 		Serial.println(EEPROM.readString(35).c_str());
 		Serial.println(EEPROM.readString(100).c_str());
 		delay(1000);
