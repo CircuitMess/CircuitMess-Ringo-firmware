@@ -22,7 +22,7 @@ uint16_t countSubstring(String string, String substring);
 String readSerial();
 String readSms(uint8_t index);
 String readAllSms();
-void viewSms(String content, String contact, uint32_t date);
+void viewSms(String content, String contact, uint32_t date, bool direction);
 void smsMenuDrawBox(String contact, DateTime date, String content, uint8_t i, int32_t y);
 void smsMenuComposeBox(uint8_t i, int32_t y);
 void smsMenuDrawCursor(uint8_t i, int32_t y);

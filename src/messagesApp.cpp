@@ -62,11 +62,14 @@ void messagesApp() {
 			if (menuChoice == -1)
 				break;
 			else if (menuChoice == -2)
+			{
 				composeSMS(&jarr);
+				menuChoice = -1;
+			}
 			else
 			{
 				viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
-				jarr[menuChoice]["dateTime"].as<uint32_t>());
+				jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>());
 				if(!jarr[menuChoice]["read"].as<bool>())
 				{
 					jarr[menuChoice]["read"] = 1;
@@ -85,7 +88,7 @@ void messagesApp() {
 	}
 }
 
-void viewSms(String content, String contact, uint32_t date) {
+void viewSms(String content, String contact, uint32_t date, bool direction) {
 	y = 14;  //Beggining point
 	unsigned long buttonHeld = millis();
 	unsigned long elapsedMillis = millis();
@@ -157,8 +160,6 @@ void viewSms(String content, String contact, uint32_t date) {
 			mp.update();
 			break;
 		}
-		//}
-		// last draw the top entry thing
 
 		if (millis() - elapsedMillis >= 1000) {
 			elapsedMillis = millis();
@@ -172,7 +173,7 @@ void viewSms(String content, String contact, uint32_t date) {
 			mp.display.setTextFont(2);
 			mp.display.setCursor(2,-1);
 			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-			mp.display.print("From: ");
+			mp.display.print(direction ? "From: " : "To: ");
 			mp.display.print(contact);
 		}
 		else
@@ -208,8 +209,7 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 		return;
 	}
 	String monthsList[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, TFT_DARKGREY);
-
+	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, isRead ? TFT_DARKGREY : 0xA534);
 	// if(!isRead)
 		// mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, 0xA800);
 	// else
@@ -220,11 +220,7 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 		mp.display.drawBitmap(3, y + 6, outgoingMessageIcon, TFT_GREEN, 2);
 	// }
 	
-	if(isRead)
-		mp.display.setTextColor(TFT_WHITE);
-	else
-		mp.display.setTextColor(0xFCCB);
-
+	mp.display.setTextColor(TFT_WHITE);
 	mp.display.setCursor(4, y + 2);
 	mp.display.drawString(contact, 22, y-1);
 	mp.display.drawString(content, 22, y + 13);
