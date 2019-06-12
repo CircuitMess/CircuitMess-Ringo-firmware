@@ -1,14 +1,5 @@
 #include "messagesApp.h"
 int16_t y;
-String smsContent[smsNumber];
-String phoneNumber[smsNumber];
-String tempDate[smsNumber];
-uint16_t smsYear[smsNumber];
-uint8_t smsDay[smsNumber];
-uint8_t smsMonth[smsNumber];
-uint8_t smsMinute[smsNumber];
-uint8_t smsSecond[smsNumber];
-uint8_t smsHour[smsNumber];
 uint32_t start = 0;
 uint32_t end = 0;
 String input;
@@ -27,7 +18,7 @@ String buffer;
 //Messages app
 void messagesApp() {
 	Serial.println("Load messages app");
-
+	int16_t menuChoice = -1;
 	mp.dataRefreshFlag = 0;
 	File file = SD.open("/.core/messages.json", "r");
 
@@ -45,13 +36,12 @@ void messagesApp() {
 		file = SD.open("/.core/messages.json", "r");
 		while(!file.available())
 			Serial.println("Messages ERROR");
-
 		Serial.println(file.size());
+		file.close();
 	}
 
 	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
-
 	if(!jarr.success())
 	{
 		Serial.println("Error");
@@ -59,6 +49,7 @@ void messagesApp() {
 		mp.display.setCursor(0, mp.display.height()/2 - 16);
 		mp.display.setTextFont(2);
 		mp.display.printCenter("Error: Messages - loading data");
+
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 		mp.update();
 	}
@@ -66,14 +57,30 @@ void messagesApp() {
 	{
 		while (1)
 		{
-			int16_t menuChoice = smsMenu(&jarr);
+			menuChoice = smsMenu(jarr, menuChoice);
 			Serial.println(menuChoice);
 			if (menuChoice == -1)
 				break;
-			else if (menuChoice == 0)
+			else if (menuChoice == -2)
 				composeSMS(&jarr);
 			else
-				viewSms(jarr[menuChoice-1]["text"].as<char*>(), jarr[menuChoice-1]["number"].as<char*>(), jarr[menuChoice-1]["dateTime"].as<uint32_t>());
+			{
+				viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
+				jarr[menuChoice]["dateTime"].as<uint32_t>());
+				if(!jarr[menuChoice]["read"].as<bool>())
+				{
+					jarr[menuChoice]["read"] = 1;
+					File temp = SD.open("/.core/messages.json", "w");
+					jarr.prettyPrintTo(temp);
+					temp.close();
+					file = SD.open("/.core/messages.json", "r");
+					while(!file.available())
+						Serial.println("Messages ERROR");
+					JsonArray& jarr = jb.parseArray(file);
+					file.close();
+				}
+				
+			}
 		}
 	}
 }
@@ -84,6 +91,7 @@ void viewSms(String content, String contact, uint32_t date) {
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	DateTime time = DateTime(date);
+	
 	for(int i = 0; i < 10; i ++)
 	{
 		if(mp.notificationTypeList[i] == 2 && mp.notificationDescriptionList[i] == contact && mp.notificationTimeList[i] == DateTime(date))
@@ -182,7 +190,7 @@ void viewSms(String content, String contact, uint32_t date) {
 		mp.update();
 	}
 }
-void smsMenuDrawBox(String contact, DateTime date, String content, uint8_t i, int32_t y) {
+void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) {
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
@@ -199,19 +207,34 @@ void smsMenuDrawBox(String contact, DateTime date, String content, uint8_t i, in
 	if (y < 0 || y > mp.display.height()) {
 		return;
 	}
-		String monthsList[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-		mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, TFT_DARKGREY);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(4, y + 2);
-		mp.display.drawString(contact, 3, y-1);
+	String monthsList[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, TFT_DARKGREY);
 
-		//mp.display.drawString(date, 3, y + 10);
-		mp.display.drawString(content, 3, y + 13);
-		mp.display.setTextFont(1);
-		mp.display.setCursor(124, y+3);
-		mp.display.print(monthsList[sms_month-1]);
-		mp.display.print(" ");
-		mp.display.print(sms_day);
+	// if(!isRead)
+		// mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, 0xA800);
+	// else
+	// {
+	if(direction)
+		mp.display.drawBitmap(3, y + 6, incomingMessageIcon, TFT_BLUE, 2);
+	else
+		mp.display.drawBitmap(3, y + 6, outgoingMessageIcon, TFT_GREEN, 2);
+	// }
+	
+	if(isRead)
+		mp.display.setTextColor(TFT_WHITE);
+	else
+		mp.display.setTextColor(0xFCCB);
+
+	mp.display.setCursor(4, y + 2);
+	mp.display.drawString(contact, 22, y-1);
+	mp.display.drawString(content, 22, y + 13);
+
+	mp.display.setTextFont(1);
+	mp.display.setCursor(127, y+3);
+	// mp.display.setTextColor(TFT_WHITE);
+	mp.display.print(monthsList[sms_month-1]);
+	mp.display.setCursor(mp.display.getCursorX() + 2, mp.display.getCursorY());
+	mp.display.print(sms_day);
 }
 void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	uint8_t offset;
@@ -227,17 +250,57 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
-int16_t smsMenu(JsonArray *messages) {
-	uint8_t cursor = 0;
+int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	int32_t cameraY = 0;
+	int16_t cursor;
 	int32_t cameraY_actual = 0;
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
-	int length = messages->size();
+	int length = messages.size();
+	messages.prettyPrintTo(Serial);
+	uint16_t sortingArray[length];
+	for(int i = 0; i < length; i++)
+		sortingArray[i] = i;
+	uint16_t min;
+	for(int i = 0; i < length - 1; i++)
+	{
+		min = i;
+		for(int j = i + 1; j < length ; j++)
+			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>())
+				min = j;
+		uint16_t temp = sortingArray[min];
+		sortingArray[min] = sortingArray[i];
+		sortingArray[i] = temp;
+	}
+	for(int i = 0; i < length; i++)
+	{
+		if(!messages[sortingArray[i]]["read"].as<bool>())
+		{
+			for(int j = 0; j < length; j++)
+			{
+				if(messages[sortingArray[j]]["read"].as<bool>() && i != j)
+				{
+					uint16_t temp = sortingArray[j];
+					sortingArray[j] = sortingArray[i];
+					sortingArray[i] = temp;
+					break;
+				}
+			}
+		}
+		if(sortingArray[i] == prevCursor)
+			cursor = i + 1;
+	}
+	for(int i = 0; i < length; i++)
+		Serial.println(sortingArray[i]);
+	if(prevCursor == -1)
+		cursor = 0;
 	scale = 2;
 	offset = 19;
 	boxHeight = 30;
+	if (length > 2 && cursor > 2) {
+		cameraY = -(cursor - 1) * (boxHeight + 1) - 1 + offset + 19;
+	}
 	while (1) {
 		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
@@ -250,11 +313,13 @@ int16_t smsMenu(JsonArray *messages) {
 		uint8_t i = 0;
 
 		smsMenuComposeBox(i, cameraY_actual);
-		for (JsonObject& elem : *messages) {
+		for(int i = 0; i < length; i++)
+		{
+			JsonObject& elem = messages[sortingArray[i]];
 			DateTime date = DateTime(elem["dateTime"].as<uint32_t>());
 
-			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), i+1, cameraY_actual);
-			i++;
+			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
+			elem["read"].as<bool>(), i+1, cameraY_actual);
 		}
 		if (cursor == 0)
 			smsMenuComposeBoxCursor(cursor, cameraY_actual);
@@ -319,12 +384,19 @@ int16_t smsMenu(JsonArray *messages) {
 
 		}
 
-		if (mp.buttons.released(BTN_B) == 1) //BUTTON BACK
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			return -1;
 		}
 	}
-	return cursor;
+	if(cursor > 0)
+	{
+		cursor = sortingArray[cursor - 1];
+		return cursor;
+	}
+	else
+		return -2;
+	
 
 }
 void smsMenuComposeBoxCursor(uint8_t i, int32_t y) {
@@ -468,7 +540,7 @@ void composeSMS(JsonArray *messages)
 			mp.display.printCenter("Sending text...");
 			while(!mp.update());
 
-			saveMessage(content, contact, messages);
+			mp.saveMessage(content, contact, 1, 0, messages);
 
 			Serial1.print("AT+CMGS=\"");
 			Serial1.print(contact);
@@ -501,15 +573,3 @@ void composeSMS(JsonArray *messages)
 	}
 }
 
-void saveMessage(String text, String number, JsonArray *messages){
-	JsonObject& new_item = jb.createObject();
-	mp.updateTimeRTC();
-	new_item["number"] = number;
-	new_item["text"] = text;
-	new_item["dateTime"] = mp.RTC.now().unixtime();
-
-	messages->add(new_item);
-	File file1 = SD.open("/.core/messages.json", "w");
-	messages->prettyPrintTo(file1);
-	file1.close();
-}

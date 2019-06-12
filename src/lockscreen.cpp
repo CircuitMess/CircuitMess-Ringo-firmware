@@ -39,7 +39,6 @@ void drawNotificationWindow(uint8_t y, uint8_t index) {
 	temp = "";
 	mp.display.print(monthsList[now.month() - 1]);
 	mp.display.setCursor(mp.display.cursor_x + 2, mp.display.cursor_y);
-	// temp.concat(monthsList[now.month() - 1]);
 	if (now.day() < 10)
 		temp.concat("0");
 	temp.concat(now.day());

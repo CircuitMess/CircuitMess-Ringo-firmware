@@ -27,10 +27,9 @@ void smsMenuDrawBox(String contact, DateTime date, String content, uint8_t i, in
 void smsMenuComposeBox(uint8_t i, int32_t y);
 void smsMenuDrawCursor(uint8_t i, int32_t y);
 void smsMenuComposeBoxCursor(uint8_t i, int32_t y);
-int16_t smsMenu(JsonArray *messages);
+int16_t smsMenu(JsonArray& messages, int16_t prevCursor);
 void messagesApp();
 void composeSMS(JsonArray *messages);
-void saveMessage(String text, String number, JsonArray *messages);
 void incomingMessagePopup();
 
 #endif
