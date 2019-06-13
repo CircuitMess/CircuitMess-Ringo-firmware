@@ -210,15 +210,11 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 	}
 	String monthsList[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, isRead ? TFT_DARKGREY : 0xA534);
-	// if(!isRead)
-		// mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-2, 0xA800);
-	// else
-	// {
+
 	if(direction)
 		mp.display.drawBitmap(3, y + 6, incomingMessageIcon, TFT_BLUE, 2);
 	else
 		mp.display.drawBitmap(3, y + 6, outgoingMessageIcon, TFT_GREEN, 2);
-	// }
 	
 	mp.display.setTextColor(TFT_WHITE);
 	mp.display.setCursor(4, y + 2);
@@ -227,7 +223,6 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 
 	mp.display.setTextFont(1);
 	mp.display.setCursor(127, y+3);
-	// mp.display.setTextColor(TFT_WHITE);
 	mp.display.print(monthsList[sms_month-1]);
 	mp.display.setCursor(mp.display.getCursorX() + 2, mp.display.getCursorY());
 	mp.display.print(sms_day);
@@ -254,7 +249,6 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	uint8_t offset;
 	uint8_t boxHeight;
 	int length = messages.size();
-	messages.prettyPrintTo(Serial);
 	uint16_t sortingArray[length];
 	for(int i = 0; i < length; i++)
 		sortingArray[i] = i;
@@ -287,8 +281,6 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if(sortingArray[i] == prevCursor)
 			cursor = i + 1;
 	}
-	for(int i = 0; i < length; i++)
-		Serial.println(sortingArray[i]);
 	if(prevCursor == -1)
 		cursor = 0;
 	scale = 2;

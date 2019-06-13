@@ -449,31 +449,8 @@ void callNumber(String number) {
 				mp.update();
 
 				mp.updateTimeRTC();
-				// 2019-04-18 12:00:00
-				String dateTime = String(mp.clockYear);
-				dateTime += "-";
-				if(mp.clockMonth < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockMonth);
-				dateTime += "-";
-				if(mp.clockDay < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockDay);
-				dateTime += " ";
-
-				if(mp.clockHour < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockHour);
-				dateTime += ":";
-				if(mp.clockMinute < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockMinute);
 				if(mp.SDinsertedFlag)
-					mp.addCall(number, dateTime, tmp_time, 1);
+					mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
 
 				delay(1000);
 				break;
@@ -579,31 +556,8 @@ void callNumber(String number) {
 			Serial.println("ENDED");
 			mp.update();
 			mp.updateTimeRTC();
-			// 2019-04-18 12:00:00
-			String dateTime = String(mp.clockYear);
-			dateTime += "-";
-			if(mp.clockMonth < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockMonth);
-			dateTime += "-";
-			if(mp.clockDay < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockDay);
-			dateTime += " ";
-
-			if(mp.clockHour < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockHour);
-			dateTime += ":";
-			if(mp.clockMinute < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockMinute);
 			if(mp.SDinsertedFlag)
-					mp.addCall(number, dateTime, tmp_time, 1);
+				mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
 			delay(1000);
 			break;
 		}
@@ -1726,7 +1680,7 @@ void setup()
 void loop()
 {
 	// startupWizard();
-	messagesApp();
+	// messagesApp();
 	lockscreen();
 	mainMenu();
 	// mediaApp();
