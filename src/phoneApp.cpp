@@ -39,6 +39,7 @@ void phoneApp() {
 			callBuffer.remove(callBuffer.length()-1);
 		else if (mp.buttons.released(BTN_FUN_RIGHT))
 		{
+			mp.update();
 			if(!mp.SDinsertedFlag)
 			{
 				mp.display.fillScreen(TFT_BLACK);
@@ -124,7 +125,7 @@ void phoneApp() {
 			mp.display.print(callBuffer);
 		}
 
-		if (mp.buttons.released(BTN_A))//initate call
+		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
 		{
 			callNumber(callBuffer);
 			mp.update();
@@ -189,7 +190,7 @@ void callLog() {
 		{
 			menuChoice = callLogMenu(jarr, menuChoice);
 
-			mp.update();
+			mp.buttons.update();
 			if (menuChoice != -2)
 			{
 				if(menuChoice >= 0)
@@ -201,6 +202,13 @@ void callLog() {
 						file.close();
 						menuChoice = -1;
 					}
+				}
+				else if(menuChoice == -10)
+				{
+					File file = SD.open("/.core/call_log.json", "r");
+					jb.clear();
+					JsonArray& jarr = jb.parseArray(file);
+					file.close();
 				}
 				mp.update();
 			}
@@ -217,7 +225,7 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t length = call_log.size();
-    uint8_t offset = 19;
+    uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	uint16_t sortingArray[length];
 	for(int i = 0; i < length; i++)
@@ -240,30 +248,21 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 	}
 	if(prevCursor == -1)
 		cursor = 0;
-	if (length > 3 && cursor > 3) {
-		cameraY = -(cursor - 1) * (boxHeight + 1) - 1 + offset + 19;
+	if (length > 2 && cursor > 2) {
+		cameraY = -(cursor - 2) * boxHeight;
 	}
 	while (1) {
-		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, 0);
-		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-		mp.display.setTextFont(2);
-		mp.display.setCursor(0,-2);
-		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
-		mp.display.setTextSize(1);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print("Call log");
-		mp.display.setCursor(5, 110);
-		mp.display.println("Erase");
-
-		if(length == 0){
+		if(length == 0)
+		{
 			mp.display.setTextSize(2);
 			mp.display.setCursor(0, 40);
 			mp.display.setTextColor(TFT_WHITE);
 			mp.display.printCenter("No calls");
 			cursor = 0;
-		} else {
+		}
+		else
+		{
 			cameraY_actual = (cameraY_actual + cameraY) / 2;
 			if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
@@ -277,13 +276,13 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			}
 			callLogMenuDrawCursor(cursor, cameraY_actual);
 
-			if (mp.buttons.released(BTN_A)) {
-				mp.update();
+			if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {
+				mp.buttons.update();
 				break;
 			}
 			if (mp.buttons.released(BTN_FUN_LEFT)) //delete call log entry
 			{
-				mp.update();
+				mp.buttons.update();
 				call_log.remove(cursor);
 				File file = SD.open("/.core/call_log.json", "w");
 				call_log.prettyPrintTo(file);
@@ -292,25 +291,25 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			}
 
 			if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-				mp.update();
+				mp.buttons.update();
 				if (cursor == 0) {
 					cursor = length - 1;
 					if (length > 3) {
-						cameraY = -(cursor - 3) * (boxHeight+1);
+						cameraY = -(cursor - 2) * (boxHeight);
 					}
 				}
 				else {
 					cursor--;
-					if (cursor > 0 && (cursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
-						cameraY += (boxHeight+1);
+					if (cursor > 0 && (cursor * (boxHeight) + cameraY + offset) < (boxHeight)) {
+						cameraY += (boxHeight);
 					}
 				}
 			}
 			if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-				mp.update();
+				mp.buttons.update();
 				cursor++;
-				if ((cursor * (boxHeight+1) + cameraY + offset) > 80) {
-					cameraY -= (boxHeight+1);
+				if ((cursor * (boxHeight) + cameraY + offset) > 80) {
+					cameraY -= (boxHeight);
 				}
 				if (cursor >= length) {
 					cursor = 0;
@@ -324,13 +323,30 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			mp.update();
 			return -2;
 		}
+		mp.display.setCursor(0, 0);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Call log");
+		mp.display.fillRect(0, 105, 160, 23, TFT_BLACK);
+		mp.display.setCursor(5, 110);
+		mp.display.print("Erase");
+		mp.display.setCursor(125, 110);
+		mp.display.print("View");
+
+
+		mp.update();
+
 	}
 	cursor = sortingArray[cursor];
 	return cursor;
 }
 
 void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
-    uint8_t offset = 19;
+    uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
 	if (y < 0 || y > mp.display.height()) {
@@ -361,7 +377,7 @@ void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
 }
 
 void callLogMenuDrawCursor(uint8_t i, int32_t y) {
-    uint8_t offset = 19;
+    uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	if (millis() % 500 <= 250) {
 		return;
