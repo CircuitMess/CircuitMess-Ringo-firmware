@@ -364,6 +364,9 @@ void callNumber(String number) {
 			localBuffer = buffer;
 			buffer = "";
 		}
+		Serial.println("---------------");
+		Serial.println(buffer);
+		delay(5);
 		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
 			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
@@ -393,9 +396,6 @@ void callNumber(String number) {
 				mp.display.setCursor(9, 9);
 				mp.display.printCenter(temp);
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
-				mp.display.setCursor(3, 3);
-				mp.display.print(micGain);
-				
 			}
 
 			else if (localBuffer.indexOf(",0,3,") != -1)
@@ -465,6 +465,9 @@ void callNumber(String number) {
 			mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+			mp.display.setCursor(5, 109);
+			mp.display.print("Mic gain: ");
+			mp.display.print(micGain);
 			mp.display.setCursor(100, 109);
 			mp.display.print("Hang up");
 
@@ -569,12 +572,14 @@ void callNumber(String number) {
 		if(mp.buttons.released(BTN_UP) && micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			micGain++;
-			Serial1.printf("AT+CMIC=0,%d", micGain);
+			Serial1.printf("AT+CMIC=0,%d\r", micGain);
+			// Serial1.println("AT+CMICBIAS=1 ");
 		}
 		if(mp.buttons.released(BTN_DOWN) && micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			micGain--;
-			Serial1.printf("AT+CMIC=0,%d", micGain);
+			Serial1.printf("AT+CMIC=0,%d\r", micGain);
+			// Serial1.println("AT+CMICBIAS=0");
 		}
 
 		tmp_time = int((millis() - timeOffset) / 1000);
