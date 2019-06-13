@@ -320,7 +320,7 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			mp.buttons.update();
 			return -2;
 		}
 		mp.display.setCursor(0, 0);

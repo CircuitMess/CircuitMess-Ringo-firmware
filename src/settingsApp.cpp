@@ -2652,7 +2652,7 @@ void wifiConnect()
 							mp.display.print(".");
 							mp.update();
 							counter++;
-							if (counter >= 5)
+							if (counter >= 8)
 							{
 								mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
 								mp.display.setCursor(0, 45);
@@ -2672,8 +2672,11 @@ void wifiConnect()
 								break;
 							}
 						}
-						if(WiFi.status() != WL_CONNECTED)
+						Serial.print("Wifi status: ");
+						Serial.println(WiFi.status());
+						if(WiFi.status() == WL_DISCONNECTED)
 						{
+							
 							mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
 							mp.display.setCursor(0, 45);
 							mp.display.printCenter("Wrong password :(");
@@ -2709,6 +2712,7 @@ void wifiConnect()
 							int8_t selection = checkForUpdate();
 							Serial.println("OUT");
 							delay(5);
+							
 							if(selection == 1)
 							{
 								EEPROM.writeBool(34, 1);
@@ -2741,10 +2745,13 @@ void wifiConnect()
 
 							else if(selection == 0)
 							{
+								mp.tft.setTextFont(2);
+								mp.tft.setTextSize(1);
+								mp.tft.setTextColor(TFT_WHITE);
 								mp.tft.fillRect(0, 40, mp.tft.width(), 50, TFT_BLACK);
-								mp.tft.setCursor(30, 45);
+								mp.tft.setCursor(20, 45);
 								mp.tft.print("No updates available");
-								mp.tft.setCursor(30, 65);
+								mp.tft.setCursor(20, 65);
 								mp.tft.print("Restarting phone...");
 								// while(!mp.update());
 								delay(2000);
