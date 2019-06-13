@@ -323,8 +323,9 @@ uint16_t countSubstring(String string, String substring) {
 }
 void callNumber(String number) {
 	mp.dataRefreshFlag = 0;
-
+	char c;
 	String localBuffer = "";
+	String buffer = "";
 	Serial1.print(F("ATD"));
 	Serial1.print(number);
 	Serial1.print(";\r\n");
@@ -354,11 +355,15 @@ void callNumber(String number) {
 	{
 		mp.display.fillScreen(TFT_WHITE);
 		if (Serial1.available())
-			localBuffer = Serial1.readString();
-		Serial.println(localBuffer);
-		delay(5);
-
-
+		{
+			c = Serial1.read();
+			buffer += c;
+		}
+		if(buffer.indexOf("CLCC:") != -1 && buffer.indexOf("\r", buffer.indexOf("CLCC:")) != -1)
+		{
+			localBuffer = buffer;
+			buffer = "";
+		}
 		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
 			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
@@ -390,6 +395,7 @@ void callNumber(String number) {
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
 				mp.display.setCursor(3, 3);
 				mp.display.print(micGain);
+				
 			}
 
 			else if (localBuffer.indexOf(",0,3,") != -1)
@@ -446,7 +452,7 @@ void callNumber(String number) {
 					mp.display.setCursor(2, 112);
 				mp.display.print("Call ended");
 				Serial.println("ENDED");
-				mp.update();
+				while(!mp.update());
 
 				mp.updateTimeRTC();
 				if(mp.SDinsertedFlag)
@@ -455,6 +461,7 @@ void callNumber(String number) {
 				delay(1000);
 				break;
 			}
+			
 			mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
@@ -513,12 +520,7 @@ void callNumber(String number) {
 		}
 		if (mp.buttons.pressed(BTN_FUN_RIGHT)) // hanging up
 		{
-			Serial.println("B PRESSED");
-			Serial1.println("ATH");
-			long long curr_millis = millis();
-			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
-				Serial1.println("ATH");
-			}
+			
 			mp.display.fillScreen(TFT_WHITE);
 			mp.display.setCursor(32, 9);
 			if (timeOffset == 0)
@@ -545,17 +547,20 @@ void callNumber(String number) {
 				mp.display.printCenter(temp);
 			}
 			mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
-			if(mp.resolutionMode)
-					mp.display.setCursor(11, 20);
-			else
-				mp.display.setCursor(11, 28);
+			mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 			mp.display.setCursor(2, 112);
 			mp.display.print("Call ended");
 			Serial.println("ENDED");
-			mp.update();
+			while(!mp.update());
 			mp.updateTimeRTC();
+			Serial.println("B PRESSED");
+			Serial1.println("ATH");
+			long long curr_millis = millis();
+			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
+				Serial1.println("ATH");
+			}
 			if(mp.SDinsertedFlag)
 				mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
 			delay(1000);
