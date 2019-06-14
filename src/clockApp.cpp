@@ -7,9 +7,10 @@ void clockApp()
 		"Stopwatch",
 		"Timer"
 	};
+	int8_t index = 0;
 	while(1)
 	{
-		int8_t index = clockMenu(clockItems, 4);
+		index = clockMenu(clockItems, 4, index);
 		if(index == -1)
 			break;
 		switch(index)
@@ -94,10 +95,10 @@ void clockApp()
 		}
 	}
 }
-int8_t clockMenu(String* title, uint8_t length) {
+int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 	uint8_t offset = 4;
 	bool pressed = 0;
-	uint8_t cursor = 0;
+	uint8_t cursor = prevCursor;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	mp.dataRefreshFlag = 0;

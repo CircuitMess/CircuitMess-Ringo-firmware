@@ -175,7 +175,7 @@ bool settingsApp() {
 	mp.display.setTextColor(TFT_WHITE);
 	if(mp.SDinsertedFlag)
 	{
-		mp.saveSettings(1);
+		mp.saveSettings(0);
 		mp.display.setCursor(0, mp.display.height()/2 - 16);
 		mp.display.setTextFont(2);
 		mp.display.printCenter("Settings saved!");
@@ -2186,49 +2186,29 @@ bool updateMenu()
 	{
 		mp.display.fillScreen(0xFD29);
 		mp.display.setTextColor(TFT_BLACK);
-		mp.display.setCursor(10, 20);
+		mp.display.setCursor(10, 10);
 		mp.display.printCenter("Check for update");
-		mp.display.setCursor(40, 50);
+		mp.display.setCursor(40, 35);
 		mp.display.printCenter("Factory reset");
-		mp.display.setCursor(90, 100);
+		mp.display.setCursor(40, 60);
+		mp.display.printCenter("Setup wizard");
+		mp.display.setCursor(40, 85);
+		mp.display.printCenter("SIM module debug");
+
+		mp.display.setCursor(90, 110);
 		mp.display.setTextColor(TFT_DARKGREY);
 		foo = "Version: " + (String)((int)mp.firmware_version / 100) + "." + (String)((int)mp.firmware_version / 10) + "." + (String)(mp.firmware_version % 10);
 		mp.display.printCenter(foo);
-		if(cursor == 0)
+		switch (cursor)
 		{
-			if(blinkState)
-				mp.display.drawRect(20,18,117, 20, TFT_BLACK);
-			else
-				mp.display.drawRect(20,18,117, 20, 0xFD29);
-			if(mp.buttons.released(BTN_A))
-			{
-				if(!mp.SDinsertedFlag)
-				{
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setTextSize(1);
-					mp.display.setTextFont(2);
-					mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-					mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-					mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-					mp.display.setCursor(47, 54);
-					mp.display.printCenter("SD card missing");
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000)
-					{
-						mp.update();
-						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-						{
-							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-								mp.update();
-							break;
-						}
-					}
-					break;
-					mp.update();
-				}
+			case 0:
+				if(blinkState)
+					mp.display.drawRect(20,8,117, 20, TFT_BLACK);
 				else
+					mp.display.drawRect(20,8,117, 20, 0xFD29);
+				if(mp.buttons.released(BTN_A))
 				{
-					if(mp.wifi)
+					if(!mp.SDinsertedFlag)
 					{
 						mp.display.setTextColor(TFT_BLACK);
 						mp.display.setTextSize(1);
@@ -2237,20 +2217,7 @@ bool updateMenu()
 						mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
 						mp.display.fillRect(5, 50, 150, 26, 0xFD29);
 						mp.display.setCursor(47, 54);
-						mp.display.printCenter("Searching for networks");
-						while(!mp.update());
-						wifiConnect();
-					}
-					else
-					{
-						mp.display.setTextColor(TFT_BLACK);
-						mp.display.setTextSize(1);
-						mp.display.setTextFont(2);
-						mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-						mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-						mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-						mp.display.setCursor(47, 54);
-						mp.display.printCenter("Wifi turned off!");
+						mp.display.printCenter("SD card missing");
 						uint32_t tempMillis = millis();
 						while(millis() < tempMillis + 2000)
 						{
@@ -2262,98 +2229,157 @@ bool updateMenu()
 								break;
 							}
 						}
-					}
-				}
-				mp.update();
-			}
-		}
-		else if (cursor == 1)
-		{
-			if(blinkState)
-				mp.display.drawRect(30, 48, 96, 20, TFT_BLACK);
-			else
-				mp.display.drawRect(30, 48, 96, 20, 0xFD29);
-			if(mp.buttons.released(BTN_A))
-			{
-				mp.update();
-				if(mp.SDinsertedFlag)
-				{
-					mp.display.fillScreen(0xFD29);
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setCursor(10, 20);
-					mp.display.printCenter("Erasing in progress...");
-					mp.update();
-
-					String contacts_default = "[]";
-					String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" }";
-
-					const char contacts_path[] = "/.core/contacts.json";
-					const char settings_path[] = "/.core/settings.json";
-
-					mp.jb.clear();
-					JsonArray& contacts = mp.jb.parseArray(contacts_default);
-					JsonObject& settings = mp.jb.parseObject(settings_default);
-
-					SD.remove(contacts_path);
-					SD.remove(settings_path);
-
-					File contacts_file = SD.open(contacts_path, "w");
-					contacts.prettyPrintTo(contacts_file);
-					contacts_file.close();
-
-					File settings_file = SD.open(settings_path, "w");
-					settings.prettyPrintTo(settings_file);
-					settings_file.close();
-
-					mp.wifi = settings["wifi"];
-					mp.bt = settings["bluetooth"];
-					mp.airplaneMode = settings["airplane_mode"];
-					mp.brightness = settings["brightness"];
-					mp.sleepTime = settings["sleep_time"];
-					mp.backgroundIndex = settings["background_color"];
-					mp.notification = settings["notification"];
-					mp.ringtone_path = String(settings["ringtone"].as<char*>());
-					Serial.println("ERASED");
-					delay(5);
-					mp.applySettings();
-				}
-				else
-				{
-					mp.wifi = 1;
-					mp.bt = 0;
-					mp.airplaneMode = 0;
-					mp.brightness = 5;
-					mp.sleepTime = 0;
-					mp.backgroundIndex = 0;
-					mp.volume = 10;
-					mp.ringtone_path = "/Music/Default ringtone.wav";
-					mp.notification = 0;
-					mp.applySettings();
-				}
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, 0xFD29);
-				mp.display.setCursor(0, mp.display.height()/2 - 20);
-				mp.display.setCursor(47, 55);
-				mp.display.printCenter("Reset to defaults!");
-				uint32_t tempMillis = millis();
-				while(millis() < tempMillis + 2000)
-				{
-					mp.update();
-					if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-					{
-						while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
 						break;
+						mp.update();
 					}
+					else
+					{
+						if(mp.wifi)
+						{
+							mp.display.setTextColor(TFT_BLACK);
+							mp.display.setTextSize(1);
+							mp.display.setTextFont(2);
+							mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+							mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+							mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+							mp.display.setCursor(47, 54);
+							mp.display.printCenter("Searching for networks");
+							while(!mp.update());
+							wifiConnect();
+						}
+						else
+						{
+							mp.display.setTextColor(TFT_BLACK);
+							mp.display.setTextSize(1);
+							mp.display.setTextFont(2);
+							mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+							mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+							mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+							mp.display.setCursor(47, 54);
+							mp.display.printCenter("Wifi turned off!");
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000)
+							{
+								mp.update();
+								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+								{
+									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+										mp.update();
+									break;
+								}
+							}
+						}
+					}
+					mp.update();
 				}
-				return 1;
+			break;
 
-			}
+			case 1:
+				if(blinkState)
+					mp.display.drawRect(30, 33, 96, 20, TFT_BLACK);
+				else
+					mp.display.drawRect(30, 33, 96, 20, 0xFD29);
+				if(mp.buttons.released(BTN_A))
+				{
+					mp.update();
+					if(mp.SDinsertedFlag)
+					{
+						mp.display.fillScreen(0xFD29);
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setCursor(10, 20);
+						mp.display.printCenter("Erasing in progress...");
+						mp.update();
+
+						String contacts_default = "[]";
+						String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" }";
+
+						const char contacts_path[] = "/.core/contacts.json";
+						const char settings_path[] = "/.core/settings.json";
+
+						mp.jb.clear();
+						JsonArray& contacts = mp.jb.parseArray(contacts_default);
+						JsonObject& settings = mp.jb.parseObject(settings_default);
+
+						SD.remove(contacts_path);
+						SD.remove(settings_path);
+
+						File contacts_file = SD.open(contacts_path, "w");
+						contacts.prettyPrintTo(contacts_file);
+						contacts_file.close();
+
+						File settings_file = SD.open(settings_path, "w");
+						settings.prettyPrintTo(settings_file);
+						settings_file.close();
+
+						mp.wifi = settings["wifi"];
+						mp.bt = settings["bluetooth"];
+						mp.airplaneMode = settings["airplane_mode"];
+						mp.brightness = settings["brightness"];
+						mp.sleepTime = settings["sleep_time"];
+						mp.backgroundIndex = settings["background_color"];
+						mp.notification = settings["notification"];
+						mp.ringtone_path = String(settings["ringtone"].as<char*>());
+						Serial.println("ERASED");
+						delay(5);
+						mp.applySettings();
+					}
+					else
+					{
+						mp.wifi = 1;
+						mp.bt = 0;
+						mp.airplaneMode = 0;
+						mp.brightness = 5;
+						mp.sleepTime = 0;
+						mp.backgroundIndex = 0;
+						mp.volume = 10;
+						mp.ringtone_path = "/Music/Default ringtone.wav";
+						mp.notification = 0;
+						mp.applySettings();
+					}
+					mp.display.setTextColor(TFT_BLACK);
+					mp.display.setTextSize(1);
+					mp.display.setTextFont(2);
+					mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+					mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+					mp.display.fillRect(15, 46, 132, 36, 0xFD29);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setCursor(47, 55);
+					mp.display.printCenter("Reset to defaults!");
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000)
+					{
+						mp.update();
+						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+						{
+							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+								mp.update();
+							break;
+						}
+					}
+					return 1;
+
+				}
+			break;
+			
+			case 2:
+				if(blinkState)
+					mp.display.drawRect(33, 58, 93, 20, TFT_BLACK);
+				else
+					mp.display.drawRect(33, 58, 93, 20, 0xFD29);
+				if(mp.buttons.released(BTN_A))
+					startupWizard();
+			break;
+
+			case 3:
+				if(blinkState)
+					mp.display.drawRect(20,83,117, 20, TFT_BLACK);
+				else
+					mp.display.drawRect(20,83,117, 20, 0xFD29);
+				if(mp.buttons.released(BTN_A))
+					controlTry();
+			break;
 		}
+		
 		if(millis()-previousMillis >= 250)
 		{
 			previousMillis = millis();
@@ -2368,7 +2394,7 @@ bool updateMenu()
 			mp.update();
 			cursor--;
 		}
-		if (mp.buttons.released(BTN_DOWN) && cursor < 1)
+		if (mp.buttons.released(BTN_DOWN) && cursor < 3)
 		{
 			osc->note(75, 0.05);
 			osc->play();

@@ -68,9 +68,16 @@ void messagesApp() {
 			}
 			else
 			{
-				viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
-				jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>());
-				if(!jarr[menuChoice]["read"].as<bool>())
+				if(viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
+				jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>()))
+				{
+					jarr.remove(menuChoice);
+					File file = SD.open("/.core/messages.json", "w");
+					jarr.prettyPrintTo(file);
+					file.close();
+					menuChoice--;
+				}
+				else if(!jarr[menuChoice]["read"].as<bool>())
 				{
 					jarr[menuChoice]["read"] = 1;
 					File temp = SD.open("/.core/messages.json", "w");
@@ -82,15 +89,13 @@ void messagesApp() {
 					JsonArray& jarr = jb.parseArray(file);
 					file.close();
 				}
-				
 			}
 		}
 	}
 }
 
-void viewSms(String content, String contact, uint32_t date, bool direction) {
+bool viewSms(String content, String contact, uint32_t date, bool direction) {
 	y = 14;  //Beggining point
-	unsigned long buttonHeld = millis();
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	DateTime time = DateTime(date);
@@ -110,60 +115,43 @@ void viewSms(String content, String contact, uint32_t date, bool direction) {
 
 		mp.display.setCursor(1, y);
 		mp.display.print(content);
-		if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
 			Serial.println(mp.display.cursor_y);
-			if (mp.display.cursor_y >= 128)
+			if (mp.display.cursor_y >= 110)
 			{
-				buttonHeld = millis();
 
-				if (!mp.buttons.released(BTN_DOWN))
-				{
-					y -= 4;
-					break;
-				}
-				while (!mp.buttons.released(BTN_DOWN))
-				{
-					if (millis() - buttonHeld > 100) {
-						y -= 4;
-						break;
-					}
-					mp.update();
-				}
+				// if (!mp.buttons.released(BTN_DOWN))
+				y -= 4;
+				// while (!mp.buttons.released(BTN_DOWN))
+				// {
+				// 	if (millis() - buttonHeld > 100) {
+				// 		y -= 4;
+				// 	}
+				// 	mp.update();
+				// 	break;
+				// }
 			}
-			mp.update();
 		}
 
-		if (mp.buttons.pressed(BTN_UP)) { //BUTTON UP
+		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
 			if (y < 14)
 			{
-				buttonHeld = millis();
-
-				if (!mp.buttons.released(BTN_UP))
-				{
-					y += 4;
-					break;
-				}
-				while (!mp.buttons.released(BTN_UP))
-				{
-					if (millis() - buttonHeld > 100) {
-						y += 4;
-						break;
-					}
-					mp.update();
-				}
+				y += 4;
 			}
-			mp.update();
 		}
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
 			break;
 		}
 
 		if (millis() - elapsedMillis >= 1000) {
 			elapsedMillis = millis();
 			blinkState = !blinkState;
+		}
+		if(mp.buttons.released(BTN_FUN_LEFT))
+		{
+			return 1;
 		}
 
 		if (blinkState == 1)
@@ -187,9 +175,14 @@ void viewSms(String content, String contact, uint32_t date, bool direction) {
 			strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
 			mp.display.print(time.format(buf));
 		}
-
+		mp.display.fillRect(0,110, 160, 18, TFT_DARKGREY);
+		mp.display.drawFastHLine(0,111, 160, TFT_WHITE);
+		mp.display.setCursor(4, 112);
+		mp.display.print("Erase");
 		mp.update();
 	}
+	mp.update();
+	return 0;
 }
 void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) {
 	uint8_t scale;

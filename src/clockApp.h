@@ -4,7 +4,7 @@
 #include "main.h"
 void clockApp();
 void clockStopwatch();
-int8_t clockMenu(String* title, uint8_t length);
+int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor);
 void clockMenuDrawBox(String title, uint8_t i, int32_t y);
 void clockAlarm();
 int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length);
