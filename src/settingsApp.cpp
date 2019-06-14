@@ -2291,7 +2291,7 @@ bool updateMenu()
 						mp.update();
 
 						String contacts_default = "[]";
-						String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" }";
+						String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"volume\" : 3}";
 
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
@@ -2319,6 +2319,7 @@ bool updateMenu()
 						mp.backgroundIndex = settings["background_color"];
 						mp.notification = settings["notification"];
 						mp.ringtone_path = String(settings["ringtone"].as<char*>());
+						mp.volume = settings["volume"];
 						Serial.println("ERASED");
 						delay(5);
 						mp.applySettings();

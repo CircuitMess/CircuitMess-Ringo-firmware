@@ -66,7 +66,7 @@ void messagesApp() {
 				composeSMS(&jarr);
 				menuChoice = -1;
 			}
-			else
+			else if(menuChoice > -1)
 			{
 				if(viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
 				jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>()))
@@ -90,6 +90,9 @@ void messagesApp() {
 					file.close();
 				}
 			}
+			else
+				menuChoice = -(menuChoice + 3);
+			
 		}
 	}
 }
@@ -280,7 +283,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	offset = 19;
 	boxHeight = 30;
 	if (length > 2 && cursor > 2) {
-		cameraY = -(cursor - 1) * (boxHeight + 1) - 1 + offset + 19;
+		cameraY = -(cursor - 1) * (boxHeight - 1) + offset + 11 ;
 	}
 	while (1) {
 		mp.update();
@@ -334,7 +337,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 			}
 			else {
 				cursor--;
-				if (cursor > 0 && (cursor * (boxHeight-1) + cameraY + offset) < 14*scale) {
+				if (cursor > 0 && ((cursor-1) * (boxHeight-1) + cameraY + offset + 21) < 20) {
 					cameraY += (boxHeight-1);
 				}
 			}
@@ -347,13 +350,13 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 			cursor++;
 			if (cursor > 0)
 			{
-				if (((cursor - 1) * (boxHeight-1) + composeBoxHeight + cameraY + offset) > 40*scale) {
+				if (((cursor - 1) * (boxHeight-1) + composeBoxHeight + cameraY + offset + 21) > 100) {
 					cameraY -= boxHeight-1;
 				}
 			}
 			else
 			{
-				if ((cursor * (boxHeight-1) + cameraY + offset) > 40*scale) {
+				if ((cursor * (boxHeight-1) + cameraY + offset + 21) > 100) {
 					cameraY -= boxHeight-1;
 				}
 			}
@@ -368,6 +371,14 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			return -1;
+		}
+		if(mp.buttons.released(BTN_FUN_LEFT) && cursor > 0)
+		{
+			messages.remove(sortingArray[cursor-1]);
+			File file = SD.open("/.core/messages.json", "w");
+			messages.prettyPrintTo(file);
+			file.close();
+			return -3 - sortingArray[cursor-1];
 		}
 	}
 	if(cursor > 0)
