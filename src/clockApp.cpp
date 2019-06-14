@@ -7,9 +7,10 @@ void clockApp()
 		"Stopwatch",
 		"Timer"
 	};
+	int8_t index = 0;
 	while(1)
 	{
-		int8_t index = clockMenu(clockItems, 4);
+		index = clockMenu(clockItems, 4, index);
 		if(index == -1)
 			break;
 		switch(index)
@@ -94,10 +95,10 @@ void clockApp()
 		}
 	}
 }
-int8_t clockMenu(String* title, uint8_t length) {
+int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 	uint8_t offset = 4;
 	bool pressed = 0;
-	uint8_t cursor = 0;
+	uint8_t cursor = prevCursor;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	mp.dataRefreshFlag = 0;
@@ -322,7 +323,7 @@ void clockStopwatch()
 
 void clockAlarm()
 {
-	loadAlarms();
+	mp.loadAlarms();
 	uint16_t alarmCount = 0;
 	for (int i = 0; i < 5;i++)
 	{
@@ -425,7 +426,7 @@ void clockAlarm()
 					temp++;
 				}
 			}
-			saveAlarms();
+			mp.saveAlarms();
 		}
 		else
 		{
@@ -962,7 +963,7 @@ void clockAlarmEdit(uint8_t index)
 						mp.alarmRepeatDays[index][i] = days[i];
 					}
 					mp.alarmRepeat[index] = repeat;
-					saveAlarms();
+					mp.saveAlarms();
 					//save RTC and exit
 					return;
 				}
@@ -1140,6 +1141,8 @@ void clockTimer()
 					{
 						if(mins == 0 && hours == 0)
 						{
+							uint32_t callMillis = millis();
+							bool playState = 1;
 							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 							{
 								mp.display.fillRect(0, 64, 160, 100, 0x97F6);
@@ -1148,10 +1151,15 @@ void clockTimer()
 								mp.display.setCursor(70, 70);
 								if(millis()%700 >= 350)
 									mp.display.printCenter("DONE!");
-								if(millis()%1000 <= 10)
+								if(millis() - callMillis >= 1000)
 								{
-									osc->note(87, 0.4);
-									osc->play();
+									playState = 1;
+									callMillis = millis();
+								}
+								if(playState)
+								{
+									mp.playNotificationSound(4);
+									playState = 0;
 								}
 								mp.update();
 							}
@@ -1227,68 +1235,4 @@ void clockTimer()
 		}
 		mp.update();
 	}
-}
-void saveAlarms()
-{
-	const char * path = "/.core/alarms.json";
-	Serial.println("");
-	mp.SD.remove(path);
-	JsonArray& alarms = mp.jb.createArray();
-
-	if (alarms.success()) {
-		for(int i = 0; i<5;i++)
-		{
-			JsonObject& tempAlarm = jb.createObject();
-			tempAlarm["hours"] = mp.alarmHours[i];
-			tempAlarm["mins"] = mp.alarmMins[i];
-			tempAlarm["enabled"] = mp.alarmEnabled[i];
-			tempAlarm["repeat"] = mp.alarmRepeat[i];
-			JsonArray& days = jb.createArray();
-			for(int x = 0; x<7;x++)
-			{
-				days.add(mp.alarmRepeatDays[i][x]);
-			}
-			tempAlarm["days"] = days;
-			tempAlarm["track"] = mp.alarmTrack[i];
-			alarms.add(tempAlarm);
-		}
-
-		SDAudioFile file1 = mp.SD.open(path, "w");
-		alarms.prettyPrintTo(file1);
-		alarms.prettyPrintTo(Serial);
-		file1.close();
-	} else {
-		Serial.println("Error saving alarm data");
-	}
-}
-void loadAlarms()
-{
-	const char * path = "/.core/alarms.json";
-	Serial.println("");
-	SDAudioFile file = mp.SD.open(path);
-	mp.jb.clear();
-	JsonArray& alarms = mp.jb.parseArray(file);
-	file.close();
-
-	if (alarms.success()) {
-		int i = 0;
-		for(JsonObject& tempAlarm:alarms)
-		{
-			mp.alarmHours[i] = tempAlarm["hours"];
-			mp.alarmMins[i] = tempAlarm["mins"];
-			mp.alarmEnabled[i] = tempAlarm["enabled"];
-			mp.alarmRepeat[i] = tempAlarm["repeat"];
-			JsonArray& days = tempAlarm["days"];
-			for(int x = 0; x<7;x++)
-			{
-				mp.alarmRepeatDays[i][x] = days[x];
-			}
-			mp.alarmTrack[i] = String(tempAlarm["track"].as<char*>());
-			i++;
-		}
-	}
-	else {
-		Serial.println("Error loading new alarms");
-	}
-	alarms.prettyPrintTo(Serial);
 }

@@ -39,7 +39,6 @@ void drawNotificationWindow(uint8_t y, uint8_t index) {
 	temp = "";
 	mp.display.print(monthsList[now.month() - 1]);
 	mp.display.setCursor(mp.display.cursor_x + 2, mp.display.cursor_y);
-	// temp.concat(monthsList[now.month() - 1]);
 	if (now.day() < 10)
 		temp.concat("0");
 	temp.concat(now.day());
@@ -294,14 +293,14 @@ void lockscreen() {
 			}
 		}
 		if (mp.buttons.released(BTN_B)) {
-			// mp.sleep();
-			for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
-			{
-				mp.notificationTypeList[i] = 0;
-				mp.notificationDescriptionList[i] = "";
-				mp.saveNotifications();
-			}
-			mp.update();
+			mp.sleep();
+			// for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
+			// {
+			// 	mp.notificationTypeList[i] = 0;
+			// 	mp.notificationDescriptionList[i] = "";
+			// 	mp.saveNotifications();
+			// }
+			// mp.update();
 		}
 
 		if (goOut == 1 && mp.buttons.released(BTN_A))

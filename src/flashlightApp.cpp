@@ -3,7 +3,7 @@ void flashlightApp()
 {
 	bool state = 0;
 	uint8_t color = 4;
-	uint8_t localBrightness = 5;
+	uint8_t localBrightness = mp.pixelsBrightness;
 	while(1)
 	{
 		for(int i = 0; i < 8; i++)
@@ -33,7 +33,7 @@ void flashlightApp()
 					break;
 			}
 		}
-		mp.pixelsBrightness = localBrightness;
+		mp.pixelsBrightness = 5;
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setTextFont(2);
@@ -58,7 +58,13 @@ void flashlightApp()
 			mp.update();
 		}
 		if(mp.buttons.released(BTN_B))
+		{
+			for(int i = 0; i < 8; i++)
+				mp.leds[i] = CRGB::Black;
+				
+			mp.pixelsBrightness = localBrightness;
 			break;
+		}
 		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))

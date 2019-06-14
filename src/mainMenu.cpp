@@ -10,7 +10,7 @@ void listDirectories(const char * dirname) {
 	directoryCount = 0;
 	Serial.printf("Listing directory: %s\n", dirname);
 
-	SDAudioFile root = mp.SD.open(dirname);
+	File root = SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
 		return;
@@ -22,14 +22,14 @@ void listDirectories(const char * dirname) {
 	}
 	int counter = 0;
 
-	SDAudioFile file = root.openNextFile();
+	File file = root.openNextFile();
 	while (file) {
 
 		if (file.isDirectory()) {
 			String Name(file.name());
 			Serial.println(Name);
 			if(Name != "/Images\0" && Name != "/Music\0" && Name != "/Video\0"
-			 && Name != "/System Volume Information\0" && mp.SD.exists(String(Name + "/" + Name + ".BIN")))
+			 && Name != "/System Volume Information\0" && SD.exists(String(Name + "/" + Name + ".BIN")))
 			{
 				Serial.println(Name);
 				directories[directoryCount] = Name.substring(1);
@@ -45,7 +45,7 @@ void listBinaries(const char * dirname, uint8_t levels) {
 	binaryCount = 0;
 	Serial.printf("Listing directory: %s\n", dirname);
 
-	SDAudioFile root = mp.SD.open(dirname);
+	File root = SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
 		return;
@@ -57,7 +57,7 @@ void listBinaries(const char * dirname, uint8_t levels) {
 	}
 	int counter = 1;
 
-	SDAudioFile file = root.openNextFile();
+	File file = root.openNextFile();
 	while (file) {
 
 		/*if (file.isDirectory()) {
@@ -177,7 +177,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 						{
 							Serial.println(directories[pageIndex * 3 + i - 9]);
 							delay(5);
-							if(mp.SD.exists(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp")))
+							if(SD.exists(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp")))
 								mp.display.drawBmp(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp"), 4 + tempX * 52, 18 + tempY * 56, 2);
 							else
 								mp.display.drawIcon(defaultIcon, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
@@ -398,7 +398,7 @@ void mainMenu()
 			{
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setTextColor(TFT_WHITE);
-				if(mp.simInserted && !mp.airplaneMode)
+				if(mp.simInserted && !mp.airplaneMode && mp.SDinsertedFlag)
 				{
 					mp.display.setCursor(0, mp.display.height()/2 - 16);
 					mp.display.printCenter(F("Loading messages..."));
@@ -424,6 +424,18 @@ void mainMenu()
 					mp.display.printCenter(F("Can't access SMS!"));
 					mp.display.setCursor(0, mp.display.height()/2);
 					mp.display.printCenter(F("Turn off airplane mode"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					mp.update();
+				}
+				else if(!mp.SDinsertedFlag)
+				{
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("Can't access SMS!"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("SD card missing"));
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();

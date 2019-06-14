@@ -39,6 +39,7 @@ void phoneApp() {
 			callBuffer.remove(callBuffer.length()-1);
 		else if (mp.buttons.released(BTN_FUN_RIGHT))
 		{
+			mp.update();
 			if(!mp.SDinsertedFlag)
 			{
 				mp.display.fillScreen(TFT_BLACK);
@@ -124,7 +125,7 @@ void phoneApp() {
 			mp.display.print(callBuffer);
 		}
 
-		if (mp.buttons.released(BTN_A))//initate call
+		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
 		{
 			callNumber(callBuffer);
 			mp.update();
@@ -142,18 +143,26 @@ void callLog() {
 	mp.dataRefreshFlag = 0;
 	mp.display.setTextWrap(0);
     mp.display.setTextFont(2);
-
-	SDAudioFile file = mp.SD.open("/.core/call_log.json", "r");
-
+	for(int i = 0; i < sizeof(mp.notificationTypeList); i++)
+	{
+		if(mp.notificationTypeList[i] == 1)
+		{
+			mp.notificationTypeList[i] = 0;
+			mp.notificationDescriptionList[i] = "";
+			mp.notificationTimeList[i] = DateTime((uint32_t)0);
+		}
+	}
+	mp.saveNotifications();
+	File file = SD.open("/.core/call_log.json", "r");
 	if(file.size() < 2){ // empty -> FILL
 		Serial.println("Override");
 		file.close();
 		JsonArray& jarr = jb.createArray();
 		delay(10);
-		SDAudioFile file1 = mp.SD.open("/.core/call_log.json", "w");
+		File file1 = SD.open("/.core/call_log.json", "w");
 		jarr.prettyPrintTo(file1);
 		file1.close();
-		file = mp.SD.open("/.core/call_log.json", "r");
+		file = SD.open("/.core/call_log.json", "r");
 		while(!file)
 			Serial.println("CONTACTS ERROR");
 	}
@@ -175,23 +184,31 @@ void callLog() {
 	else
 	{
 		// add("5555", "2019-04-18 13:00:00", "342", &jarr);
+		int menuChoice = -1;
 
 		while (1)
 		{
-			int menuChoice = -1;
-			menuChoice = callLogMenu(&jarr);
+			menuChoice = callLogMenu(jarr, menuChoice);
 
-			mp.update();
+			mp.buttons.update();
 			if (menuChoice != -2)
 			{
 				if(menuChoice >= 0)
 				{
 					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"], jarr[menuChoice]["duration"])){
 						jarr.remove(menuChoice);
-						SDAudioFile file = mp.SD.open("/.core/call_log.json", "w");
+						File file = SD.open("/.core/call_log.json", "w");
 						jarr.prettyPrintTo(file);
 						file.close();
+						menuChoice = -1;
 					}
+				}
+				else if(menuChoice == -10)
+				{
+					File file = SD.open("/.core/call_log.json", "r");
+					jb.clear();
+					JsonArray& jarr = jb.parseArray(file);
+					file.close();
 				}
 				mp.update();
 			}
@@ -203,80 +220,96 @@ void callLog() {
 	}
 }
 
-int callLogMenu(JsonArray *call_log){
+int callLogMenu(JsonArray& call_log, int prevCursor){
 	uint8_t cursor = 0;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
-	uint8_t length = call_log->size();
-    uint8_t offset = 19;
+	uint8_t length = call_log.size();
+    uint8_t offset = 20;
     uint8_t boxHeight = 28;
-
+	uint16_t sortingArray[length];
+	for(int i = 0; i < length; i++)
+		sortingArray[i] = i;
+	uint16_t min;
+	for(int i = 0; i < length - 1; i++)
+	{
+		min = i;
+		for(int j = i + 1; j < length ; j++)
+			if(call_log[sortingArray[j]]["dateTime"].as<uint32_t>() > call_log[sortingArray[min]]["dateTime"].as<uint32_t>())
+				min = j;
+		uint16_t temp = sortingArray[min];
+		sortingArray[min] = sortingArray[i];
+		sortingArray[i] = temp;
+	}
+	for(int i = 0; i < length; i++)
+	{
+		if(sortingArray[i] == prevCursor)
+			cursor = i;
+	}
+	if(prevCursor == -1)
+		cursor = 0;
+	if (length > 2 && cursor > 2) {
+		cameraY = -(cursor - 2) * boxHeight;
+	}
 	while (1) {
-		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, 0);
-		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-		mp.display.setTextFont(2);
-		mp.display.setCursor(0,-2);
-		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
-		mp.display.setTextSize(1);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print("Call log");
-		mp.display.setCursor(5, 110);
-		mp.display.println("Erase");
-
-		if(call_log->size() == 0){
+		if(length == 0)
+		{
 			mp.display.setTextSize(2);
 			mp.display.setCursor(0, 40);
 			mp.display.setTextColor(TFT_WHITE);
 			mp.display.printCenter("No calls");
-		} else {
+			cursor = 0;
+		}
+		else
+		{
 			cameraY_actual = (cameraY_actual + cameraY) / 2;
 			if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 			}
 
-			int i = 0;
-			for (JsonObject& elem : *call_log) {
+			for(int i = 0; i < length; i++)
+			{
+				JsonObject& elem = call_log[sortingArray[i]];
 				callLogDrawBoxSD(elem, i, cameraY_actual);
-				i++;
+
 			}
 			callLogMenuDrawCursor(cursor, cameraY_actual);
 
-			if (mp.buttons.released(BTN_A)) {
-				mp.update();
+			if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {
+				mp.buttons.update();
 				break;
 			}
 			if (mp.buttons.released(BTN_FUN_LEFT)) //delete call log entry
 			{
-				mp.update();
-				call_log->remove(cursor);
-				SDAudioFile file = mp.SD.open("/.core/call_log.json", "w");
-				call_log->prettyPrintTo(file);
+				mp.buttons.update();
+				call_log.remove(cursor);
+				File file = SD.open("/.core/call_log.json", "w");
+				call_log.prettyPrintTo(file);
 				file.close();
 				return -10;
 			}
 
 			if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-				mp.update();
+				mp.buttons.update();
 				if (cursor == 0) {
 					cursor = length - 1;
-					if (length > 2) {
-					cameraY = -(cursor - 2) * (boxHeight+1);
+					if (length > 3) {
+						cameraY = -(cursor - 2) * (boxHeight);
 					}
 				}
 				else {
 					cursor--;
-					if (cursor > 0 && (cursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
-					cameraY += (boxHeight+1);
+					if (cursor > 0 && (cursor * (boxHeight) + cameraY + offset) < (boxHeight)) {
+						cameraY += (boxHeight);
 					}
 				}
 			}
 			if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-				mp.update();
+				mp.buttons.update();
 				cursor++;
-				if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
-					cameraY -= (boxHeight+1);
+				if ((cursor * (boxHeight) + cameraY + offset) > 80) {
+					cameraY -= (boxHeight);
 				}
 				if (cursor >= length) {
 					cursor = 0;
@@ -287,46 +320,64 @@ int callLogMenu(JsonArray *call_log){
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			mp.buttons.update();
 			return -2;
 		}
+		mp.display.setCursor(0, 0);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Call log");
+		mp.display.fillRect(0, 105, 160, 23, TFT_BLACK);
+		mp.display.setCursor(5, 110);
+		mp.display.print("Erase");
+		mp.display.setCursor(125, 110);
+		mp.display.print("View");
+
+
+		mp.update();
+
 	}
+	cursor = sortingArray[cursor];
 	return cursor;
 }
 
 void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
-    uint8_t offset = 19;
+    uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
 	if (y < 0 || y > mp.display.height()) {
 		return;
 	}
+	DateTime date = DateTime(object["dateTime"].as<uint32_t>());
     mp.display.setTextSize(1);
     mp.display.setTextFont(2);
     mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
     mp.display.setTextColor(TFT_WHITE);
     mp.display.setCursor(2, y + 2);
-    mp.display.drawString(object["dateTime"].as<char*>(), 27, y);
-    mp.display.drawString(object["number"].as<char*>(), 27, y + 12);
+	char buf[100];
+	strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
+    mp.display.drawString(date.format(buf), 24, y);
+    mp.display.drawString(object["number"].as<char*>(), 24, y + 12);
 	switch (object["direction"].as<uint8_t>())
 	{
 	case 0:
-		mp.display.drawBitmap(5, y + 6, missedCallIcon, TFT_RED, 2);
+		mp.display.drawBitmap(3, y + 6, missedCallIcon, TFT_RED, 2);
 		break;
 	case 1:
-		mp.display.drawBitmap(5, y + 6, outgoingCallIcon, TFT_GREEN, 2);
+		mp.display.drawBitmap(3, y + 6, outgoingCallIcon, TFT_GREEN, 2);
 		break;
 	case 2:
-		mp.display.drawBitmap(5, y + 6, incomingCallIcon, TFT_BLUE, 2);
-		break;
-	
-	default:
+		mp.display.drawBitmap(3, y + 6, incomingCallIcon, TFT_BLUE, 2);
 		break;
 	}
 }
 
 void callLogMenuDrawCursor(uint8_t i, int32_t y) {
-    uint8_t offset = 19;
+    uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	if (millis() % 500 <= 250) {
 		return;
@@ -384,7 +435,7 @@ uint8_t showCall(int id, String number, String dateTime, String duration)
 			mp.update();
 			break;
 		}
-		if (mp.buttons.released(BTN_A)) // Call
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // Call
 		{
 			callNumber(number);
 			mp.update();

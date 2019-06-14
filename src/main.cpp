@@ -239,7 +239,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 			}
 			else {
 				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
-					cameraY += (boxHeight + 1);
+					cameraY += (boxHeight + 2);
 				}
 				cursor--;
 			}
@@ -271,9 +271,9 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 }
 void listAudio(const char * dirname, uint8_t levels) {
 	audioCount = 0;
-	while(!mp.SD.begin(5, SPI, 8000000))
+	while(!SD.begin(5, SPI, 8000000))
 		Serial.println(F("SD ERROR"));
-	SDAudioFile root = mp.SD.open(dirname);
+	File root = SD.open(dirname);
 	if (!root) {
 		Serial.println(F("Failed to open directory"));
 		return;
@@ -284,7 +284,7 @@ void listAudio(const char * dirname, uint8_t levels) {
 	}
 	int counter = 1;
 	uint8_t start = 0;
-	SDAudioFile file = root.openNextFile();
+	File file = root.openNextFile();
 	while (file) {
 		String Name(file.name());
 		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3"))
@@ -323,8 +323,9 @@ uint16_t countSubstring(String string, String substring) {
 }
 void callNumber(String number) {
 	mp.dataRefreshFlag = 0;
-
+	char c;
 	String localBuffer = "";
+	String buffer = "";
 	Serial1.print(F("ATD"));
 	Serial1.print(number);
 	Serial1.print(";\r\n");
@@ -332,7 +333,6 @@ void callNumber(String number) {
 	mp.display.setTextColor(TFT_BLACK);
 	bool firstPass = 1;
 	uint32_t timeOffset = 0;
-	uint16_t textLength;
 	uint8_t scale;
 	unsigned int tmp_time = 0;
 	uint8_t micGain = 4;
@@ -348,23 +348,29 @@ void callNumber(String number) {
 		mp.display.setTextFont(2);
 	}
 	mp.display.setTextSize(1);
+	digitalWrite(soundSwitchPin, 1);
 
 	mp.display.printCenter(number);
-	textLength = mp.display.cursor_x - textLength;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
 		if (Serial1.available())
-			localBuffer = Serial1.readString();
-		Serial.println(localBuffer);
+		{
+			c = Serial1.read();
+			buffer += c;
+		}
+		if(buffer.indexOf("CLCC:") != -1 && buffer.indexOf("\r", buffer.indexOf("CLCC:")) != -1)
+		{
+			localBuffer = buffer;
+			buffer = "";
+		}
+		Serial.println("---------------");
+		Serial.println(buffer);
 		delay(5);
-
-
 		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
 			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 			{
-				digitalWrite(soundSwitchPin, 1);
 				if (firstPass == 1)
 				{
 					timeOffset = millis();
@@ -390,8 +396,6 @@ void callNumber(String number) {
 				mp.display.setCursor(9, 9);
 				mp.display.printCenter(temp);
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
-				mp.display.setCursor(3, 3);
-				mp.display.print(micGain);
 			}
 
 			else if (localBuffer.indexOf(",0,3,") != -1)
@@ -410,7 +414,6 @@ void callNumber(String number) {
 
 			else if (localBuffer.indexOf(",0,6,") != -1)
 			{
-				digitalWrite(soundSwitchPin, 0);
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
 				if (timeOffset == 0)
@@ -449,41 +452,22 @@ void callNumber(String number) {
 					mp.display.setCursor(2, 112);
 				mp.display.print("Call ended");
 				Serial.println("ENDED");
-				mp.update();
+				while(!mp.update());
 
 				mp.updateTimeRTC();
-				// 2019-04-18 12:00:00
-				String dateTime = String(mp.clockYear);
-				dateTime += "-";
-				if(mp.clockMonth < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockMonth);
-				dateTime += "-";
-				if(mp.clockDay < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockDay);
-				dateTime += " ";
-
-				if(mp.clockHour < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockHour);
-				dateTime += ":";
-				if(mp.clockMinute < 10){
-					dateTime += "0";
-				}
-				dateTime += String(mp.clockMinute);
 				if(mp.SDinsertedFlag)
-					mp.addCall(number, dateTime, tmp_time, 1);
+					mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
 
 				delay(1000);
 				break;
 			}
+			
 			mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+			mp.display.setCursor(5, 109);
+			mp.display.print("Mic gain: ");
+			mp.display.print(micGain);
 			mp.display.setCursor(100, 109);
 			mp.display.print("Hang up");
 
@@ -539,13 +523,7 @@ void callNumber(String number) {
 		}
 		if (mp.buttons.pressed(BTN_FUN_RIGHT)) // hanging up
 		{
-			Serial.println("B PRESSED");
-			Serial1.println("ATH");
-			long long curr_millis = millis();
-			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
-				Serial1.println("ATH");
-			}
-			digitalWrite(soundSwitchPin, 0);
+			
 			mp.display.fillScreen(TFT_WHITE);
 			mp.display.setCursor(32, 9);
 			if (timeOffset == 0)
@@ -572,59 +550,43 @@ void callNumber(String number) {
 				mp.display.printCenter(temp);
 			}
 			mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
-			if(mp.resolutionMode)
-					mp.display.setCursor(11, 20);
-			else
-				mp.display.setCursor(11, 28);
+			mp.display.setCursor(11, 28);
 			mp.display.printCenter(number);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 			mp.display.setCursor(2, 112);
 			mp.display.print("Call ended");
 			Serial.println("ENDED");
-			mp.update();
+			while(!mp.update());
 			mp.updateTimeRTC();
-			// 2019-04-18 12:00:00
-			String dateTime = String(mp.clockYear);
-			dateTime += "-";
-			if(mp.clockMonth < 10){
-				dateTime += "0";
+			Serial.println("B PRESSED");
+			Serial1.println("ATH");
+			long long curr_millis = millis();
+			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
+				Serial1.println("ATH");
 			}
-			dateTime += String(mp.clockMonth);
-			dateTime += "-";
-			if(mp.clockDay < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockDay);
-			dateTime += " ";
-
-			if(mp.clockHour < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockHour);
-			dateTime += ":";
-			if(mp.clockMinute < 10){
-				dateTime += "0";
-			}
-			dateTime += String(mp.clockMinute);
 			if(mp.SDinsertedFlag)
-					mp.addCall(number, dateTime, tmp_time, 1);
+				mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
 			delay(1000);
 			break;
 		}
 		if(mp.buttons.released(BTN_UP) && micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			micGain++;
-			Serial1.printf("AT+CMIC=0,%d", micGain);
+			Serial1.printf("AT+CMIC=0,%d\r", micGain);
+			// Serial1.println("AT+CMICBIAS=1 ");
 		}
 		if(mp.buttons.released(BTN_DOWN) && micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			micGain--;
-			Serial1.printf("AT+CMIC=0,%d", micGain);
+			Serial1.printf("AT+CMIC=0,%d\r", micGain);
+			// Serial1.println("AT+CMICBIAS=0");
 		}
 
 		tmp_time = int((millis() - timeOffset) / 1000);
 		mp.update();
 	}
+	digitalWrite(soundSwitchPin, 0);
+
 }
 bool startupWizard()
 {
@@ -1408,7 +1370,7 @@ bool startupWizard()
 		delay(500);
 		mp.SDinsertedFlag = 1;
 		uint32_t tempMillis = millis();
-		while (!mp.SD.begin(5, SPI, 8000000))
+		while (!SD.begin(5, SPI, 8000000))
 		{
 			Serial.println("SD ERROR");
 			if(millis()-tempMillis > 5)
@@ -1419,7 +1381,7 @@ bool startupWizard()
 		}
 		if(!mp.SDinsertedFlag)
 		{
-			mp.SD.end();
+			SD.end();
 			mp.display.setTextColor(TFT_BLACK);
 			mp.display.setTextSize(1);
 			mp.display.setTextFont(2);
@@ -1660,6 +1622,7 @@ void controlTry() //for debug purposes
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
+			Serial.println("B pressed");
 			mp.update();
 			break;
 		}
@@ -1685,8 +1648,29 @@ void controlTry() //for debug purposes
 }
 void setup()
 {
-	Serial.begin(115200);
-	mp.inAlarmPopup = 1;
+	Serial.begin(115200);	
+	EEPROM.begin(256);
+	if(EEPROM.readBool(34))
+	{
+		EEPROM.writeBool(34, 0);
+		EEPROM.commit();
+		SD.begin(5, SPI, 8000000);
+		Serial.println(EEPROM.readString(35).c_str());
+		Serial.println(EEPROM.readString(100).c_str());
+		delay(1000);
+		WiFi.begin(EEPROM.readString(35).c_str(), EEPROM.readString(100).c_str());
+		delay(1000);
+		Serial.print("Connected: ");
+		Serial.println(WiFi.status() == WL_CONNECTED);
+		Serial.println("FREE HEAP:");
+		Serial.println(ESP.getFreeHeap());
+		delay(5);
+		if(!fetchUpdate())
+			ESP.restart();
+		mp.updateFromFS("/.core/LOADER.BIN");
+		ESP.restart();
+	}
+
 	mp.begin(0);
 	mp.homePopupEnable(0);
 	osc = new Oscillator();
@@ -1696,9 +1680,9 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 	{
-		startupWizard();
 		EEPROM.writeBool(33, 0);
 		EEPROM.commit();
+		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
 	// controlTry();
@@ -1706,14 +1690,6 @@ void setup()
 void loop()
 {
 	// startupWizard();
-	// pinMode(soundSwitchPin, HIGH);
-	// Serial.println(digitalRead(soundSwitchPin));
-	// digitalWrite(32, HIGH);
-	// Serial.println(digitalRead(32));
-	// Serial.println("TEST");
-	// osc->note(75, 0.05);
-	// osc->play();
-	// delay(500);
 	// messagesApp();
 	lockscreen();
 	mainMenu();
