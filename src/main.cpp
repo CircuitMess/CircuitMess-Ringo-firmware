@@ -1680,9 +1680,9 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 	{
-		startupWizard();
 		EEPROM.writeBool(33, 0);
 		EEPROM.commit();
+		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
 	// controlTry();
