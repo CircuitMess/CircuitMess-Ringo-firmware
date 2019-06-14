@@ -530,6 +530,8 @@ void composeSMS(JsonArray *messages)
             mp.display.setCursor(0, mp.display.height()/2 - 16);
             mp.display.setTextFont(2);
 			mp.display.printCenter("Sending text...");
+			if(contact.startsWith("00"))
+				contact = String("+" + contact.substring(2));
 			while(!mp.update());
 
 			mp.saveMessage(content, contact, 1, 0, messages);

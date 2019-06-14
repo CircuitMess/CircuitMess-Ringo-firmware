@@ -195,7 +195,8 @@ void callLog() {
 			{
 				if(menuChoice >= 0)
 				{
-					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"], jarr[menuChoice]["duration"])){
+					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"],
+					 jarr[menuChoice]["duration"], jarr[menuChoice]["direction"].as<uint8_t>())){
 						jarr.remove(menuChoice);
 						File file = SD.open("/.core/call_log.json", "w");
 						jarr.prettyPrintTo(file);
@@ -386,8 +387,9 @@ void callLogMenuDrawCursor(uint8_t i, int32_t y) {
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
 }
 
-uint8_t showCall(int id, String number, String dateTime, String duration)
+uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint8_t direction)
 {
+	DateTime time = DateTime(dateTime);
 	while (1)
 	{
 		mp.display.fillScreen(TFT_BLACK);
@@ -397,17 +399,18 @@ uint8_t showCall(int id, String number, String dateTime, String duration)
         mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Call log");
-
-		mp.display.setCursor(0, 18);
-		mp.display.print(" ");
-		mp.display.println(dateTime);
-		mp.display.print(" ");
+		char buf[100];
+		strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
+		mp.display.setCursor(5,20);
+		mp.display.print(time.format(buf));
+		mp.display.setCursor(5, 40);
 		mp.display.println(number);
 
 		int seconds = duration.toInt() % 60;
 		int minutes = duration.toInt() / 60;
 
-		mp.display.print(" ");
+		mp.display.setCursor(5, 60);
+		mp.display.print("Duration: ");
 		if(minutes < 10)
 			mp.display.print("0");
 		mp.display.print(minutes);

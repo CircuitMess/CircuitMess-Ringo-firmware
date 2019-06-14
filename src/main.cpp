@@ -1691,6 +1691,8 @@ void loop()
 {
 	// startupWizard();
 	// messagesApp();
+	// phoneApp();
+	callLog();
 	lockscreen();
 	mainMenu();
 	// mediaApp();
