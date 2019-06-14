@@ -1140,6 +1140,8 @@ void clockTimer()
 					{
 						if(mins == 0 && hours == 0)
 						{
+							uint32_t callMillis = millis();
+							bool playState = 1;
 							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 							{
 								mp.display.fillRect(0, 64, 160, 100, 0x97F6);
@@ -1148,10 +1150,15 @@ void clockTimer()
 								mp.display.setCursor(70, 70);
 								if(millis()%700 >= 350)
 									mp.display.printCenter("DONE!");
-								if(millis()%1000 <= 10)
+								if(millis() - callMillis >= 1000)
 								{
-									osc->note(87, 0.4);
-									osc->play();
+									playState = 1;
+									callMillis = millis();
+								}
+								if(playState)
+								{
+									mp.playNotificationSound(4);
+									playState = 0;
 								}
 								mp.update();
 							}

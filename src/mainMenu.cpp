@@ -398,7 +398,7 @@ void mainMenu()
 			{
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setTextColor(TFT_WHITE);
-				if(mp.simInserted && !mp.airplaneMode)
+				if(mp.simInserted && !mp.airplaneMode && mp.SDinsertedFlag)
 				{
 					mp.display.setCursor(0, mp.display.height()/2 - 16);
 					mp.display.printCenter(F("Loading messages..."));
@@ -424,6 +424,18 @@ void mainMenu()
 					mp.display.printCenter(F("Can't access SMS!"));
 					mp.display.setCursor(0, mp.display.height()/2);
 					mp.display.printCenter(F("Turn off airplane mode"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					mp.update();
+				}
+				else if(!mp.SDinsertedFlag)
+				{
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("Can't access SMS!"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("SD card missing"));
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
