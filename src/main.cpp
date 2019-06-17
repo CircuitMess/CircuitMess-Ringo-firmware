@@ -1686,9 +1686,23 @@ void setup()
 	}
 	mp.shutdownPopupEnable(1);
 	// controlTry();
+	// Wire.begin(14, 27);
+	// mp.buttons.ads.begin();
+	// mp.buttons.ads.startComparator_Windowed(1, 10  00, 200);
+	// mp.buttons.ads.startComparator_Windowed(0, 800, 200);
+	// pinMode(13, INPUT_PULLUP);
 }
 void loop()
 {
+	// int16_t x,y;
+	// x = mp.buttons.ads.readADC_SingleEnded(0);
+	// y = mp.buttons.ads.readADC_SingleEnded(1);
+	// mp.buttons.ads.startComparator_Windowed(0, 1000, 200);
+	// mp.buttons.ads.startComparator_Windowed(1, 1000, 200);
+	// Serial.print("X: "); Serial.println(x);
+	// Serial.print("Y: "); Serial.println(y);
+	// Serial.print("INTERRUPT: "); Serial.println(digitalRead(13));
+	// delay(200);
 	// startupWizard();
 	// messagesApp();
 	// phoneApp();
