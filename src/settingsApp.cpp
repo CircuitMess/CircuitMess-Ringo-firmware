@@ -2444,7 +2444,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		mp.display.print("Notifications");
 		mp.display.setCursor(130,110);
 		mp.display.print("Play");
-		if(mp.released(BTN_FUN_RIGHT))
+		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{
 			mp.update();
 			mp.playNotificationSound(cursor);
