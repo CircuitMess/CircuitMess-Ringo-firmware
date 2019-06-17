@@ -68,6 +68,20 @@ void messagesApp() {
 			}
 			else if(menuChoice == -3)
 			{
+				File file = SD.open("/.core/messages.json", "r");
+				jb.clear();
+				JsonArray& jarr = jb.parseArray(file);
+				if(!jarr.success())
+				{
+					Serial.println("Error");
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setCursor(0, mp.display.height()/2 - 16);
+					mp.display.setTextFont(2);
+					mp.display.printCenter("Error: Messages - loading data");
+
+					while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+					mp.update();
+				}
 				mp.newMessage = 0;
 				menuChoice = -1;
 			}
