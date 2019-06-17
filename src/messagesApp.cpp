@@ -66,6 +66,11 @@ void messagesApp() {
 				composeSMS(&jarr);
 				menuChoice = -1;
 			}
+			else if(menuChoice == -3)
+			{
+				mp.newMessage = 0;
+				menuChoice = -1;
+			}
 			else if(menuChoice > -1)
 			{
 				if(viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
@@ -379,6 +384,11 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 			messages.prettyPrintTo(file);
 			file.close();
 			return -3 - sortingArray[cursor-1];
+		}
+		if(mp.newMessage)
+		{
+			mp.newMessage = 0;
+			return -3;
 		}
 	}
 	if(cursor > 0)
