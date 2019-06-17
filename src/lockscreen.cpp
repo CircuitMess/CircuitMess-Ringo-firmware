@@ -293,7 +293,7 @@ void lockscreen() {
 			}
 		}
 		if (mp.buttons.released(BTN_B)) {
-			mp.sleep();
+			// mp.sleep();
 			// for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
 			// {
 			// 	mp.notificationTypeList[i] = 0;
