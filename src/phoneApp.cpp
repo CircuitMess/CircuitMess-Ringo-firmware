@@ -284,7 +284,7 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			if (mp.buttons.released(BTN_FUN_LEFT)) //delete call log entry
 			{
 				mp.buttons.update();
-				call_log.remove(cursor);
+				call_log.remove(sortingArray[cursor]);
 				File file = SD.open("/.core/call_log.json", "w");
 				call_log.prettyPrintTo(file);
 				file.close();
