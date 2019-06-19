@@ -1696,7 +1696,7 @@ void setup()
 	osc->setVolume(256*mp.volume/14);
 	addOscillator(osc);
 	Serial.print("Setup: ");
-	Serial.println(EEPROM.readBool(33));
+	Serial.println(EEPROM.readBool(33));/* at+cusd=1,"*101#"atd0921518476;*/
 	if(EEPROM.readBool(33))
 	{
 		EEPROM.writeBool(33, 0);
@@ -1704,6 +1704,8 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
+	controlTry();
+	phoneApp();
 }
 void loop()
 {

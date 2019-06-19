@@ -23,14 +23,16 @@ void phoneApp() {
 		mp.display.setTextColor(TFT_WHITE);
 
 		key = NO_KEY;
-		for(int i = 0; i < 11; i++) {
-			if(mp.buttons.released(i) && i != 9) {
-				Serial.println(i);
-				if(i == 10) {
+		for(int i = 0; i < 12; i++) {
+			if(mp.buttons.released(i)) {
+				if(i == 10)
 					key = '0';
-				} else {
+				else if(i == 9)
+					key = '*';
+				else if(i == 11)
+					key = '#';
+				else
 					key = '0' + i + 1;
-				}
 				break;
 			}
 		}
@@ -56,7 +58,7 @@ void phoneApp() {
 			else
 				callLog();
 		}
-		else if (key != NO_KEY && isdigit(key))
+		else if (key != NO_KEY)
 		{
 			switch (key)
 			{
@@ -127,8 +129,15 @@ void phoneApp() {
 
 		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
 		{
-			callNumber(callBuffer);
-			mp.update();
+			if(callBuffer.startsWith("*"))
+			{
+				sendMMI(callBuffer);
+			}
+			else
+			{
+				callNumber(callBuffer);
+				mp.update();
+			}
 			callBuffer = "";
 		}
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
@@ -448,4 +457,52 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint
 		mp.update();
 	}
 	return 0;
+}
+void sendMMI(String code)
+{
+	String buffer = "";
+	Serial1.println("AT+CUSD=1");
+	delay(10);
+	Serial1.print("AT+CUSD=1,\"");
+	Serial1.print(code);
+	Serial1.println("\"");
+	while(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1)
+	{
+		if(Serial1.available())
+		{
+			buffer+=(char)Serial1.read();
+			Serial.println(buffer);
+		}
+		mp.display.fillScreen(TFT_WHITE);
+		mp.display.drawRect(9, 34, 142, 60, TFT_BLACK);
+		mp.display.drawRect(10, 35, 140, 58, TFT_BLACK);
+		mp.display.fillRect(11, 36, 138, 56, TFT_WHITE);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setCursor(55, 50);
+		mp.display.printCenter("Sending USSD code");
+		mp.update();
+	}
+	uint16_t helper = buffer.indexOf("\"", buffer.indexOf("+CUSD:") + 1);
+	buffer = buffer.substring(helper, buffer.indexOf("\"", helper + 1));
+	Serial.println(buffer);
+	while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	{
+		mp.display.fillScreen(TFT_WHITE);
+		mp.display.drawRect(10, 20, 142, 88, TFT_BLACK);
+		mp.display.drawRect(11, 21, 141, 86, TFT_BLACK);
+		mp.display.fillRect(12, 22, 138, 84, TFT_WHITE);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setCursor(10, 30);
+		for(int i = 0; i < buffer.length();i++)
+		{
+			mp.display.print(buffer[i]);
+			if(mp.display.getCursorX() > 150)
+				mp.display.print("\n");
+		}
+		mp.update();
+	}
 }
