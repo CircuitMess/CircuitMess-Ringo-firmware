@@ -398,21 +398,21 @@ void callNumber(String number) {
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
 			}
 
-			else if (localBuffer.indexOf(",0,3,") != -1)
+			else if (localBuffer.indexOf(",0,3,0") != -1)
 			{
 				mp.display.setCursor(25, 9);
 				mp.display.printCenter("Ringing...");
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
 			}
 
-			else if (localBuffer.indexOf(",0,2,") != -1)
+			else if (localBuffer.indexOf(",0,2,0") != -1)
 			{
 				mp.display.setCursor(25, 9);
 				mp.display.printCenter("Calling...");
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
 			}
 
-			else if (localBuffer.indexOf(",0,6,") != -1)
+			else if (localBuffer.indexOf(",0,6,0") != -1)
 			{
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
@@ -582,6 +582,25 @@ void callNumber(String number) {
 			// Serial1.println("AT+CMICBIAS=0");
 		}
 
+		for(int i = 0; i < 12;i++)
+		{
+			
+			if(mp.buttons.released(i))
+			{
+				if(i == 9)
+					Serial1.println("AT+VTS=*");
+				else if(i == 10)
+					Serial1.println("AT+VTS=0");
+				else if(i == 11)
+					Serial1.println("AT+VTS=#");
+				else
+				{
+					Serial1.print("AT+VTS=");
+					Serial1.println(i+1);
+				}
+				break;
+			}
+		}
 		tmp_time = int((millis() - timeOffset) / 1000);
 		mp.update();
 	}
@@ -1685,7 +1704,6 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
-	// controlTry();
 }
 void loop()
 {

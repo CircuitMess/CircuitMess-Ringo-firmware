@@ -169,6 +169,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 	uint8_t boxHeight;
 	boxHeight = 54; //actually 2 less than that
 	while (1) {
+		if(!mp.SDinsertedFlag)
+			return -1;
 		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
