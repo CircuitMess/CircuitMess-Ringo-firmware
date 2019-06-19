@@ -154,17 +154,22 @@ void lockscreen() {
 		if(!mp.SDinsertedFlag)
 			mp.display.drawBitmap(helper * 2, 2, noSDIcon, TFT_BLACK, 2);
 
-		if (mp.batteryVoltage > 4000)
+		if (mp.batteryVoltage > 4300)
 			mp.display.drawBitmap(148, 2, batteryChargingIcon, TFT_BLACK, 2);
-		else if (mp.batteryVoltage <= 4000 && mp.batteryVoltage >= 3800)
+			
+		else if (mp.batteryVoltage <= 4300 && mp.batteryVoltage >= 3850)
 			mp.display.drawBitmap(148, 2, batteryFullIcon, TFT_BLACK, 2);
-		else if (mp.batteryVoltage < 3800 && mp.batteryVoltage >= 3600)
+
+		else if (mp.batteryVoltage < 3850 && mp.batteryVoltage >= 3750)
 			mp.display.drawBitmap(148, 2, batteryHighIcon, TFT_BLACK, 2);
-		else if (mp.batteryVoltage < 3600 && mp.batteryVoltage >= 3400)
+
+		else if (mp.batteryVoltage < 3750 && mp.batteryVoltage >= 3650)
 			mp.display.drawBitmap(148, 2, batteryMidIcon, TFT_BLACK, 2);
-		else if (mp.batteryVoltage < 3400 && mp.batteryVoltage >= 3200)
+
+		else if (mp.batteryVoltage < 3650 && mp.batteryVoltage >= 3600)
 			mp.display.drawBitmap(148, 2, batteryLowIcon, TFT_BLACK, 2);
-		else if (mp.batteryVoltage < 3200)
+
+		else if (mp.batteryVoltage < 3600)
 			mp.display.drawBitmap(148, 2, batteryEmptyIcon, TFT_BLACK, 2);
 
 		uint8_t temp = 0;
