@@ -322,6 +322,7 @@ uint16_t countSubstring(String string, String substring) {
 	return count;
 }
 void callNumber(String number) {
+	mp.inCall = 1;
 	mp.dataRefreshFlag = 0;
 	char c;
 	String localBuffer = "";
