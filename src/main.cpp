@@ -1704,8 +1704,6 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
-	controlTry();
-	phoneApp();
 }
 void loop()
 {

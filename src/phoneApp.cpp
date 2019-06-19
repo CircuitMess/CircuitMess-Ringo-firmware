@@ -461,17 +461,24 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint
 void sendMMI(String code)
 {
 	String buffer = "";
-	Serial1.println("AT+CUSD=1");
-	delay(10);
+	// Serial1.println("AT+CUSD=1");
+	// delay(10);
 	Serial1.print("AT+CUSD=1,\"");
 	Serial1.print(code);
 	Serial1.println("\"");
-	while(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1)
+	uint32_t tempMillis = millis();
+	bool cleared = 0;
+	while(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1 && millis() - tempMillis < 4000)
 	{
 		if(Serial1.available())
 		{
+			tempMillis = millis();
 			buffer+=(char)Serial1.read();
-			Serial.println(buffer);
+			if(buffer.indexOf("+CUSD:") != -1 && !cleared)
+			{
+				buffer = "+CUSD:";
+				cleared = 1;
+			}
 		}
 		mp.display.fillScreen(TFT_WHITE);
 		mp.display.drawRect(9, 34, 142, 60, TFT_BLACK);
@@ -480,28 +487,33 @@ void sendMMI(String code)
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(55, 50);
+		mp.display.setCursor(55, 54);
 		mp.display.printCenter("Sending USSD code");
 		mp.update();
 	}
-	uint16_t helper = buffer.indexOf("\"", buffer.indexOf("+CUSD:") + 1);
+	if(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1)
+		return;
+	uint16_t helper = buffer.indexOf("\"") + 1;
 	buffer = buffer.substring(helper, buffer.indexOf("\"", helper + 1));
 	Serial.println(buffer);
 	while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 	{
 		mp.display.fillScreen(TFT_WHITE);
-		mp.display.drawRect(10, 20, 142, 88, TFT_BLACK);
-		mp.display.drawRect(11, 21, 141, 86, TFT_BLACK);
+		// mp.display.drawRect(10, 20, 142, 88, TFT_BLACK);
+		// mp.display.drawRect(11, 21, 141, 86, TFT_BLACK);
 		mp.display.fillRect(12, 22, 138, 84, TFT_WHITE);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(10, 30);
+		mp.display.setCursor(10, 10);
 		for(int i = 0; i < buffer.length();i++)
 		{
 			mp.display.print(buffer[i]);
 			if(mp.display.getCursorX() > 150)
+			{
 				mp.display.print("\n");
+				mp.display.setCursor(10, mp.display.getCursorY());
+			}
 		}
 		mp.update();
 	}
