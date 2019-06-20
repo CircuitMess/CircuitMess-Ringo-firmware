@@ -47,7 +47,7 @@ void drawNotificationWindow(uint8_t y, uint8_t index) {
 void lockscreen() {
 	mp.dataRefreshFlag = 1;
     bool blinkState = 0;
-    bool goOut = 0;
+    // bool goOut = 0;
 	uint32_t elapsedMillis = millis();
     uint32_t buttonHeld;
 	// FastLED.clear();
@@ -217,16 +217,8 @@ void lockscreen() {
 			mp.display.setTextSize(1);
 
 			mp.display.fillRect(0, 112, mp.display.width(), 14, backgroundColors[mp.backgroundIndex]);
-			if(mp.resolutionMode)
-			{
-				mp.display.setCursor(1, 63);
-				mp.display.setFreeFont(TT1);
-			}
-			else
-			{
-				mp.display.setCursor(2, 111);
-				mp.display.setTextFont(2);
-			}
+			mp.display.setCursor(2, 111);
+			mp.display.setTextFont(2);
 			mp.display.print("Unlocking");
 			buttonHeld = millis();
 			while (!mp.buttons.released(BTN_A))
@@ -289,26 +281,12 @@ void lockscreen() {
 						mp.update();
 					}
 					Serial.println(millis() - buttonHeld);
-					goOut = 1;
-					// FastLED.clear();
-					// delay(10);
-					break;
+					return;
 				}
 				mp.update();
 			}
 		}
-		if (mp.buttons.released(BTN_B)) {
-			// mp.sleep();
-			// for(int i = 0; i< sizeof(mp.notificationTypeList);i++)
-			// {
-			// 	mp.notificationTypeList[i] = 0;
-			// 	mp.notificationDescriptionList[i] = "";
-			// 	mp.saveNotifications();
-			// }
-			// mp.update();
-		}
-
-		if (goOut == 1 && mp.buttons.released(BTN_A))
-			break;
+		// if (goOut == 1 && mp.buttons.released(BTN_A))
+			// break;
 	}
 }

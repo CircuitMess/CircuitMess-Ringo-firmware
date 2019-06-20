@@ -98,6 +98,8 @@ void clockApp()
 int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 	uint8_t offset = 4;
 	bool pressed = 0;
+	uint32_t blinkMillis = millis();
+	bool blinkState = 0;
 	uint8_t cursor = prevCursor;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
@@ -117,18 +119,17 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 		}
 		uint8_t y = cameraY_actual;
 		uint8_t i = cursor;
-		if (millis() % 500 <= 250 && pressed == 0);
-		else
+		if(millis() - blinkMillis >= 350)
+		{
+			blinkState = !blinkState;
+			blinkMillis = millis();
+		}
+		if (blinkState)
 		{
 			y += i * boxHeight + offset;
 			mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
 			mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
 		}
-
-
-
-		if (mp.buttons.kpd.pin_read(BTN_DOWN) == 1 && mp.buttons.kpd.pin_read(BTN_UP) == 1)
-			pressed = 0;
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			osc->note(75, 0.05);
@@ -171,7 +172,7 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 		}
 
 
-		if (mp.buttons.released(BTN_B) == 1) //BUTTON BACK
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			return -1;
 		}
@@ -430,6 +431,7 @@ void clockAlarm()
 		}
 		else
 		{
+			Serial.println(index);
 			clockAlarmEdit(index);
 			alarmCount = 0;
 			for (int i = 0; i < 5;i++)
@@ -627,7 +629,7 @@ void clockAlarmEdit(uint8_t index)
 		mp.display.fillScreen(0xFC92);
 		//Hour black
 		mp.display.setTextColor(TFT_BLACK);
-		mp.display.setCursor(15, 8);
+		mp.display.setCursor(15, 4);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(2);
 		temp = "";
@@ -639,30 +641,30 @@ void clockAlarmEdit(uint8_t index)
 			temp.concat("0");
 		temp.concat(mins);
 		mp.display.print(temp);
-		mp.display.drawRect(115, 15, 20, 20, TFT_BLACK);
-		mp.display.drawRect(116, 16, 18, 18, TFT_BLACK);
+		mp.display.drawRect(115, 11, 20, 20, TFT_BLACK);
+		mp.display.drawRect(116, 12, 18, 18, TFT_BLACK);
 		if(enabled)
 		{
 			mp.display.setTextFont(1);
 			mp.display.setTextSize(2);
-			mp.display.setCursor(120, 18);
+			mp.display.setCursor(120, 14);
 			mp.display.print("X");
 			mp.display.setTextFont(2);
 		}
 		else
 			color = TFT_DARKGREY;
 		mp.display.setTextColor(color);
-		mp.display.setCursor(15,45);
+		mp.display.setCursor(15,38);
 		mp.display.setTextSize(1);
 		if(enabled)
 		{
 			if(!repeat)
 			{
-				mp.display.setCursor(42, 45);
+				mp.display.setCursor(42, 38);
 				mp.display.print("once/");
 				mp.display.setTextColor(TFT_DARKGREY);
 				mp.display.print("repeat");
-				mp.display.setCursor(85,63);
+				mp.display.setCursor(85,56);
 				mp.display.printCenter("M T W T F S S");
 				temp = "";
 				for(int i = 0; i<7;i++)
@@ -671,18 +673,18 @@ void clockAlarmEdit(uint8_t index)
 					if(i < 6)
 						temp.concat(" ");
 				}
-				mp.display.setCursor(0,78);
+				mp.display.setCursor(0,71);
 				mp.display.printCenter(temp);
 				mp.display.setTextColor(TFT_BLACK);
 			}
 			else
 			{
-				mp.display.setCursor(42, 45);
+				mp.display.setCursor(42, 38);
 				mp.display.setTextColor(TFT_DARKGREY);
 				mp.display.print("once");
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.print("/repeat");
-				mp.display.setCursor(85,63);
+				mp.display.setCursor(85,56);
 				mp.display.printCenter("M T W T F S S");
 				temp = "";
 				for(int i = 0; i<7;i++)
@@ -691,7 +693,7 @@ void clockAlarmEdit(uint8_t index)
 					if(i < 6)
 						temp.concat(" ");
 				}
-				mp.display.setCursor(0,78);
+				mp.display.setCursor(0,71);
 				mp.display.printCenter(temp);
 			}
 
@@ -699,7 +701,7 @@ void clockAlarmEdit(uint8_t index)
 		else
 		{
 			mp.display.printCenter("once/repeat");
-			mp.display.setCursor(85,63);
+			mp.display.setCursor(85,56);
 			mp.display.printCenter("M T W T F S S");
 			temp = "";
 			for(int i = 0; i<7;i++)
@@ -708,13 +710,19 @@ void clockAlarmEdit(uint8_t index)
 				if(i < 6)
 					temp.concat(" ");
 			}
-			mp.display.setCursor(0,78);
+			mp.display.setCursor(0,71);
 			mp.display.printCenter(temp);
 		}
-		mp.display.drawRect(20, 98, 120, 20, color);
-		mp.display.drawRect(19, 97, 122, 22, color);
-		mp.display.setCursor(0,100);
+		mp.display.drawRect(20, 88, 120, 20, color);
+		mp.display.drawRect(19, 87, 122, 22, color);
+		mp.display.setCursor(0,90);
 		mp.display.printCenter(parsedRingtone);
+		mp.display.setCursor(4, 112);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.print("Erase");
+		mp.display.setCursor(125, 112);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.print("Save");
 		if(millis()-blinkMillis >= 350)
 		{
 			blinkState = !blinkState;
@@ -739,7 +747,7 @@ void clockAlarmEdit(uint8_t index)
 						else if (isdigit(key) && hours < 10)
 							hours = hours * 10 + key - 48;
 						if(!blinkState)
-							mp.display.fillRect(0, 0, 46, 50, 0xFC92);
+							mp.display.fillRect(0, 0, 46, 41, 0xFC92);
 					break;
 					case 1:
 						if(mp.buttons.released(BTN_FUN_LEFT))
@@ -750,13 +758,13 @@ void clockAlarmEdit(uint8_t index)
 						else if (isdigit(key) && mins < 10)
 							mins = mins * 10 + key - 48;
 						if(!blinkState)
-							mp.display.fillRect(51, 0, 40, 45, 0xFC92);
+							mp.display.fillRect(51, 0, 40, 41, 0xFC92);
 					break;
 					case 2:
 						if(!blinkState)
 						{
-							mp.display.drawRect(115, 15, 20, 20, 0xFC92);
-							mp.display.drawRect(116, 16, 18, 18, 0xFC92);
+							mp.display.drawRect(115, 11, 20, 20, 0xFC92);
+							mp.display.drawRect(116, 12, 18, 18, 0xFC92);
 						}
 						if(mp.buttons.released(BTN_A))
 						{
@@ -793,9 +801,9 @@ void clockAlarmEdit(uint8_t index)
 				if(!blinkState)
 				{
 					if(cursorX == 0)
-						mp.display.fillRect(0, 50, 71, 12, 0xFC92);
+						mp.display.fillRect(0, 43, 71, 12, 0xFC92);
 					else if(cursorX == 1)
-						mp.display.fillRect(78, 48, 50, 14, 0xFC92);
+						mp.display.fillRect(78, 41, 50, 14, 0xFC92);
 				}
 				if(mp.buttons.released(BTN_RIGHT) && cursorX < 1)
 				{
@@ -815,7 +823,7 @@ void clockAlarmEdit(uint8_t index)
 
 			case 2:
 				if(!blinkState)
-					mp.display.fillRect(29 + 14*cursorX, 64, 15, 15, 0xFC92);
+					mp.display.fillRect(29 + 14*cursorX, 57, 15, 15, 0xFC92);
 				if(mp.buttons.released(BTN_RIGHT) && cursorX < 6)
 				{
 					cursorX++;
@@ -842,8 +850,8 @@ void clockAlarmEdit(uint8_t index)
 			case 3:
 				if(!blinkState)
 				{
-					mp.display.drawRect(20, 98, 120, 20, 0xFC92);
-					mp.display.drawRect(19, 97, 122, 22, 0xFC92);
+					mp.display.drawRect(20, 88, 120, 20, 0xFC92);
+					mp.display.drawRect(19, 87, 122, 22, 0xFC92);
 				}
 				if(mp.buttons.released(BTN_A))
 				{
@@ -931,19 +939,54 @@ void clockAlarmEdit(uint8_t index)
 			mp.update();
 
 		}
+		if(mp.buttons.released(BTN_FUN_RIGHT))
+		{
+			mp.display.setTextColor(TFT_BLACK);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(14, 49, 134, 26, TFT_BLACK);
+			mp.display.drawRect(13, 48, 136, 28, TFT_BLACK);
+			mp.display.fillRect(15, 50, 132, 24, 0xFC92);
+			mp.display.setCursor(47, 53);
+			mp.display.printCenter("Alarms saved!");
+			while(!mp.update());
+			mp.alarmHours[index] = hours;
+			mp.alarmMins[index] = mins;
+			mp.alarmEnabled[index] = enabled;
+			mp.alarmTrack[index] = localRingtone;
+			for(int i = 0; i < 7; i++)
+			{
+				mp.alarmRepeatDays[index][i] = days[i];
+			}
+			mp.alarmRepeat[index] = repeat;
+			mp.saveAlarms();
+			uint32_t tempMillis = millis();
+			while(millis() < tempMillis + 1000)
+			{
+				mp.update();
+				if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+				{
+					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					break;
+				}
+			}
+			//save RTC and exit
+			return;
+		}
 		if(mp.buttons.released(BTN_B))
 		{
 			mp.update();
 			mp.display.setTextColor(TFT_BLACK);
 			mp.display.setTextSize(1);
 			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, 0xFC92);
+			mp.display.drawRect(10, 45, 142, 38, TFT_BLACK);
+			mp.display.drawRect(9, 44, 144, 40, TFT_BLACK);
+			mp.display.fillRect(11, 46, 140, 36, 0xFC92);
 			mp.display.setCursor(47, 48);
-			mp.display.printCenter("Save and exit?");
+			mp.display.printCenter("Exit without saving?");
 			mp.display.setCursor(47, 61);
-			mp.display.printCenter("A: yes    B:cancel");
+			mp.display.printCenter("A: yes      B: no");
 			while(1)
 			{
 				if(mp.buttons.released(BTN_B))
@@ -952,21 +995,7 @@ void clockAlarmEdit(uint8_t index)
 					break;
 				}
 				if(mp.buttons.released(BTN_A))
-				{
-					mp.update();
-					mp.alarmHours[index] = hours;
-					mp.alarmMins[index] = mins;
-					mp.alarmEnabled[index] = enabled;
-					mp.alarmTrack[index] = localRingtone;
-					for(int i = 0; i < 7; i++)
-					{
-						mp.alarmRepeatDays[index][i] = days[i];
-					}
-					mp.alarmRepeat[index] = repeat;
-					mp.saveAlarms();
-					//save RTC and exit
 					return;
-				}
 				mp.update();
 			}
 		}
