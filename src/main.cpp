@@ -336,7 +336,6 @@ void callNumber(String number) {
 	uint32_t timeOffset = 0;
 	uint8_t scale;
 	unsigned int tmp_time = 0;
-	uint8_t micGain = 4;
 	String temp;
 	if(mp.resolutionMode)
 	{
@@ -352,6 +351,7 @@ void callNumber(String number) {
 	digitalWrite(soundSwitchPin, 1);
 
 	mp.display.printCenter(number);
+
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -468,7 +468,7 @@ void callNumber(String number) {
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 			mp.display.setCursor(5, 109);
 			mp.display.print("Mic gain: ");
-			mp.display.print(micGain);
+			mp.display.print(mp.micGain);
 			mp.display.setCursor(100, 109);
 			mp.display.print("Hang up");
 
@@ -570,16 +570,16 @@ void callNumber(String number) {
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		if(mp.buttons.released(BTN_UP) && mp.micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
-			micGain++;
-			Serial1.printf("AT+CMIC=0,%d\r", micGain);
+			mp.micGain++;
+			Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
 			// Serial1.println("AT+CMICBIAS=1 ");
 		}
-		if(mp.buttons.released(BTN_DOWN) && micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
-			micGain--;
-			Serial1.printf("AT+CMIC=0,%d\r", micGain);
+			mp.micGain--;
+			Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
 			// Serial1.println("AT+CMICBIAS=0");
 		}
 
@@ -1705,9 +1705,20 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
+	// mp.dataRefreshFlag = 1;
 }
 void loop()
 {
+	// mp.display.fillScreen(TFT_WHITE);
+	// mp.display.setTextColor(TFT_BLACK);
+	// mp.display.setTextFont(2);
+	// mp.display.setTextSize(1);
+	// mp.display.setCursor(40, 40);
+	// mp.display.printCenter((float)mp.batteryVoltage);
+	// mp.display.setCursor(60,60);
+	// mp.display.printCenter((float)mp.simVoltage);
+	// mp.update();
+
 	// startupWizard();
 	// messagesApp();
 	// phoneApp();
