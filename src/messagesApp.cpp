@@ -59,13 +59,16 @@ void messagesApp() {
 		{
 			menuChoice = smsMenu(jarr, menuChoice);
 			Serial.println(menuChoice);
+
 			if (menuChoice == -1)
 				break;
+
 			else if (menuChoice == -2)
 			{
 				composeSMS(&jarr);
 				menuChoice = -1;
 			}
+
 			else if(menuChoice == -3)
 			{
 				File file = SD.open("/.core/messages.json", "r");
@@ -85,6 +88,7 @@ void messagesApp() {
 				mp.newMessage = 0;
 				menuChoice = -1;
 			}
+
 			else if(menuChoice > -1)
 			{
 				if(viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
@@ -110,8 +114,12 @@ void messagesApp() {
 				}
 			}
 			else
+			{
+				// Serial.print("before: "); Serial.println(menuChoice);
 				menuChoice = -(menuChoice + 3);
-			
+				menuChoice--;
+				// Serial.print("after: "); Serial.println(menuChoice);
+			}
 		}
 	}
 }
@@ -258,7 +266,7 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 }
 int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	int32_t cameraY = 0;
-	int16_t cursor;
+	int16_t cursor = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t scale;
 	uint8_t offset;
@@ -278,6 +286,9 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		sortingArray[min] = sortingArray[i];
 		sortingArray[i] = temp;
 	}
+	Serial.print("Prevcursor: ");
+	Serial.println(prevCursor);
+	Serial.println(length);
 	for(int i = 0; i < length; i++)
 	{
 		if(!messages[sortingArray[i]]["read"].as<bool>())
@@ -296,6 +307,13 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if(sortingArray[i] == prevCursor)
 			cursor = i + 1;
 	}
+	Serial.print("Cursor: ");
+	Serial.println(cursor);
+	// messages.prettyPrintTo(Serial);
+	// for(int i = 0; i< length; i++)
+	// {
+	// 	Serial.print(sortingArray[i]); Serial.print(", ");
+	// }
 	if(prevCursor == -1)
 		cursor = 0;
 	scale = 2;
@@ -388,12 +406,11 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		}
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
-		{
 			return -1;
-		}
+		
 		if(mp.buttons.released(BTN_FUN_LEFT) && cursor > 0)
 		{
-			messages.remove(sortingArray[cursor-1]);
+			messages.remove(sortingArray[cursor - 1]);
 			File file = SD.open("/.core/messages.json", "w");
 			messages.prettyPrintTo(file);
 			file.close();
