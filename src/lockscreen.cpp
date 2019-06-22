@@ -125,6 +125,10 @@ void lockscreen() {
 		}
 		else if(!mp.simInserted && !mp.airplaneMode)
 			mp.display.drawBitmap(2, 2, signalErrorIcon, TFT_BLACK, 2);
+		else if(mp.airplaneMode)
+		{
+			mp.display.drawBitmap(2, 2, airplaneModeIcon, TFT_BLACK, 2);
+		}
 		if (mp.volume == 0)
 		{
 			mp.display.drawBitmap(helper*2, 2, silentModeIcon, TFT_BLACK, 2);
@@ -132,27 +136,37 @@ void lockscreen() {
 		}
 		//mp.display.drawBitmap(31, 1, missedcall);
 		//mp.display.drawBitmap(41, 1, newtext);
-		if (!mp.airplaneMode)
-		{
-			if (mp.wifi == 1)
-				mp.display.drawBitmap(helper * 2, 2, wifiOnIcon, TFT_BLACK, 2);
-			else
-				mp.display.drawBitmap(helper * 2, 2, wifiOffIcon, TFT_BLACK, 2);
-			helper += 10;
-			if (mp.bt)
-				mp.display.drawBitmap(helper * 2, 2, BTonIcon, TFT_BLACK, 2);
-			else
-				mp.display.drawBitmap(helper * 2, 2, BToffIcon, TFT_BLACK, 2);
-			helper += 10;
-		}
-		else
-		{
-			helper-=10;
-			mp.display.drawBitmap(helper*2, 2, airplaneModeIcon, TFT_BLACK, 2);
-		}
+		// if (!mp.airplaneMode)
+		// {
+		// 	if (mp.wifi == 1)
+		// 		mp.display.drawBitmap(helper * 2, 2, wifiOnIcon, TFT_BLACK, 2);
+		// 	else
+		// 		mp.display.drawBitmap(helper * 2, 2, wifiOffIcon, TFT_BLACK, 2);
+		// 	helper += 10;
+		// 	if (mp.bt)
+		// 		mp.display.drawBitmap(helper * 2, 2, BTonIcon, TFT_BLACK, 2);
+		// 	else
+		// 		mp.display.drawBitmap(helper * 2, 2, BToffIcon, TFT_BLACK, 2);
+		// 	helper += 10;
+		// }
+		
 
 		if(!mp.SDinsertedFlag)
+		{
 			mp.display.drawBitmap(helper * 2, 2, noSDIcon, TFT_BLACK, 2);
+			helper+=10;
+		}
+		if(mp.carrierName != "")
+		{
+			// mp.display.setFreeFont(TT1);
+			// mp.display.setTextSize(2);
+			// mp.display.setCursor(helper*2, 15);
+
+			mp.display.setTextFont(2);
+			mp.display.setTextSize(1);
+			mp.display.setCursor(helper*2, 4);
+			mp.display.print(mp.carrierName);
+		}
 
 		if (mp.batteryVoltage > 4100)
 			mp.display.drawBitmap(148, 2, batteryChargingIcon, TFT_BLACK, 2);
