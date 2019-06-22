@@ -9,7 +9,6 @@ String mediaItems[3] PROGMEM = {
 };
 String photoFiles[100];
 uint8_t photoCount = 0;
-MPTrack* trackArray[100];
 bool firstPass = 0;
 MPTrack* mp3;
 
@@ -296,19 +295,9 @@ int16_t audioPlayer(uint16_t index) {
 	bool shuffleList[audioCount];
 	if(!firstPass)
 	{
-		for(int i = 0; i < audioCount;i++)
-		{
-			String songName = audioFiles[i];
-			char test[songName.length() + 1];
-			songName.toCharArray(test, songName.length() + 1);
-			Serial.println(test);
-			delay(5);
-			trackArray[i] = new MPTrack(test);
-		}
 		firstPass = 1;
 		mp3 = new MPTrack((char*)audioFiles[index].c_str());
 		addTrack(mp3);
-
 	}
 	while(1)
 	{
