@@ -11,6 +11,7 @@ String photoFiles[100];
 uint8_t photoCount = 0;
 MPTrack* trackArray[100];
 bool firstPass = 0;
+MPTrack* mp3;
 
 //Media app
 
@@ -293,7 +294,6 @@ int16_t audioPlayer(uint16_t index) {
 	bool allTrue = 0;
 	bool shuffle = 0;
 	bool shuffleList[audioCount];
-	MPTrack* mp3;
 	if(!firstPass)
 	{
 		for(int i = 0; i < audioCount;i++)
@@ -306,6 +306,9 @@ int16_t audioPlayer(uint16_t index) {
 			trackArray[i] = new MPTrack(test);
 		}
 		firstPass = 1;
+		mp3 = new MPTrack((char*)audioFiles[index].c_str());
+		addTrack(mp3);
+
 	}
 	while(1)
 	{
@@ -343,13 +346,14 @@ int16_t audioPlayer(uint16_t index) {
 		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 
 		mp.update();
-		removeTrack(mp3);
-		mp3 = trackArray[index];
-		if(addTrack(mp3))
+		// removeTrack(mp3);
+		// mp3 = trackArray[index];
+		if(mp3->reloadFile((char*)audioFiles[index].c_str()))
 			Serial.println("OK");
 		else
 			Serial.println("ERROR");
 		delay(5);
+		
 		if(playState)
 			mp3->play();
 		mp3->setVolume(256/14*mp.volume);
@@ -359,7 +363,6 @@ int16_t audioPlayer(uint16_t index) {
 			{
 
 				mp3->stop();
-				removeTrack(mp3);
 				Serial.println(F("Stopped"));
 				delay(5);
 				mp.update();
@@ -529,7 +532,6 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				removeTrack(mp3);
 				mp.update();
 				break;
 			}
@@ -576,7 +578,6 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				removeTrack(mp3);
 				mp.update();
 				break;
 			}
