@@ -625,7 +625,7 @@ bool startupWizard()
 		mp.display.setCursor(0, mp.display.height()/2 - 14);
 		mp.display.printCenter("Connect your charger");
 		mp.display.drawBitmap(72, 74, batteryChargingIcon, TFT_BLACK, 3);
-		if(mp.batteryVoltage > 4000)
+		if(mp.batteryVoltage > 4100)
 		{
 			mp.display.setTextColor(TFT_BLACK);
 			mp.display.setTextSize(1);
@@ -1580,13 +1580,13 @@ bool startupWizard()
 	mp.update();
 
 	// Wifi testing
-	if(!mp.wifi)
-	{
-		mp.wifi = 1;
-		delay(50);
-		WiFi.begin();
-		delay(50);
-	}
+	// if(!mp.wifi)
+	// {
+		// mp.wifi = 1;
+	delay(50);
+	WiFi.begin();
+	delay(50);
+	// }
 	mp.display.fillScreen(TFT_WHITE);
 	mp.display.setTextFont(2);
 	mp.display.setTextSize(1);

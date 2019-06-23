@@ -219,211 +219,233 @@ void networkMenu() {
 	uint8_t cursor = 0;
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
+	uint16_t color = 0;
+	mp.dataRefreshFlag = 1;
 	while (1)
 	{
-		Serial.println(mp.airplaneMode);
+		// Serial.println(mp.airplaneMode);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.fillScreen(0xFB6D);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(18, 20);
-		mp.display.print("Wifi");
-		mp.display.setCursor(22, 58);
-		mp.display.print("BT");
-		mp.display.setCursor(16, 88);
-		mp.display.print("Plane\n   mode");
-
+		// mp.display.setCursor(18, 20);
+		// mp.display.print("Wifi");
+		// mp.display.setCursor(22, 58);
+		// mp.display.print("BT");
+		// mp.display.setCursor(16, 88);
+		mp.display.setCursor(10,15);
+		mp.display.printCenter("Airplane mode");
+		mp.display.drawBitmap(12, 15, airplaneModeIcon, TFT_BLACK, 2);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(79, 19);
+		mp.display.setCursor(47, 39);
 		mp.display.print("ON");
-		mp.display.setCursor(122, 19);
+		mp.display.setCursor(90, 39);
 		mp.display.print("OFF");
-		mp.display.setCursor(79, 57);
-		mp.display.print("ON");
-		mp.display.setCursor(122, 57);
-		mp.display.print("OFF");
-		mp.display.setCursor(79, 95);
-		mp.display.print("ON");
-		mp.display.setCursor(122, 95);
-		mp.display.print("OFF");
-		switch (cursor) {
+		if(mp.airplaneMode || !mp.simInserted)
+			color = TFT_DARKGREY;
+		else
+			color = TFT_BLACK;
+		mp.display.drawBitmap(12, 75, signalHighIcon, color, 2);
+		mp.display.setCursor(75,75);
+		mp.display.setTextColor(color);
+		mp.display.printCenter("Signal strength");
+		mp.display.setCursor(95, 95);
+		mp.display.printCenter(mp.signalStrength);
+		// mp.display.setCursor(79, 57);
+		// mp.display.print("ON");
+		// mp.display.setCursor(122, 57);
+		// mp.display.print("OFF");
+		// mp.display.setCursor(79, 95);
+		// mp.display.print("ON");
+		// mp.display.setCursor(122, 95);
+		// mp.display.print("OFF");
+		if(mp.airplaneMode)
+			mp.display.drawRect(38, 36, 34, 22, blinkState ? TFT_BLACK : 0xFB6D);
+		else
+			mp.display.drawRect(82, 36, 40, 22, blinkState ? TFT_BLACK : 0xFB6D);
 
-		case 0:
-			if (mp.bt == 1)
-			{
-				mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
-			}
-			if (mp.airplaneMode == 1)
-			{
-				mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
-			}
-			break;
+		// switch (cursor) {
+		
+		// case 0:
+		// 	if (mp.bt == 1)
+		// 	{
+		// 		mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else
+		// 	{
+		// 		mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	if (mp.airplaneMode == 1)
+		// 	{
+		// 		mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else
+		// 	{
+		// 		mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	break;
 
-		case 1:
-			if (mp.wifi == 1)
-			{
-				mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
-			}
+		// case 1:
+		// 	if (mp.wifi == 1)
+		// 	{
+		// 		mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else
+		// 	{
+		// 		mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
 
-			if (mp.airplaneMode == 1)
-			{
-				mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
-			}
-			break;
+		// 	if (mp.airplaneMode == 1)
+		// 	{
+		// 		mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else
+		// 	{
+		// 		mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	break;
 
-		case 2:
-			if (mp.wifi == 1)
-			{
-				mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
-			}
+		// case 2:
+		// 	if (mp.wifi == 1)
+		// 	{
+		// 		mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else
+		// 	{
+		// 		mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
 
-			if (mp.bt == 1)
-			{
-				mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else
-			{
-				mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
-			}
-		}
-
-
+		// 	if (mp.bt == 1)
+		// 	{
+		// 		mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else
+		// 	{
+		// 		mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// }
 
 
-		if (cursor == 0)
-		{
-			if (blinkState && mp.wifi)
-			{
-				mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else if (blinkState && !mp.wifi)
-			{
-				mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
-			}
-			if (mp.buttons.released(BTN_LEFT) && !mp.wifi)
-			{
-				mp.update();
-				osc->note(75, 0.05);
-				osc->play();
-				blinkState = 1;
-				blinkMillis = millis();
-				mp.wifi = !mp.wifi;
-			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.wifi)
-			{
-				mp.update();
-				osc->note(75, 0.05);
-				osc->play();
-				blinkState = 1;
-				blinkMillis = millis();
-				mp.wifi = !mp.wifi;
-			}
-		}
-		if (cursor == 1)
-		{
-			if (blinkState && mp.bt)
-			{
-				mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else if (blinkState && !mp.bt)
-			{
-				mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
-			}
-			if (mp.buttons.released(BTN_LEFT) && !mp.bt)
-			{
-				mp.update();
-				osc->note(75, 0.05);
-				osc->play();
-				blinkState = 1;
-				blinkMillis = millis();
-				mp.bt = !mp.bt;
-			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.bt)
-			{
-				mp.update();
-				osc->note(75, 0.05);
-				osc->play();
-				blinkState = 1;
-				blinkMillis = millis();
-				mp.bt = !mp.bt;
-			}
-		}
-		if (cursor == 2)
-		{
-			if (blinkState && mp.airplaneMode)
-			{
-				mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
-			}
-			else if (blinkState && !mp.airplaneMode)
-			{
-				mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
-			}
-			if (mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
-			{
-				mp.update();
-				osc->note(75, 0.05);
-				osc->play();
-				blinkState = 1;
-				blinkMillis = millis();
-				mp.airplaneMode = !mp.airplaneMode;
-			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode)
-			{
-				mp.update();
-				osc->note(75, 0.05);
-				osc->play();
-				blinkState = 1;
-				blinkMillis = millis();
-				mp.airplaneMode = !mp.airplaneMode;
-			}
-		}
 
-		if (mp.buttons.released(BTN_UP))
-		{
-			osc->note(75, 0.05);
-			osc->play();
-			blinkState = 0;
-			blinkMillis = millis();
-			mp.update();
-			if (cursor == 0)
-				cursor = 2;
-			else
-				cursor--;
-		}
-		if (mp.buttons.released(BTN_DOWN))
-		{
-			osc->note(75, 0.05);
-			osc->play();
-			blinkState = 0;
-			blinkMillis = millis();
-			mp.update();
-			if (cursor == 2)
-				cursor = 0;
-			else
-				cursor++;
 
-		}
+		// if (cursor == 0)
+		// {
+		// 	if (blinkState && mp.wifi)
+		// 	{
+		// 		mp.display.drawRect(35*2, 8*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else if (blinkState && !mp.wifi)
+		// 	{
+		// 		mp.display.drawRect(57*2, 8*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	if (mp.buttons.released(BTN_LEFT) && !mp.wifi)
+		// 	{
+		// 		mp.update();
+		// 		osc->note(75, 0.05);
+		// 		osc->play();
+		// 		blinkState = 1;
+		// 		blinkMillis = millis();
+		// 		mp.wifi = !mp.wifi;
+		// 	}
+		// 	if (mp.buttons.released(BTN_RIGHT) && mp.wifi)
+		// 	{
+		// 		mp.update();
+		// 		osc->note(75, 0.05);
+		// 		osc->play();
+		// 		blinkState = 1;
+		// 		blinkMillis = millis();
+		// 		mp.wifi = !mp.wifi;
+		// 	}
+		// }
+		// if (cursor == 1)
+		// {
+		// 	if (blinkState && mp.bt)
+		// 	{
+		// 		mp.display.drawRect(35*2, 27*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else if (blinkState && !mp.bt)
+		// 	{
+		// 		mp.display.drawRect(57*2, 27*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	if (mp.buttons.released(BTN_LEFT) && !mp.bt)
+		// 	{
+		// 		mp.update();
+		// 		osc->note(75, 0.05);
+		// 		osc->play();
+		// 		blinkState = 1;
+		// 		blinkMillis = millis();
+		// 		mp.bt = !mp.bt;
+		// 	}
+		// 	if (mp.buttons.released(BTN_RIGHT) && mp.bt)
+		// 	{
+		// 		mp.update();
+		// 		osc->note(75, 0.05);
+		// 		osc->play();
+		// 		blinkState = 1;
+		// 		blinkMillis = millis();
+		// 		mp.bt = !mp.bt;
+		// 	}
+		// }
+		// if (cursor == 2)
+		// {
+		// 	if (blinkState && mp.airplaneMode)
+		// 	{
+		// 		mp.display.drawRect(35*2, 46*2, 17*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	else if (blinkState && !mp.airplaneMode)
+		// 	{
+		// 		mp.display.drawRect(57*2, 46*2, 20*2, 11*2, TFT_BLACK);
+		// 	}
+		// 	if (mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
+		// 	{
+		// 		mp.update();
+		// 		osc->note(75, 0.05);
+		// 		osc->play();
+		// 		blinkState = 1;
+		// 		blinkMillis = millis();
+		// 		mp.airplaneMode = !mp.airplaneMode;
+		// 	}
+		// 	if (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode)
+		// 	{
+		// 		mp.update();
+		// 		osc->note(75, 0.05);
+		// 		osc->play();
+		// 		blinkState = 1;
+		// 		blinkMillis = millis();
+		// 		mp.airplaneMode = !mp.airplaneMode;
+		// 	}
+		// }
+
+		// if (mp.buttons.released(BTN_UP))
+		// {
+		// 	osc->note(75, 0.05);
+		// 	osc->play();
+		// 	blinkState = 0;
+		// 	blinkMillis = millis();
+		// 	mp.update();
+		// 	if (cursor == 0)
+		// 		cursor = 2;
+		// 	else
+		// 		cursor--;
+		// }
+		// if (mp.buttons.released(BTN_DOWN))
+		// {
+		// 	osc->note(75, 0.05);
+		// 	osc->play();
+		// 	blinkState = 0;
+		// 	blinkMillis = millis();
+		// 	mp.update();
+		// 	if (cursor == 2)
+		// 		cursor = 0;
+		// 	else
+		// 		cursor++;
+
+		// }
+		if((mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
+		|| (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode))
+			mp.airplaneMode = !mp.airplaneMode;
+
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			mp.update();
@@ -437,6 +459,7 @@ void networkMenu() {
 		}
 		mp.update();
 	}
+	mp.dataRefreshFlag = 0;
 }
 void displayMenu() {
 	mp.display.setTextFont(1);
@@ -2234,41 +2257,41 @@ bool updateMenu()
 					}
 					else
 					{
-						if(mp.wifi)
-						{
-							mp.display.setTextColor(TFT_BLACK);
-							mp.display.setTextSize(1);
-							mp.display.setTextFont(2);
-							mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-							mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-							mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-							mp.display.setCursor(47, 54);
-							mp.display.printCenter("Searching for networks");
-							while(!mp.update());
-							wifiConnect();
-						}
-						else
-						{
-							mp.display.setTextColor(TFT_BLACK);
-							mp.display.setTextSize(1);
-							mp.display.setTextFont(2);
-							mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-							mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-							mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-							mp.display.setCursor(47, 54);
-							mp.display.printCenter("Wifi turned off!");
-							uint32_t tempMillis = millis();
-							while(millis() < tempMillis + 2000)
-							{
-								mp.update();
-								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-								{
-									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-										mp.update();
-									break;
-								}
-							}
-						}
+						// if(mp.wifi)
+						// {
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
+						mp.display.setTextFont(2);
+						mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+						mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+						mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+						mp.display.setCursor(47, 54);
+						mp.display.printCenter("Searching for networks");
+						while(!mp.update());
+						wifiConnect();
+						// }
+						// else
+						// {
+						// 	mp.display.setTextColor(TFT_BLACK);
+						// 	mp.display.setTextSize(1);
+						// 	mp.display.setTextFont(2);
+						// 	mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+						// 	mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+						// 	mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+						// 	mp.display.setCursor(47, 54);
+						// 	mp.display.printCenter("Wifi turned off!");
+						// 	uint32_t tempMillis = millis();
+						// 	while(millis() < tempMillis + 2000)
+						// 	{
+						// 		mp.update();
+						// 		if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+						// 		{
+						// 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						// 				mp.update();
+						// 			break;
+						// 		}
+						// 	}
+						// }
 					}
 					mp.update();
 				}
@@ -2291,7 +2314,7 @@ bool updateMenu()
 						mp.update();
 
 						String contacts_default = "[]";
-						String settings_default = "{ \"wifi\": 0, \"bluetooth\": 0, \"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"volume\" : 3, \"micGain\" : 15}";
+						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"volume\" : 3, \"micGain\" : 15}";
 
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
@@ -2311,8 +2334,8 @@ bool updateMenu()
 						settings.prettyPrintTo(settings_file);
 						settings_file.close();
 
-						mp.wifi = settings["wifi"];
-						mp.bt = settings["bluetooth"];
+						// mp.wifi = settings["wifi"];
+						// mp.bt = settings["bluetooth"];
 						mp.airplaneMode = settings["airplane_mode"];
 						mp.brightness = settings["brightness"];
 						mp.sleepTime = settings["sleep_time"];
@@ -2327,8 +2350,8 @@ bool updateMenu()
 					}
 					else
 					{
-						mp.wifi = 1;
-						mp.bt = 0;
+						// mp.wifi = 1;
+						// mp.bt = 0;
 						mp.airplaneMode = 0;
 						mp.brightness = 5;
 						mp.sleepTime = 0;
@@ -2524,33 +2547,35 @@ void notificationsDrawBox(String text, uint8_t i, int32_t y) {
 }
 void wifiConnect()
 {
-	if(!mp.wifi)
-	{
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.setTextSize(1);
-		mp.display.setTextFont(2);
-		mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-		mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-		mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-		mp.display.setCursor(47, 54);
-		mp.display.printCenter("WiFi turned off!");
-		uint32_t tempMillis = millis();
-		while(millis() < tempMillis + 2000)
-		{
-			mp.update();
-			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-			{
-				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-					mp.update();
-				break;
-			}
-		}
-		mp.update();
-	}
+	// if(!mp.wifi)
+	// {
+	// 	mp.display.setTextColor(TFT_BLACK);
+	// 	mp.display.setTextSize(1);
+	// 	mp.display.setTextFont(2);
+	// 	mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+	// 	mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+	// 	mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+	// 	mp.display.setCursor(47, 54);
+	// 	mp.display.printCenter("WiFi turned off!");
+	// 	uint32_t tempMillis = millis();
+	// 	while(millis() < tempMillis + 2000)
+	// 	{
+	// 		mp.update();
+	// 		if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+	// 		{
+	// 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	// 				mp.update();
+	// 			break;
+	// 		}
+	// 	}
+	// 	mp.update();
+	// }
 	bool blinkState = 1;
 	unsigned long elapsedMillis = millis();
 	String content = ""; //password string
 	String prevContent = "";
+	WiFi.begin();
+	WiFi.mode(WIFI_STA);
 	delay(1000);
 	int n = WiFi.scanNetworks();
 	// delay(1000);
