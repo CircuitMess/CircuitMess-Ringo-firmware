@@ -368,6 +368,8 @@ void callNumber(String number) {
 		Serial.println("---------------");
 		Serial.println(buffer);
 		delay(5);
+		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
+			buffer = "";
 		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
 			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
@@ -1697,7 +1699,7 @@ void setup()
 	osc->setVolume(256*mp.volume/14);
 	addOscillator(osc);
 	Serial.print("Setup: ");
-	Serial.println(EEPROM.readBool(33));/* at+cusd=1,"*101#"atd0921518476;*/
+	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 	{
 		EEPROM.writeBool(33, 0);
