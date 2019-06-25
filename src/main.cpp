@@ -1612,8 +1612,10 @@ void controlTry() //for debug purposes
 	bool blinkState = 1;
 	uint8_t scale;
 	String updateBuffer = "";
-
-	// mp.dataRefreshFlag = 1;
+	char c;
+	String outBuffer = "";
+	mp.dataRefreshFlag = 0;
+	// Serial1.print("AT+CPIN?\r\n");
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
@@ -1656,14 +1658,28 @@ void controlTry() //for debug purposes
 			mp.textInput("");
 			mp.textPointer = 0;
 		}
-		if(Serial1.available())
+		while(Serial1.available())
 		{
-			updateBuffer+=(char)Serial1.read();
+			c = Serial1.read();
+			// if(isAlphaNumeric(c))
+				updateBuffer+=c;
+			// else
+			// {
+				// Serial.println((int)c);
+			// }
+			
 			Serial.println(updateBuffer);
 		}
-		if(Serial.available())
+		if(Serial.available() && Serial1.availableForWrite())
 		{
-			Serial1.println(Serial.readString());
+			outBuffer = Serial.readString();
+			Serial1.println(outBuffer);
+			Serial.write('\r');
+			// Serial.write(10);
+			// Serial1.println("\n\r");
+			// Serial1.flush();
+			// Serial1.println("\n");
+			// Serial1.println("\r\n");
 		}
 		mp.update();
 	}
@@ -1707,6 +1723,7 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
+	controlTry();
 	// mp.dataRefreshFlag = 1;
 }
 void loop()
