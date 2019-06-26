@@ -358,7 +358,8 @@ void callNumber(String number) {
 		if (Serial1.available())
 		{
 			c = Serial1.read();
-			buffer += c;
+			if((uint8_t)c != 255)
+				buffer += c;
 		}
 		if(buffer.indexOf("CLCC:") != -1 && buffer.indexOf("\r", buffer.indexOf("CLCC:")) != -1)
 		{
@@ -572,17 +573,22 @@ void callNumber(String number) {
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && mp.micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		if(mp.buttons.released(BTN_UP) && ((mp.micGain < 15 && mp.sim_module_version == 1) || (mp.micGain < 8 && mp.sim_module_version == 0))
+		&& (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			mp.micGain++;
-			Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			// Serial1.println("AT+CMICBIAS=1 ");
+			if(mp.sim_module_version == 1)
+				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
+			else if(mp.sim_module_version == 0)
+				Serial.printf("AT+CMICGAIN=%d\r\n", mp.micGain);
 		}
 		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			mp.micGain--;
-			Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			// Serial1.println("AT+CMICBIAS=0");
+			if(mp.sim_module_version == 1)
+				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
+			else if(mp.sim_module_version == 0)
+				Serial.printf("AT+CMICGAIN=%d\r\n", mp.micGain);
 		}
 
 		for(int i = 0; i < 12;i++)
@@ -1603,6 +1609,7 @@ bool startupWizard()
 }
 void controlTry() //for debug purposes
 {
+	mp.dataRefreshFlag = 0;
 	mp.textInput("");
 	mp.textPointer = 0;
     y = 16; //beginning point
@@ -1662,6 +1669,7 @@ void controlTry() //for debug purposes
 		{
 			c = Serial1.read();
 			// if(isAlphaNumeric(c))
+			if((uint8_t)c != 255)
 				updateBuffer+=c;
 			// else
 			// {
@@ -1670,11 +1678,12 @@ void controlTry() //for debug purposes
 			
 			Serial.println(updateBuffer);
 		}
-		if(Serial.available() && Serial1.availableForWrite())
+		while(Serial.available())
 		{
-			outBuffer = Serial.readString();
-			Serial1.println(outBuffer);
-			Serial.write('\r');
+			// outBuffer = Serial.read();
+			Serial1.println(Serial.readString());
+			// Serial.write('\r');
+			// Serial.write('\n');
 			// Serial.write(10);
 			// Serial1.println("\n\r");
 			// Serial1.flush();
@@ -1723,7 +1732,7 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
-	controlTry();
+	// controlTry();
 	// mp.dataRefreshFlag = 1;
 }
 void loop()
