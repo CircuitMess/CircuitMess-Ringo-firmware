@@ -2720,11 +2720,11 @@ void wifiConnect()
 									{
 										while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 											mp.update();
-										break;
+										return;
 									}
 								}
 								mp.update();
-								break;
+								return;
 							}
 						}
 						Serial.print("Wifi status: ");
