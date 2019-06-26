@@ -2134,7 +2134,7 @@ void timeMenu()
 							mp.display.printCenter("Couldn't fetch time");
 							mp.display.setCursor(0, mp.display.height()/2);
 							mp.display.printCenter("Set it manually");
-							mp.update();
+							while(!mp.update());
 							delay(2000);
 							break;
 						}
@@ -2145,7 +2145,7 @@ void timeMenu()
 							mp.display.fillScreen(0xFFED);
 							mp.display.setCursor(0, mp.display.height()/2 - 16);
 							mp.display.printCenter("Time fetched over GSM!");
-							mp.update();
+							while(!mp.update());
 							delay(1500);
 							break;
 						}
@@ -2574,8 +2574,10 @@ void wifiConnect()
 	unsigned long elapsedMillis = millis();
 	String content = ""; //password string
 	String prevContent = "";
+	delay(500);
 	WiFi.begin();
 	WiFi.mode(WIFI_STA);
+	WiFi.disconnect();
 	delay(1000);
 	int n = WiFi.scanNetworks();
 	// delay(1000);
@@ -2701,7 +2703,7 @@ void wifiConnect()
 						uint8_t counter = 0;
 						while (WiFi.status() != WL_CONNECTED)
 						{
-							delay(500);
+							delay(750);
 							mp.display.print(".");
 							mp.update();
 							counter++;
@@ -2718,11 +2720,11 @@ void wifiConnect()
 									{
 										while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 											mp.update();
-										break;
+										return;
 									}
 								}
 								mp.update();
-								break;
+								return;
 							}
 						}
 						Serial.print("Wifi status: ");

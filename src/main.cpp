@@ -366,9 +366,9 @@ void callNumber(String number) {
 			localBuffer = buffer;
 			buffer = "";
 		}
-		Serial.println("---------------");
-		Serial.println(buffer);
-		delay(5);
+		// Serial.println("---------------");
+		// Serial.println(buffer);
+		// delay(5);
 		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
 			buffer = "";
 		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
@@ -580,7 +580,12 @@ void callNumber(String number) {
 			if(mp.sim_module_version == 1)
 				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
 			else if(mp.sim_module_version == 0)
-				Serial.printf("AT+CMICGAIN=%d\r\n", mp.micGain);
+			{
+				String foo = "AT+CMICGAIN=";
+				foo+=mp.micGain;
+				Serial1.println(foo);
+				delay(10);
+			}
 		}
 		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
@@ -588,7 +593,12 @@ void callNumber(String number) {
 			if(mp.sim_module_version == 1)
 				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
 			else if(mp.sim_module_version == 0)
-				Serial.printf("AT+CMICGAIN=%d\r\n", mp.micGain);
+			{
+				String foo = "AT+CMICGAIN=";
+				foo+=mp.micGain;
+				Serial1.println(foo);
+				delay(10);
+			}
 		}
 
 		for(int i = 0; i < 12;i++)
@@ -1677,6 +1687,8 @@ void controlTry() //for debug purposes
 			// }
 			
 			Serial.println(updateBuffer);
+			if(updateBuffer.indexOf("\n") != -1)
+				updateBuffer = "";
 		}
 		while(Serial.available())
 		{
