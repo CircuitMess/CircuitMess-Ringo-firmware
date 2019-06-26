@@ -2574,8 +2574,10 @@ void wifiConnect()
 	unsigned long elapsedMillis = millis();
 	String content = ""; //password string
 	String prevContent = "";
+	delay(500);
 	WiFi.begin();
 	WiFi.mode(WIFI_STA);
+	WiFi.disconnect();
 	delay(1000);
 	int n = WiFi.scanNetworks();
 	// delay(1000);
@@ -2701,7 +2703,7 @@ void wifiConnect()
 						uint8_t counter = 0;
 						while (WiFi.status() != WL_CONNECTED)
 						{
-							delay(500);
+							delay(750);
 							mp.display.print(".");
 							mp.update();
 							counter++;
