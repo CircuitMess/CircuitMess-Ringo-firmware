@@ -806,7 +806,7 @@ void soundMenu() {
 				break;
 
 			case 2:
-				mp.display.drawRect(6, 55, 148, 22, blinkState ? TFT_BLACK : 0xA7FF);
+				mp.display.drawRect(6, 69, 148, 20, blinkState ? TFT_BLACK : 0xA7FF);
 				if (mp.buttons.released(BTN_A))
 				{
 					mp.update();
@@ -852,7 +852,7 @@ void soundMenu() {
 				break;
 
 			case 3:
-				mp.display.drawRect(6, 100, 148, 22, blinkState ? TFT_BLACK : 0xA7FF);
+				mp.display.drawRect(6, 105, 148, 20, blinkState ? TFT_BLACK : 0xA7FF);
 				if (mp.buttons.released(BTN_A))
 				{
 					mp.update();
@@ -3070,12 +3070,12 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 4) {
-					cameraY = -(cursor - 3) * (boxHeight + 1) - 1;
+					cameraY = -(cursor - 3) * (boxHeight + 1);
 				}
 			}
 			else {
-				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
-					cameraY += (boxHeight + 2);
+				if (cursor > 0 && (cursor * (boxHeight + 1)  + cameraY + offset) <= 30) {
+					cameraY += (boxHeight + 1);
 				}
 				cursor--;
 			}
