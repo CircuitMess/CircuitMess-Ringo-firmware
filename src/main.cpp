@@ -563,7 +563,7 @@ void callNumber(String number) {
 			mp.updateTimeRTC();
 			Serial.println("B PRESSED");
 			Serial1.println("ATH");
-			long long curr_millis = millis();
+			uint32_t curr_millis = millis();
 			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
 				Serial1.println("ATH");
 			}
@@ -622,8 +622,10 @@ void callNumber(String number) {
 		tmp_time = int((millis() - timeOffset) / 1000);
 		mp.update();
 	}
+	if(mp.SDinsertedFlag)
+		mp.saveSettings();
 	digitalWrite(soundSwitchPin, 0);
-
+	mp.inCall = 0;
 }
 bool startupWizard()
 {
@@ -1732,6 +1734,7 @@ void setup()
 }
 void loop()
 {
+	// mp.dataRefreshFlag = 1;
 	// mp.display.fillScreen(TFT_WHITE);
 	// mp.display.setTextColor(TFT_BLACK);
 	// mp.display.setTextFont(2);
