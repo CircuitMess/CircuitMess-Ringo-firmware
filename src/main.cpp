@@ -358,17 +358,16 @@ void callNumber(String number) {
 		if (Serial1.available())
 		{
 			c = Serial1.read();
-			if((uint8_t)c != 255)
-				buffer += c;
+			buffer += c;
 		}
 		if(buffer.indexOf("CLCC:") != -1 && buffer.indexOf("\r", buffer.indexOf("CLCC:")) != -1)
 		{
 			localBuffer = buffer;
 			buffer = "";
 		}
-		// Serial.println("---------------");
-		// Serial.println(buffer);
-		// delay(5);
+		Serial.println("---------------");
+		Serial.println(buffer);
+		delay(5);
 		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
 			buffer = "";
 		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
@@ -1675,32 +1674,16 @@ void controlTry() //for debug purposes
 			mp.textInput("");
 			mp.textPointer = 0;
 		}
-		while(Serial1.available())
+		if(Serial1.available())
 		{
-			c = Serial1.read();
-			// if(isAlphaNumeric(c))
-			if((uint8_t)c != 255)
-				updateBuffer+=c;
-			// else
-			// {
-				// Serial.println((int)c);
-			// }
-			
-			Serial.println(updateBuffer);
-			if(updateBuffer.indexOf("\n") != -1)
-				updateBuffer = "";
+			// updateBuffer+=(char)Serial1.read();
+			Serial.println(Serial1.readString());
+			// if(updateBuffer.indexOf("\r", updateBuffer.indexOf("\r") + 1) != -1)
+				// updateBuffer = "";
 		}
-		while(Serial.available())
+		if(Serial.available())
 		{
-			// outBuffer = Serial.read();
 			Serial1.println(Serial.readString());
-			// Serial.write('\r');
-			// Serial.write('\n');
-			// Serial.write(10);
-			// Serial1.println("\n\r");
-			// Serial1.flush();
-			// Serial1.println("\n");
-			// Serial1.println("\r\n");
 		}
 		mp.update();
 	}
