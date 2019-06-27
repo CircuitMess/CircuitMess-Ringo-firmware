@@ -723,134 +723,153 @@ void soundMenu() {
 	while (1)
 	{
 		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.fillScreen(0xA7FF);
-		mp.display.setCursor(20, 4);
-		mp.display.printCenter("Volume");
-		mp.display.drawRect(36, 12*2, 88, 4*2, TFT_BLACK);
-		mp.display.drawBitmap(4*2, 10*2, noSound, TFT_BLACK, 2);
-		mp.display.drawBitmap(67*2, 10*2, fullSound, TFT_BLACK, 2);
-		mp.display.fillRect(38, 13*2, mp.volume * 3*2, 2*2, TFT_BLACK);
-		mp.display.setCursor(15, 37);
+		mp.display.setCursor(20, 1);
+		mp.display.printCenter("Ring volume");
+		mp.display.drawBitmap(8, 14, noSound, TFT_BLACK, 2);
+		mp.display.drawBitmap(134, 14, fullSound, TFT_BLACK, 2);
+		mp.display.drawRect(36, 18, 88, 8, TFT_BLACK);
+		mp.display.fillRect(38, 20, mp.ringVolume * 6, 4, TFT_BLACK);
+
+		mp.display.setCursor(29,29);
+		mp.display.printCenter("Media volume");
+		mp.display.drawRect(36, 44, 88, 8, TFT_BLACK);
+		mp.display.fillRect(38, 46, mp.mediaVolume * 6, 4, TFT_BLACK);
+		mp.display.drawBitmap(8, 40, noSound, TFT_BLACK, 2);
+		mp.display.drawBitmap(134, 40, fullSound, TFT_BLACK, 2);
+
+		mp.display.setCursor(15, 52);
 		mp.display.printCenter("Ringtone");
-		mp.display.drawRect(3*2, 55, 74*2, 11*2, TFT_BLACK);
-		mp.display.setCursor(6*2, 58);
+		mp.display.drawRect(6, 69, 148, 20, TFT_BLACK);
+		mp.display.setCursor(12, 71);
 		mp.display.print(parsedRingtone);
 
-		mp.display.setCursor(5, 82);
+		mp.display.setCursor(5, 90);
 		mp.display.printCenter("Notification");
-		mp.display.drawRect(3*2, 100, 74*2, 11*2, TFT_BLACK);
-		mp.display.setCursor(6*2, 103);
+		mp.display.drawRect(6, 105, 148, 20, TFT_BLACK);
+		mp.display.setCursor(12, 107);
 		mp.display.printCenter(notificationSounds[mp.notification]);
 		if(millis()-blinkMillis >= 350)
 		{
 			blinkMillis = millis();
 			blinkState = !blinkState;
 		}
-		if (cursor == 0)
+		switch (cursor)
 		{
-			if (blinkState)
-			{
-				mp.display.drawBitmap(4*2, 10*2, noSound, TFT_BLACK, 2);
-				mp.display.drawBitmap(67*2, 10*2, fullSound, TFT_BLACK, 2);
-			}
-			else
-			{
-				mp.display.drawBitmap(4*2, 10*2, noSound, 0xA7FF, 2);
-				mp.display.drawBitmap(67*2, 10*2, fullSound, 0xA7FF, 2);
-			}
-			if (mp.buttons.released(BTN_LEFT) && mp.volume > 0)
-			{
-				mp.volume--;
-				mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.update();
-				// Serial.print("Volume: "); Serial.println(mp.volume);
-			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.volume < 14)
-			{
-				mp.volume++;
-				mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.update();
-				// Serial.print("Volume: "); Serial.println(mp.volume);
-			}
-		}
-		if (cursor == 1)
-		{
-			if (blinkState)
-				mp.display.drawRect(3*2, 55, 74*2, 11*2, TFT_BLACK);
-			else
-				mp.display.drawRect(3*2, 55, 74*2, 11*2, 0xA7FF);
-
-			if (mp.buttons.released(BTN_A))
-			{
-				mp.update();
-				if(mp.SDinsertedFlag)
+			case 0:
+				mp.display.drawBitmap(8, 14, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(134, 14, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				if (mp.buttons.released(BTN_LEFT) && mp.ringVolume > 0)
 				{
+					mp.ringVolume--;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
-					i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
-					mp.display.setTextColor(TFT_BLACK);
-					if (i >= 0)
-						mp.ringtone_path = audioFiles[i];
-					else
-						Serial.println("pressed B in menu");
-					start = 0;
-					while (mp.ringtone_path.indexOf("/", start) != -1)
-						start = mp.ringtone_path.indexOf("/", start) + 1;
-					parsedRingtone = mp.ringtone_path.substring(start, mp.ringtone_path.indexOf("."));
-				}
-				else
-				{
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setTextSize(1);
-					mp.display.setTextFont(2);
-					mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-					mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-					mp.display.fillRect(15, 46, 132, 36, 0xA7FF);
-					mp.display.setCursor(47, 55);
-					mp.display.printCenter("No SD card!");
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 1500)
-					{
-						mp.update();
-						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-						{
-							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-								mp.update();
-							break;
-						}
-					}
 					mp.update();
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				if (mp.buttons.released(BTN_RIGHT) && mp.ringVolume < 14)
+				{
+					mp.ringVolume++;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.update();
+					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
 
-			}
-		}
-		if (cursor == 2)
-		{
-			if (blinkState)
-				mp.display.drawRect(3*2, 100, 74*2, 11*2, TFT_BLACK);
-			else
-				mp.display.drawRect(3*2, 100, 74*2, 11*2, 0xA7FF);
+				break;
+			
+			case 1:
+				mp.display.drawBitmap(8, 40, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(134, 40, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				if (mp.buttons.released(BTN_LEFT) && mp.mediaVolume > 0)
+				{
+					mp.mediaVolume--;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.update();
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				if (mp.buttons.released(BTN_RIGHT) && mp.mediaVolume < 14)
+				{
+					mp.mediaVolume++;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.update();
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				break;
 
-			if (mp.buttons.released(BTN_A))
-			{
-				mp.update();
-				int8_t temp = notificationsAudioMenu(notificationSounds, 4);
-				if(temp>=0)
-					mp.notification = temp;
-			}
+			case 2:
+				mp.display.drawRect(6, 55, 148, 22, blinkState ? TFT_BLACK : 0xA7FF);
+				if (mp.buttons.released(BTN_A))
+				{
+					mp.update();
+					if(mp.SDinsertedFlag)
+					{
+						mp.osc->note(75, 0.05);
+						mp.osc->play();
+						i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
+						mp.display.setTextColor(TFT_BLACK);
+						if (i >= 0)
+							mp.ringtone_path = audioFiles[i];
+						else
+							Serial.println("pressed B in menu");
+						start = 0;
+						while (mp.ringtone_path.indexOf("/", start) != -1)
+							start = mp.ringtone_path.indexOf("/", start) + 1;
+						parsedRingtone = mp.ringtone_path.substring(start, mp.ringtone_path.indexOf("."));
+					}
+					else
+					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
+						mp.display.setTextFont(2);
+						mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+						mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+						mp.display.fillRect(15, 46, 132, 36, 0xA7FF);
+						mp.display.setCursor(47, 55);
+						mp.display.printCenter("No SD card!");
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 1500)
+						{
+							mp.update();
+							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+							{
+								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								break;
+							}
+						}
+						mp.update();
+					}
+				}
+				break;
+
+			case 3:
+				mp.display.drawRect(6, 100, 148, 22, blinkState ? TFT_BLACK : 0xA7FF);
+				if (mp.buttons.released(BTN_A))
+				{
+					mp.update();
+					int8_t temp = notificationsAudioMenu(notificationSounds, 4);
+					if(temp>=0)
+						mp.notification = temp;
+				}
+				break;
 		}
 
 		if (mp.buttons.released(BTN_UP))
 		{
+			mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			if (cursor == 0)
-				cursor = 2;
+				cursor = 3;
 			else
 				cursor--;
 			mp.update();
@@ -859,9 +878,10 @@ void soundMenu() {
 		}
 		if (mp.buttons.released(BTN_DOWN))
 		{
+			mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
-			if (cursor == 2)
+			if (cursor == 3)
 				cursor = 0;
 			else
 				cursor++;
@@ -876,6 +896,7 @@ void soundMenu() {
 		}
 		mp.update();
 	}
+	mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 }
 void securityMenu() {
 
@@ -2316,7 +2337,7 @@ bool updateMenu()
 						mp.update();
 
 						String contacts_default = "[]";
-						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"volume\" : 3, \"micGain\" : 15}";
+						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 15}";
 
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
@@ -2344,7 +2365,7 @@ bool updateMenu()
 						mp.backgroundIndex = settings["background_color"];
 						mp.notification = settings["notification"];
 						mp.ringtone_path = String(settings["ringtone"].as<char*>());
-						mp.volume = settings["volume"];
+						mp.ringVolume = settings["ringVolume"];
 						mp.micGain = settings["micGain"];
 						Serial.println("ERASED");
 						delay(5);
@@ -2358,7 +2379,8 @@ bool updateMenu()
 						mp.brightness = 5;
 						mp.sleepTime = 0;
 						mp.backgroundIndex = 0;
-						mp.volume = 10;
+						mp.ringVolume = 10;
+						mp.mediaVolume = 10;
 						mp.ringtone_path = "/Music/Default ringtone.wav";
 						mp.notification = 0;
 						mp.applySettings();

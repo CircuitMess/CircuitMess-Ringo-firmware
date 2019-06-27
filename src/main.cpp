@@ -1728,7 +1728,6 @@ void loop()
 	// phoneApp();
 	// clockApp();
 	// soundMenu();
-	mediaApp();
 	lockscreen();
 	mainMenu();
 	// mediaApp();

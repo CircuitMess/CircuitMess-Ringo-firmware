@@ -129,7 +129,7 @@ void lockscreen() {
 		{
 			mp.display.drawBitmap(2, 2, airplaneModeIcon, TFT_BLACK, 2);
 		}
-		if (mp.volume == 0)
+		if (mp.ringVolume == 0)
 		{
 			mp.display.drawBitmap(helper*2, 2, silentModeIcon, TFT_BLACK, 2);
 			helper += 10;

@@ -325,7 +325,7 @@ int16_t audioPlayer(uint16_t index) {
 		mp.display.setTextWrap(0);
 		//drawtext
 		mp.display.setCursor(4, 2);
-		mp.display.print(mp.volume);
+		mp.display.print(mp.mediaVolume);
 		mp.display.setCursor(1, 111);
 		if(audioFiles[index].length() > 20)
 			mp.display.print(audioFiles[index]);
@@ -345,7 +345,7 @@ int16_t audioPlayer(uint16_t index) {
 		
 		if(playState)
 			mp3->play();
-		mp3->setVolume(map(mp.volume, 0, 14, 100, 300));
+		mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
 		while (1) 
 		{
 			if (mp.buttons.released(BTN_B))
@@ -386,7 +386,7 @@ int16_t audioPlayer(uint16_t index) {
 					else
 						mp.display.printCenter(audioFiles[index]);
 					mp.display.setCursor(4, 2);
-					mp.display.print(mp.volume);
+					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				
@@ -418,7 +418,7 @@ int16_t audioPlayer(uint16_t index) {
 					else
 						mp.display.printCenter(audioFiles[index]);
 					mp.display.setCursor(4, 2);
-					mp.display.print(mp.volume);
+					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.update();
@@ -428,13 +428,13 @@ int16_t audioPlayer(uint16_t index) {
 				mp.update();
 			}
 
-			if (mp.buttons.released(BTN_DOWN) && mp.volume > 1) //DOWN
+			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 1) //DOWN
 			{
 				
-				mp.volume--;
-				mp3->setVolume(map(mp.volume, 0, 14, 100, 300));
-				// mp3->setVolume(256/14*mp.volume);
-				mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
+				mp.mediaVolume--;
+				mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				// mp3->setVolume(256/14*mp.mediaVolume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -443,7 +443,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
+				mp.display.print(mp.mediaVolume);
 
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
@@ -453,17 +453,17 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
+				mp.display.print(mp.mediaVolume);
 				mp.update();
 			}
 
-			if (mp.buttons.released(BTN_UP) && mp.volume < 14) //UP
+			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
 			{
 				
-				mp.volume++;
-				mp3->setVolume(map(mp.volume, 0, 14, 100, 300));
-				// mp3->setVolume(256/14*mp.volume);
-				mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
+				mp.mediaVolume++;
+				mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				// mp3->setVolume(256/14*mp.mediaVolume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -472,7 +472,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
+				mp.display.print(mp.mediaVolume);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -481,7 +481,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
+				mp.display.print(mp.mediaVolume);
 				mp.update();
 			}
 			if(mp.buttons.released(BTN_LEFT)) //previous
