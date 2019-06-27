@@ -63,52 +63,52 @@ void phoneApp() {
 			switch (key)
 			{
 				case '1':
-					osc->note(C5,0.05);
-					osc->play();
+					mp.osc->note(C5,0.05);
+					mp.osc->play();
 					break;
 				case '2':
-					osc->note(D5,0.05);
-					osc->play();
+					mp.osc->note(D5,0.05);
+					mp.osc->play();
 					break;
 				case '3':
-					osc->note(E5,0.05);
-					osc->play();
+					mp.osc->note(E5,0.05);
+					mp.osc->play();
 					break;
 				case '4':
-					osc->note(F5,0.05);
-					osc->play();
+					mp.osc->note(F5,0.05);
+					mp.osc->play();
 					break;
 				case '5':
-					osc->note(G5,0.05);
-					osc->play();
+					mp.osc->note(G5,0.05);
+					mp.osc->play();
 					break;
 				case '6':
-					osc->note(A5,0.05);
-					osc->play();
+					mp.osc->note(A5,0.05);
+					mp.osc->play();
 					break;
 				case '7':
-					osc->note(B5,0.05);
-					osc->play();
+					mp.osc->note(B5,0.05);
+					mp.osc->play();
 					break;
 				case '8':
-					osc->note(C6,0.05);
-					osc->play();
+					mp.osc->note(C6,0.05);
+					mp.osc->play();
 					break;
 				case '9':
-					osc->note(D6,0.05);
-					osc->play();
+					mp.osc->note(D6,0.05);
+					mp.osc->play();
 					break;
 				case '*':
-					osc->note(E6,0.05);
-					osc->play();
+					mp.osc->note(E6,0.05);
+					mp.osc->play();
 					break;
 				case '0':
-					osc->note(F6,0.05);
-					osc->play();
+					mp.osc->note(F6,0.05);
+					mp.osc->play();
 					break;
 				case '#':
-					osc->note(G6,0.05);
-					osc->play();
+					mp.osc->note(G6,0.05);
+					mp.osc->play();
 					break;
 
 				default:

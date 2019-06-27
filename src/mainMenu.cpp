@@ -227,8 +227,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		///////////////////////////////////////
 		if (mp.buttons.released(BTN_A)) //CONFIRM
 		{
-			// osc->note(75, 0.05);
-			// osc->play();
+			// mp.osc->note(75, 0.05);
+			// mp.osc->play();
 			mp.update();
 			return cursorY * x_elements + cursorX;  //returns index of selected icon
 		}
@@ -236,8 +236,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			passcode += "UP";
 			passcodeMillis = millis();
 			mp.leds[0] = CRGB::Blue;
@@ -275,8 +275,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			passcode += "DOWN";
 			passcodeMillis = millis();
 			mp.leds[3] = CRGB::Blue;
@@ -311,8 +311,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			passcode += "LEFT";
 			passcodeMillis = millis();
 			mp.leds[6] = CRGB::Blue;
@@ -332,8 +332,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			passcode += "RIGHT";
 			passcodeMillis = millis();
 			mp.leds[1] = CRGB::Blue;

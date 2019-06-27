@@ -100,15 +100,15 @@ void flashlightApp()
 				}
 				if (mp.buttons.released(BTN_LEFT) && color > 0)
 				{
-					osc->note(75, 0.05);
-					osc->play();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
 					color--;
 					mp.update();
 				}
 				if (mp.buttons.released(BTN_RIGHT) && color < 6)
 				{
-					osc->note(75, 0.05);
-					osc->play();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
 					color++;
 					mp.update();
 				}

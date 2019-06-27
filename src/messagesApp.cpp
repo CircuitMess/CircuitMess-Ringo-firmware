@@ -356,15 +356,15 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		mp.display.print("Messages");
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.update();// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 
 			if (cursor == 0) {
 				cursor = length;
@@ -381,8 +381,8 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 
 			cursor++;
 			if (cursor > 0)

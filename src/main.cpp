@@ -113,8 +113,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.update();// Exit when pressed
 			break;
 		}
@@ -122,8 +122,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			return -1;
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
 			mp.update();
@@ -143,8 +143,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
 			mp.update();
@@ -1697,9 +1697,9 @@ void setup()
 
 	mp.begin(0);
 	mp.homePopupEnable(0);
-	osc = new Oscillator();
-	osc->setVolume(256*mp.volume/14);
-	addOscillator(osc);
+	// osc = new Oscillator();
+	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
+	// addOscillator(osc);
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
@@ -1727,6 +1727,8 @@ void loop()
 	// messagesApp();
 	// phoneApp();
 	// clockApp();
+	// soundMenu();
+	mediaApp();
 	lockscreen();
 	mainMenu();
 	// mediaApp();

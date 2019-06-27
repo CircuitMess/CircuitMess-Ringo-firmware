@@ -188,15 +188,15 @@ int8_t mediaMenu(String* title, uint8_t length) {
 			pressed = 0;
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.update();// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -213,8 +213,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			cursor++;
 			if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
 				cameraY -= boxHeight;
@@ -345,7 +345,7 @@ int16_t audioPlayer(uint16_t index) {
 		
 		if(playState)
 			mp3->play();
-		mp3->setVolume(256/14*mp.volume);
+		mp3->setVolume(map(mp.volume, 0, 14, 100, 300));
 		while (1) 
 		{
 			if (mp.buttons.released(BTN_B))
@@ -432,7 +432,9 @@ int16_t audioPlayer(uint16_t index) {
 			{
 				
 				mp.volume--;
-				mp3->setVolume(256/14*mp.volume);
+				mp3->setVolume(map(mp.volume, 0, 14, 100, 300));
+				// mp3->setVolume(256/14*mp.volume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -459,7 +461,9 @@ int16_t audioPlayer(uint16_t index) {
 			{
 				
 				mp.volume++;
-				mp3->setVolume(256/14*mp.volume);
+				mp3->setVolume(map(mp.volume, 0, 14, 100, 300));
+				// mp3->setVolume(256/14*mp.volume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);

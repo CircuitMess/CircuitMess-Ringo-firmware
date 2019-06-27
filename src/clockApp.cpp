@@ -132,15 +132,15 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 		}
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.update();// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -157,8 +157,8 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			cursor++;
 			if ((cursor * boxHeight + cameraY + offset) > 128) {
 				cameraY -= boxHeight;
@@ -504,15 +504,15 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.print("Delete");
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.update();// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 4) {
@@ -528,8 +528,8 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			cursor++;
 			if ((cursor * boxHeight + cameraY + offset) > 128 - bottomBezel) {
 				cameraY -= boxHeight;
@@ -1192,7 +1192,7 @@ void clockTimer()
 								}
 								mp.update();
 							}
-							osc->stop();
+							mp.osc->stop();
 							mp.update();
 							state = 0;
 							break;
