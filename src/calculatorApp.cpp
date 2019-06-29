@@ -122,7 +122,7 @@ void calculatorApp()
 
 		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
-			mp.update();
+			while(!mp.update());
 			result = 0;
 			operation = -1;
 			input = "0";
@@ -139,7 +139,7 @@ void calculatorApp()
 				cursor += 3;
 			blinkState = 1;
 			blinkMillis = millis();
-			mp.update();
+			while(!mp.update());
 		}
 		if(mp.buttons.released(BTN_RIGHT))
 		{
@@ -151,7 +151,7 @@ void calculatorApp()
 				cursor -= 3;
 			blinkState = 1;
 			blinkMillis = millis();
-			mp.update();
+			while(!mp.update());
 		}
 		if(mp.buttons.released(BTN_DOWN))
 		{
@@ -163,7 +163,7 @@ void calculatorApp()
 				cursor -= 4;
 			blinkState = 1;
 			blinkMillis = millis();
-			mp.update();
+			while(!mp.update());
 		}
 		if(mp.buttons.released(BTN_UP))
 		{
@@ -175,7 +175,7 @@ void calculatorApp()
 				cursor += 4;
 			blinkState = 1;
 			blinkMillis = millis();
-			mp.update();
+			while(!mp.update());
 		}
 		if(mp.buttons.released(BTN_A))
 		{
@@ -255,11 +255,11 @@ void calculatorApp()
 					operation = cursor;
 
 			}
-			mp.update();
+			while(!mp.update());
 		}
 		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{
-			mp.update();
+			while(!mp.update());
 			if(operation != -1 && !clear)
 			{
 				if(!set)
@@ -302,5 +302,5 @@ void calculatorApp()
 			break;
 		mp.update();
 	}
-	mp.update();
+	while(!mp.update());
 }

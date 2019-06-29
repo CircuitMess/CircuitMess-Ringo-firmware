@@ -96,20 +96,20 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-		mp.update();// Exit when pressed
+		while(!mp.update());// Exit when pressed
 		break;
 		}
 		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
-		mp.update(); // Delete
+		while(!mp.update()); // Delete
 		return -1000 + cursor;
 		}
 		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
-		mp.update(); // Edit contact
+		while(!mp.update()); // Edit contact
 		return -3000 + cursor;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-		mp.update();
+		while(!mp.update());
 		if (cursor == 0) {
 			cursor = length;
 			if (length > 2) {
@@ -125,7 +125,7 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-		mp.update();
+		while(!mp.update());
 		cursor++;
 		if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
 			cameraY -= (boxHeight+1);
@@ -138,7 +138,7 @@ int contactsMenu(const char* title, String* contact, String *number, uint8_t len
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-		mp.update();
+		while(!mp.update());
 		return -2;
 		}
 	}
@@ -189,7 +189,7 @@ uint8_t deleteContactSD(String name, String number)
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // DELETE
@@ -240,7 +240,7 @@ void contactsAppSD(){
 		mp.display.printCenter("Error loading contacts");
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 			mp.update();
-		mp.update();
+		while(!mp.update());
 	}
 	else
 	{
@@ -261,9 +261,11 @@ void contactsAppSD(){
 			mp.update();
 			if (menuChoice != -2) //creating new contact
 			{
-				if (menuChoice == 0){
+				if (menuChoice == 0)
+				{
 					String name, number;
-					if(newContactSD(&name, &number)){
+					if(newContactSD(&name, &number))
+					{
 						JsonObject& newContact = jb.createObject();
 						newContact["name"] = name;
 						newContact["number"] = number;
@@ -298,16 +300,19 @@ void contactsAppSD(){
 					// 	file.close();
 					// }
 				}
-				else if (menuChoice < -10){
+				else if (menuChoice < -10)
+				{
 					int id = menuChoice + 1000 - 1;
-					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"])){
+					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"]))
+					{
 						jarr.remove(id);
 						File file = SD.open("/.core/contacts.json", "w");
 						jarr.prettyPrintTo(file);
 						file.close();
 					}
-				// EDIT
-				} else {
+				}
+				else
+				{
 					if(mp.simInserted)
 						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
 					else
@@ -331,14 +336,14 @@ void contactsAppSD(){
 								break;
 							}
 						}
-						mp.update();
+						while(!mp.update());
 					}
 
-					mp.update();
+					while(!mp.update());
 				}
-			} else {
-				break;
 			}
+			else
+				break;
 		}
 	}
 }
@@ -433,22 +438,22 @@ uint8_t newContactSD(String *name, String *number)
 		// mp.display.printCenter("SAVE");
 
 		if (mp.buttons.released(BTN_DOWN) && cursor == 1) { //BUTTON UP
-			mp.update();
+			while(!mp.update());
 			cursor = 0;
 		}
 
 		if (mp.buttons.released(BTN_UP) && cursor == 0) { //BUTTON DOWN
-			mp.update();
+			while(!mp.update());
 			cursor = 1;
 		}
 
 		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
-			mp.update();
+			while(!mp.update());
 			if(contact != "" && content != "")
 			{
 				*name = content;
@@ -502,20 +507,20 @@ int contactsMenuSD(JsonArray *contacts){
 		mp.display.printCenter("Delete               Edit");
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.update();// Exit when pressed
+			while(!mp.update());// Exit when pressed
 			break;
 		}
 		if (mp.buttons.released(BTN_FUN_LEFT) && cursor != 0) {
-			mp.update(); // Delete
+			while(!mp.update()); // Delete
 			return -1000 + cursor;
 		}
 		if (mp.buttons.released(BTN_FUN_RIGHT) && cursor != 0) {
-			mp.update(); // Edit contact
+			while(!mp.update()); // Edit contact
 			return -3000 + cursor;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			mp.update();
+			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length;
 				if (length > 2) {
@@ -531,7 +536,7 @@ int contactsMenuSD(JsonArray *contacts){
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			mp.update();
+			while(!mp.update());
 
 			cursor++;
 			if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
@@ -543,7 +548,7 @@ int contactsMenuSD(JsonArray *contacts){
 			}
 		}
 		if (mp.buttons.released(BTN_B) == 1) {
-			mp.update();
+			while(!mp.update());
 			return -2;
 		}
 

@@ -69,7 +69,7 @@ void mediaApp() {
 						break;
 					}
 				}
-				mp.update();
+				while(!mp.update());
 			}
 		}
 		else if(input == 1) //photos
@@ -97,7 +97,7 @@ void mediaApp() {
 						mp.display.drawBmp(photoFiles[index], 0,0);
 					else
 						mp.drawJpeg(photoFiles[index], 0, 0);
-					mp.update();
+					while(!mp.update());
 					while(1)
 					{
 						
@@ -113,7 +113,7 @@ void mediaApp() {
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
 								mp.drawJpeg(photoFiles[index], 0, 0);
-							mp.update();
+							while(!mp.update());
 						}
 						if(mp.buttons.released(BTN_RIGHT))
 						{
@@ -125,12 +125,12 @@ void mediaApp() {
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
 								mp.drawJpeg(photoFiles[index], 0, 0);
-							mp.update();
+							while(!mp.update());
 						}
 						mp.update();
 					}
 					Serial.println(F("out"));
-					mp.update();
+					while(!mp.update());
 				} 
 			}
 			else
@@ -151,9 +151,9 @@ void mediaApp() {
 						break;
 					}
 				}
-				mp.update();
+				while(!mp.update());
 			}
-			mp.update();
+			while(!mp.update());
 		}
 		else if(input == -1)
 			break;
@@ -190,7 +190,7 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
-			mp.update();// Exit when pressed
+			while(!mp.update());// Exit when pressed
 			break;
 		}
 
@@ -334,7 +334,6 @@ int16_t audioPlayer(uint16_t index) {
 		mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 
-		mp.update();
 		// removeTrack(mp3);
 		// mp3 = trackArray[index];
 		if(mp3->reloadFile((char*)audioFiles[index].c_str()))
@@ -354,7 +353,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp3->stop();
 				Serial.println(F("Stopped"));
 				delay(5);
-				mp.update();
+				while(!mp.update());
 
 				return index;
 			}
@@ -421,11 +420,10 @@ int16_t audioPlayer(uint16_t index) {
 					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
-					mp.update();
 					mp3->resume();
 				}
 				playState = !playState;
-				mp.update();
+				while(!mp.update());
 			}
 
 			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 1) //DOWN
@@ -454,7 +452,7 @@ int16_t audioPlayer(uint16_t index) {
 				//drawtext
 				mp.display.setCursor(4, 2);
 				mp.display.print(mp.mediaVolume);
-				mp.update();
+				while(!mp.update());
 			}
 
 			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
@@ -482,7 +480,7 @@ int16_t audioPlayer(uint16_t index) {
 				//drawtext
 				mp.display.setCursor(4, 2);
 				mp.display.print(mp.mediaVolume);
-				mp.update();
+				while(!mp.update());
 			}
 			if(mp.buttons.released(BTN_LEFT)) //previous
 			{
@@ -525,7 +523,7 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				mp.update();
+				while(!mp.update());
 				break;
 			}
 			if(mp.buttons.released(BTN_RIGHT)) //next
@@ -571,12 +569,12 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				mp.update();
+				while(!mp.update());
 				break;
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT)) //shuffle button
 			{
-				mp.update();
+				while(!mp.update());
 				if(!shuffle)
 					memset(shuffleList, 0, sizeof(shuffleList));
 				shuffle = !shuffle;
@@ -587,7 +585,7 @@ int16_t audioPlayer(uint16_t index) {
 			}
 			if(mp.buttons.released(BTN_FUN_LEFT)) //loop button
 			{
-				mp.update();
+				while(!mp.update());
 				loop = !loop;
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
@@ -634,11 +632,6 @@ int16_t audioPlayer(uint16_t index) {
 			}
 		}
 	}
-	// for(int i = 0; i < audioCount;i++)
-	// {
-	// 	removeTrack(trackArray[i]);
-	// 	delete trackArray[i];
-	// }
 }
 void listPhotos(const char * dirname, uint8_t levels) {
 	photoCount = 0;

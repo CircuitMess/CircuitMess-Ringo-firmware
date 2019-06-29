@@ -51,7 +51,8 @@ void messagesApp() {
 		mp.display.printCenter("Error: Messages - loading data");
 
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-		mp.update();
+			mp.update();
+		while(!mp.update());
 	}
 	else
 	{
@@ -83,7 +84,8 @@ void messagesApp() {
 					mp.display.printCenter("Error: Messages - loading data");
 
 					while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-					mp.update();
+						mp.update();
+					while(!mp.update());
 				}
 				mp.newMessage = 0;
 				menuChoice = -1;
@@ -211,7 +213,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 		mp.display.print("Erase");
 		mp.update();
 	}
-	mp.update();
+	while(!mp.update());
 	return 0;
 }
 void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) {
@@ -358,7 +360,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
-			mp.update();// Exit when pressed
+			while(!mp.update());// Exit when pressed
 			break;
 		}
 
@@ -562,7 +564,7 @@ void composeSMS(JsonArray *messages)
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_A) && contact != "" && content != "") // SEND SMS
@@ -591,7 +593,7 @@ void composeSMS(JsonArray *messages)
 			while (Serial1.readString().indexOf("OK") != -1);
 			mp.display.fillScreen(TFT_BLACK);
 			mp.display.printCenter("Text sent!");
-			mp.update();
+			while(!mp.update());
 			delay(1000);
 			break;
 		}
@@ -601,9 +603,6 @@ void composeSMS(JsonArray *messages)
         mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.print("To: ");
 		mp.display.print(contact);
-
-
-
 		mp.update();
 	}
 }

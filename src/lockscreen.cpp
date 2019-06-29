@@ -292,7 +292,7 @@ void lockscreen() {
 						mp.leds[5] = CRGB::Red;
 						mp.leds[3] = CRGB::Red;
 						mp.leds[4] = CRGB::Red;
-						mp.update();
+						while(!mp.update());
 					}
 					Serial.println(millis() - buttonHeld);
 					return;

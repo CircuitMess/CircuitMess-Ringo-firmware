@@ -38,10 +38,13 @@ void phoneApp() {
 		}
 
 		if (mp.buttons.released(BTN_FUN_LEFT))
+		{
 			callBuffer.remove(callBuffer.length()-1);
+			while(!mp.update());
+		}
 		else if (mp.buttons.released(BTN_FUN_RIGHT))
 		{
-			mp.update();
+			while(!mp.update());
 			if(!mp.SDinsertedFlag)
 			{
 				mp.display.fillScreen(TFT_BLACK);
@@ -53,7 +56,7 @@ void phoneApp() {
 				uint32_t tempMillis = millis();
 				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 					mp.update();
-				mp.update();
+				while(!mp.update());
 			}
 			else
 				callLog();
@@ -136,7 +139,7 @@ void phoneApp() {
 			else
 			{
 				callNumber(callBuffer);
-				mp.update();
+				while(!mp.update());
 			}
 			callBuffer = "";
 		}
@@ -145,7 +148,7 @@ void phoneApp() {
 
 		mp.update();
 	}
-	mp.update();
+	while(!mp.update());
 }
 
 void callLog() {
@@ -189,6 +192,7 @@ void callLog() {
 		mp.display.printCenter("Error: Call log - loading data");
 		while (!mp.buttons.released(BTN_B))//BUTTON BACK
 			mp.update();
+		while(!mp.update());
 	}
 	else
 	{
@@ -220,12 +224,10 @@ void callLog() {
 					JsonArray& jarr = jb.parseArray(file);
 					file.close();
 				}
-				mp.update();
+				while(!mp.update());
 			}
 			else
-			{
 				break;
-			}
 		}
 	}
 }
@@ -438,19 +440,19 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint
 
 		if (mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			return 1;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("Go back");
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // Call
 		{
 			callNumber(number);
-			mp.update();
+			while(!mp.update());
 			return 0;
 		}
 
@@ -489,7 +491,7 @@ void sendMMI(String code)
 		mp.display.setTextSize(1);
 		mp.display.setCursor(55, 54);
 		mp.display.printCenter("Sending USSD code");
-		mp.update();
+		while(!mp.update());
 	}
 	if(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1)
 		return;
@@ -517,4 +519,5 @@ void sendMMI(String code)
 		}
 		mp.update();
 	}
+	while(!mp.update());
 }
