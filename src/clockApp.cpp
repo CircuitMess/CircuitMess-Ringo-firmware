@@ -1193,6 +1193,7 @@ void clockTimer()
 								mp.update();
 							}
 							mp.osc->stop();
+							mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 							mp.update();
 							state = 0;
 							break;

@@ -1223,10 +1223,10 @@ void securityMenu() {
 
 						if ((mp.buttons.released(BTN_A) || mp.released(BTN_FUN_RIGHT)) && oldPin.length() == 4)//enter PIN
 						{
+							reply = "";
 							mp.update();
 							if (pinLock)
 							{
-								reply = "";
 								Serial1.print(F("AT+CPWD=\"SC\", \""));
 								Serial1.print(oldPin);
 								Serial1.print("\", \"");
