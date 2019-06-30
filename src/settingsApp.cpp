@@ -963,9 +963,8 @@ void securityMenu() {
 	uint8_t foo = reply.indexOf(" ", reply.indexOf("+SPIC:"));
 	timesRemaining = reply.substring(foo, reply.indexOf(",", foo)).toInt();
 	Serial.println(timesRemaining);
-	delay(5);
-	if (timesRemaining == 0) //PUK lock WIP
-		mp.enterPUK();
+	// if (timesRemaining == 0) //PUK lock WIP
+		// mp.enterPUK();
 	//check if the SIM card is locked
 	while (reply.indexOf("+CLCK:") == -1)
 	{
