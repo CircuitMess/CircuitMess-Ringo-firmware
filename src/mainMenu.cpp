@@ -558,7 +558,7 @@ void mainMenu()
 			mp.display.fillScreen(TFT_BLACK);
 			mp.display.setCursor(0,mp.display.height() / 2 - 16);
 			mp.display.printCenter(F("LOADING NOW..."));
-			mp.update();
+			while(!mp.update());
 
 			String foo = directories[index - 9]; //9 is the number of preloaded apps
 			initWavLib();
