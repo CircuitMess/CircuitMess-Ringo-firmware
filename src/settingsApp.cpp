@@ -964,9 +964,8 @@ void securityMenu() {
 	uint8_t foo = reply.indexOf(" ", reply.indexOf("+SPIC:"));
 	timesRemaining = reply.substring(foo, reply.indexOf(",", foo)).toInt();
 	Serial.println(timesRemaining);
-	delay(5);
-	if (timesRemaining == 0) //PUK lock WIP
-		mp.enterPUK();
+	// if (timesRemaining == 0) //PUK lock WIP
+		// mp.enterPUK();
 	//check if the SIM card is locked
 	while (reply.indexOf("+CLCK:") == -1)
 	{
@@ -1225,9 +1224,9 @@ void securityMenu() {
 						if ((mp.buttons.released(BTN_A) || mp.released(BTN_FUN_RIGHT)) && oldPin.length() == 4)//enter PIN
 						{
 							while(!mp.update());
+							reply = "";
 							if (pinLock)
 							{
-								reply = "";
 								Serial1.print(F("AT+CPWD=\"SC\", \""));
 								Serial1.print(oldPin);
 								Serial1.print("\", \"");
