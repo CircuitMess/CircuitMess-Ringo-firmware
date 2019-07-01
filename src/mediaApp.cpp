@@ -69,7 +69,7 @@ void mediaApp() {
 						break;
 					}
 				}
-				mp.update();
+				while(!mp.update());
 			}
 		}
 		else if(input == 1) //photos
@@ -97,7 +97,7 @@ void mediaApp() {
 						mp.display.drawBmp(photoFiles[index], 0,0);
 					else
 						mp.drawJpeg(photoFiles[index], 0, 0);
-					mp.update();
+					while(!mp.update());
 					while(1)
 					{
 						
@@ -113,7 +113,7 @@ void mediaApp() {
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
 								mp.drawJpeg(photoFiles[index], 0, 0);
-							mp.update();
+							while(!mp.update());
 						}
 						if(mp.buttons.released(BTN_RIGHT))
 						{
@@ -125,12 +125,12 @@ void mediaApp() {
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
 								mp.drawJpeg(photoFiles[index], 0, 0);
-							mp.update();
+							while(!mp.update());
 						}
 						mp.update();
 					}
 					Serial.println(F("out"));
-					mp.update();
+					while(!mp.update());
 				} 
 			}
 			else
@@ -151,9 +151,9 @@ void mediaApp() {
 						break;
 					}
 				}
-				mp.update();
+				while(!mp.update());
 			}
-			mp.update();
+			while(!mp.update());
 		}
 		else if(input == -1)
 			break;
@@ -188,15 +188,15 @@ int8_t mediaMenu(String* title, uint8_t length) {
 			pressed = 0;
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
-			mp.update();// Exit when pressed
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
+			while(!mp.update());// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -213,8 +213,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			cursor++;
 			if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
 				cameraY -= boxHeight;
@@ -325,7 +325,7 @@ int16_t audioPlayer(uint16_t index) {
 		mp.display.setTextWrap(0);
 		//drawtext
 		mp.display.setCursor(4, 2);
-		mp.display.print(mp.volume);
+		mp.display.print(mp.mediaVolume);
 		mp.display.setCursor(1, 111);
 		if(audioFiles[index].length() > 20)
 			mp.display.print(audioFiles[index]);
@@ -334,7 +334,6 @@ int16_t audioPlayer(uint16_t index) {
 		mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 
-		mp.update();
 		// removeTrack(mp3);
 		// mp3 = trackArray[index];
 		if(mp3->reloadFile((char*)audioFiles[index].c_str()))
@@ -345,7 +344,7 @@ int16_t audioPlayer(uint16_t index) {
 		
 		if(playState)
 			mp3->play();
-		mp3->setVolume(256/14*mp.volume);
+		mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
 		while (1) 
 		{
 			if (mp.buttons.released(BTN_B))
@@ -354,7 +353,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp3->stop();
 				Serial.println(F("Stopped"));
 				delay(5);
-				mp.update();
+				while(!mp.update());
 
 				return index;
 			}
@@ -386,7 +385,7 @@ int16_t audioPlayer(uint16_t index) {
 					else
 						mp.display.printCenter(audioFiles[index]);
 					mp.display.setCursor(4, 2);
-					mp.display.print(mp.volume);
+					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				
@@ -418,21 +417,22 @@ int16_t audioPlayer(uint16_t index) {
 					else
 						mp.display.printCenter(audioFiles[index]);
 					mp.display.setCursor(4, 2);
-					mp.display.print(mp.volume);
+					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
-					mp.update();
 					mp3->resume();
 				}
 				playState = !playState;
-				mp.update();
+				while(!mp.update());
 			}
 
-			if (mp.buttons.released(BTN_DOWN) && mp.volume > 1) //DOWN
+			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 1) //DOWN
 			{
 				
-				mp.volume--;
-				mp3->setVolume(256/14*mp.volume);
+				mp.mediaVolume--;
+				mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				// mp3->setVolume(256/14*mp.mediaVolume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -441,7 +441,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
+				mp.display.print(mp.mediaVolume);
 
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
@@ -451,15 +451,17 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
-				mp.update();
+				mp.display.print(mp.mediaVolume);
+				while(!mp.update());
 			}
 
-			if (mp.buttons.released(BTN_UP) && mp.volume < 14) //UP
+			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
 			{
 				
-				mp.volume++;
-				mp3->setVolume(256/14*mp.volume);
+				mp.mediaVolume++;
+				mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				// mp3->setVolume(256/14*mp.mediaVolume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -468,7 +470,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
+				mp.display.print(mp.mediaVolume);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -477,8 +479,8 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
 				mp.display.setCursor(4, 2);
-				mp.display.print(mp.volume);
-				mp.update();
+				mp.display.print(mp.mediaVolume);
+				while(!mp.update());
 			}
 			if(mp.buttons.released(BTN_LEFT)) //previous
 			{
@@ -521,7 +523,7 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				mp.update();
+				while(!mp.update());
 				break;
 			}
 			if(mp.buttons.released(BTN_RIGHT)) //next
@@ -567,12 +569,12 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				mp.update();
+				while(!mp.update());
 				break;
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT)) //shuffle button
 			{
-				mp.update();
+				while(!mp.update());
 				if(!shuffle)
 					memset(shuffleList, 0, sizeof(shuffleList));
 				shuffle = !shuffle;
@@ -583,7 +585,7 @@ int16_t audioPlayer(uint16_t index) {
 			}
 			if(mp.buttons.released(BTN_FUN_LEFT)) //loop button
 			{
-				mp.update();
+				while(!mp.update());
 				loop = !loop;
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
@@ -630,11 +632,6 @@ int16_t audioPlayer(uint16_t index) {
 			}
 		}
 	}
-	// for(int i = 0; i < audioCount;i++)
-	// {
-	// 	removeTrack(trackArray[i]);
-	// 	delete trackArray[i];
-	// }
 }
 void listPhotos(const char * dirname, uint8_t levels) {
 	photoCount = 0;

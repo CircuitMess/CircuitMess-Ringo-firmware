@@ -96,16 +96,16 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 			pressed = 0;
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 
-			mp.update();// Exit when pressed
+			while(!mp.update());// Exit when pressed
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -122,8 +122,8 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			cursor++;
 			if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
 				cameraY -= boxHeight;
@@ -139,7 +139,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			return -1;
 		}
 	}
@@ -149,7 +149,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 }
 bool settingsApp() {
 	int8_t input = 0;
-	mp.update();
+	while(!mp.update());
 	while (1)
 	{
 		input = settingsMenu(settingsItems, 6, input);
@@ -190,7 +190,7 @@ bool settingsApp() {
 				break;
 			}
 		}
-		mp.update();
+		while(!mp.update());
 	}
 	else
 	{
@@ -210,7 +210,7 @@ bool settingsApp() {
 				break;
 			}
 		}
-		mp.update();
+		while(!mp.update());
 	}
 	return false;
 
@@ -342,8 +342,8 @@ void networkMenu() {
 		// 	if (mp.buttons.released(BTN_LEFT) && !mp.wifi)
 		// 	{
 		// 		mp.update();
-		// 		osc->note(75, 0.05);
-		// 		osc->play();
+		// 		mp.osc->note(75, 0.05);
+		// 		mp.osc->play();
 		// 		blinkState = 1;
 		// 		blinkMillis = millis();
 		// 		mp.wifi = !mp.wifi;
@@ -351,8 +351,8 @@ void networkMenu() {
 		// 	if (mp.buttons.released(BTN_RIGHT) && mp.wifi)
 		// 	{
 		// 		mp.update();
-		// 		osc->note(75, 0.05);
-		// 		osc->play();
+		// 		mp.osc->note(75, 0.05);
+		// 		mp.osc->play();
 		// 		blinkState = 1;
 		// 		blinkMillis = millis();
 		// 		mp.wifi = !mp.wifi;
@@ -371,8 +371,8 @@ void networkMenu() {
 		// 	if (mp.buttons.released(BTN_LEFT) && !mp.bt)
 		// 	{
 		// 		mp.update();
-		// 		osc->note(75, 0.05);
-		// 		osc->play();
+		// 		mp.osc->note(75, 0.05);
+		// 		mp.osc->play();
 		// 		blinkState = 1;
 		// 		blinkMillis = millis();
 		// 		mp.bt = !mp.bt;
@@ -380,8 +380,8 @@ void networkMenu() {
 		// 	if (mp.buttons.released(BTN_RIGHT) && mp.bt)
 		// 	{
 		// 		mp.update();
-		// 		osc->note(75, 0.05);
-		// 		osc->play();
+		// 		mp.osc->note(75, 0.05);
+		// 		mp.osc->play();
 		// 		blinkState = 1;
 		// 		blinkMillis = millis();
 		// 		mp.bt = !mp.bt;
@@ -400,8 +400,8 @@ void networkMenu() {
 		// 	if (mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
 		// 	{
 		// 		mp.update();
-		// 		osc->note(75, 0.05);
-		// 		osc->play();
+		// 		mp.osc->note(75, 0.05);
+		// 		mp.osc->play();
 		// 		blinkState = 1;
 		// 		blinkMillis = millis();
 		// 		mp.airplaneMode = !mp.airplaneMode;
@@ -409,8 +409,8 @@ void networkMenu() {
 		// 	if (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode)
 		// 	{
 		// 		mp.update();
-		// 		osc->note(75, 0.05);
-		// 		osc->play();
+		// 		mp.osc->note(75, 0.05);
+		// 		mp.osc->play();
 		// 		blinkState = 1;
 		// 		blinkMillis = millis();
 		// 		mp.airplaneMode = !mp.airplaneMode;
@@ -419,8 +419,8 @@ void networkMenu() {
 
 		// if (mp.buttons.released(BTN_UP))
 		// {
-		// 	osc->note(75, 0.05);
-		// 	osc->play();
+		// 	mp.osc->note(75, 0.05);
+		// 	mp.osc->play();
 		// 	blinkState = 0;
 		// 	blinkMillis = millis();
 		// 	mp.update();
@@ -431,8 +431,8 @@ void networkMenu() {
 		// }
 		// if (mp.buttons.released(BTN_DOWN))
 		// {
-		// 	osc->note(75, 0.05);
-		// 	osc->play();
+		// 	mp.osc->note(75, 0.05);
+		// 	mp.osc->play();
 		// 	blinkState = 0;
 		// 	blinkMillis = millis();
 		// 	mp.update();
@@ -448,7 +448,7 @@ void networkMenu() {
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 
@@ -529,17 +529,17 @@ void displayMenu() {
 			}
 			if (mp.buttons.released(BTN_LEFT) && mp.brightness > 0)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				mp.brightness--;
-				mp.update();
+				while(!mp.update());
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.brightness < 5)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				mp.brightness++;
-				mp.update();
+				while(!mp.update());
 			}
 		}
 		if (cursor == 1)
@@ -548,17 +548,17 @@ void displayMenu() {
 				mp.leds[i] = CRGB::White;
 			if (mp.buttons.released(BTN_LEFT) && mp.pixelsBrightness > 0)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				mp.pixelsBrightness--;
-				mp.update();
+				while(!mp.update());
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.pixelsBrightness < 5)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				mp.pixelsBrightness++;
-				mp.update();
+				while(!mp.update());
 			}
 		}
 		if (cursor == 2)
@@ -581,17 +581,17 @@ void displayMenu() {
 			}
 			if (mp.buttons.released(BTN_LEFT) && sleepTimeBuffer!= 0)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				sleepTimeBuffer--;
-				mp.update();
+				while(!mp.update());
 			}
 			if (mp.buttons.released(BTN_RIGHT) && sleepTimeBuffer!= 5)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				sleepTimeBuffer++;
-				mp.update();
+				while(!mp.update());
 			}
 		}
 		if (cursor == 3)
@@ -625,25 +625,25 @@ void displayMenu() {
 			}
 			if (mp.buttons.released(BTN_LEFT) && mp.backgroundIndex != 0)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				mp.backgroundIndex--;
-				mp.update();
+				while(!mp.update());
 			}
 			if (mp.buttons.released(BTN_RIGHT) && mp.backgroundIndex != 6)
 			{
-				osc->note(75, 0.05);
-				osc->play();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
 				mp.backgroundIndex++;
-				mp.update();
+				while(!mp.update());
 			}
 		}
 
 		if (mp.buttons.released(BTN_UP))
 		{
-			osc->note(75, 0.05);
-			osc->play();
-			mp.update();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
+			while(!mp.update());
   			if (cursor == 0)
 				cursor = 3;
 			else
@@ -651,9 +651,9 @@ void displayMenu() {
 		}
 		if (mp.buttons.released(BTN_DOWN))
 		{
-			osc->note(75, 0.05);
-			osc->play();
-			mp.update();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
+			while(!mp.update());
 			if (cursor == 3)
 				cursor = 0;
 			else
@@ -723,157 +723,180 @@ void soundMenu() {
 	while (1)
 	{
 		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.fillScreen(0xA7FF);
-		mp.display.setCursor(20, 4);
-		mp.display.printCenter("Volume");
-		mp.display.drawRect(33, 12*2, 47*2, 4*2, TFT_BLACK);
-		mp.display.drawBitmap(4*2, 10*2, noSound, TFT_BLACK, 2);
-		mp.display.drawBitmap(67*2, 10*2, fullSound, TFT_BLACK, 2);
-		mp.display.fillRect(35, 13*2, mp.volume * 3*2, 2*2, TFT_BLACK);
-		mp.display.setCursor(15, 37);
+		mp.display.setCursor(20, 1);
+		mp.display.printCenter("Ring volume");
+		mp.display.drawBitmap(8, 14, noSound, TFT_BLACK, 2);
+		mp.display.drawBitmap(134, 14, fullSound, TFT_BLACK, 2);
+		mp.display.drawRect(36, 18, 88, 8, TFT_BLACK);
+		mp.display.fillRect(38, 20, mp.ringVolume * 6, 4, TFT_BLACK);
+
+		mp.display.setCursor(29,29);
+		mp.display.printCenter("Media volume");
+		mp.display.drawRect(36, 44, 88, 8, TFT_BLACK);
+		mp.display.fillRect(38, 46, mp.mediaVolume * 6, 4, TFT_BLACK);
+		mp.display.drawBitmap(8, 40, noSound, TFT_BLACK, 2);
+		mp.display.drawBitmap(134, 40, fullSound, TFT_BLACK, 2);
+
+		mp.display.setCursor(15, 52);
 		mp.display.printCenter("Ringtone");
-		mp.display.drawRect(3*2, 55, 74*2, 11*2, TFT_BLACK);
-		mp.display.setCursor(6*2, 58);
+		mp.display.drawRect(6, 69, 148, 20, TFT_BLACK);
+		mp.display.setCursor(12, 71);
 		mp.display.print(parsedRingtone);
 
-		mp.display.setCursor(5, 82);
+		mp.display.setCursor(5, 90);
 		mp.display.printCenter("Notification");
-		mp.display.drawRect(3*2, 100, 74*2, 11*2, TFT_BLACK);
-		mp.display.setCursor(6*2, 103);
+		mp.display.drawRect(6, 105, 148, 20, TFT_BLACK);
+		mp.display.setCursor(12, 107);
 		mp.display.printCenter(notificationSounds[mp.notification]);
 		if(millis()-blinkMillis >= 350)
 		{
 			blinkMillis = millis();
 			blinkState = !blinkState;
 		}
-		if (cursor == 0)
+		switch (cursor)
 		{
-			if (blinkState)
-			{
-				mp.display.drawBitmap(4*2, 10*2, noSound, TFT_BLACK, 2);
-				mp.display.drawBitmap(67*2, 10*2, fullSound, TFT_BLACK, 2);
-			}
-			else
-			{
-				mp.display.drawBitmap(4*2, 10*2, noSound, 0xA7FF, 2);
-				mp.display.drawBitmap(67*2, 10*2, fullSound, 0xA7FF, 2);
-			}
-			if (mp.buttons.released(BTN_LEFT) && mp.volume != 0)
-			{
-				mp.volume--;
-				osc->setVolume(256 * mp.volume / 14);
-				osc->note(75, 0.05);
-				osc->play();
-				mp.update();
-			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.volume != 15)
-			{
-				mp.volume++;
-				osc->setVolume(256 * mp.volume / 14);
-				osc->note(75, 0.05);
-				osc->play();
-				mp.update();
-			}
-		}
-		if (cursor == 1)
-		{
-			if (blinkState)
-				mp.display.drawRect(3*2, 55, 74*2, 11*2, TFT_BLACK);
-			else
-				mp.display.drawRect(3*2, 55, 74*2, 11*2, 0xA7FF);
-
-			if (mp.buttons.released(BTN_A))
-			{
-				mp.update();
-				if(mp.SDinsertedFlag)
+			case 0:
+				mp.display.drawBitmap(8, 14, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(134, 14, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				if (mp.buttons.released(BTN_LEFT) && mp.ringVolume > 0)
 				{
-					osc->note(75, 0.05);
-					osc->play();
-					i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
-					mp.display.setTextColor(TFT_BLACK);
-					if (i >= 0)
-						mp.ringtone_path = audioFiles[i];
-					else
-						Serial.println("pressed B in menu");
-					start = 0;
-					while (mp.ringtone_path.indexOf("/", start) != -1)
-						start = mp.ringtone_path.indexOf("/", start) + 1;
-					parsedRingtone = mp.ringtone_path.substring(start, mp.ringtone_path.indexOf("."));
+					mp.ringVolume--;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
-				else
+				if (mp.buttons.released(BTN_RIGHT) && mp.ringVolume < 14)
 				{
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setTextSize(1);
-					mp.display.setTextFont(2);
-					mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-					mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-					mp.display.fillRect(15, 46, 132, 36, 0xA7FF);
-					mp.display.setCursor(47, 55);
-					mp.display.printCenter("No SD card!");
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 1500)
+					mp.ringVolume++;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+
+				break;
+			
+			case 1:
+				mp.display.drawBitmap(8, 40, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(134, 40, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				if (mp.buttons.released(BTN_LEFT) && mp.mediaVolume > 0)
+				{
+					mp.mediaVolume--;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				if (mp.buttons.released(BTN_RIGHT) && mp.mediaVolume < 14)
+				{
+					mp.mediaVolume++;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				break;
+
+			case 2:
+				mp.display.drawRect(6, 69, 148, 20, blinkState ? TFT_BLACK : 0xA7FF);
+				if (mp.buttons.released(BTN_A))
+				{
+					while(!mp.update());
+					if(mp.SDinsertedFlag)
 					{
-						mp.update();
-						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-						{
-							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-								mp.update();
-							break;
-						}
+						mp.osc->note(75, 0.05);
+						mp.osc->play();
+						i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
+						mp.display.setTextColor(TFT_BLACK);
+						if (i >= 0)
+							mp.ringtone_path = audioFiles[i];
+						else
+							Serial.println("pressed B in menu");
+						start = 0;
+						while (mp.ringtone_path.indexOf("/", start) != -1)
+							start = mp.ringtone_path.indexOf("/", start) + 1;
+						parsedRingtone = mp.ringtone_path.substring(start, mp.ringtone_path.indexOf("."));
 					}
-					mp.update();
+					else
+					{
+						mp.display.setTextColor(TFT_BLACK);
+						mp.display.setTextSize(1);
+						mp.display.setTextFont(2);
+						mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+						mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+						mp.display.fillRect(15, 46, 132, 36, 0xA7FF);
+						mp.display.setCursor(47, 55);
+						mp.display.printCenter("No SD card!");
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 1500)
+						{
+							mp.update();
+							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+							{
+								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								break;
+							}
+						}
+						while(!mp.update());
+					}
 				}
+				break;
 
-			}
-		}
-		if (cursor == 2)
-		{
-			if (blinkState)
-				mp.display.drawRect(3*2, 100, 74*2, 11*2, TFT_BLACK);
-			else
-				mp.display.drawRect(3*2, 100, 74*2, 11*2, 0xA7FF);
-
-			if (mp.buttons.released(BTN_A))
-			{
-				mp.update();
-				int8_t temp = notificationsAudioMenu(notificationSounds, 4);
-				if(temp>=0)
-					mp.notification = temp;
-			}
+			case 3:
+				mp.display.drawRect(6, 105, 148, 20, blinkState ? TFT_BLACK : 0xA7FF);
+				if (mp.buttons.released(BTN_A))
+				{
+					while(!mp.update());
+					int8_t temp = notificationsAudioMenu(notificationSounds, 4);
+					if(temp>=0)
+						mp.notification = temp;
+				}
+				break;
 		}
 
 		if (mp.buttons.released(BTN_UP))
 		{
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			if (cursor == 0)
-				cursor = 2;
+				cursor = 3;
 			else
 				cursor--;
-			mp.update();
+			while(!mp.update());
 			blinkState = 0;
 			blinkMillis = millis();
 		}
 		if (mp.buttons.released(BTN_DOWN))
 		{
-			osc->note(75, 0.05);
-			osc->play();
-			if (cursor == 2)
+			mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
+			if (cursor == 3)
 				cursor = 0;
 			else
 				cursor++;
-			mp.update();
+			while(!mp.update());
 			blinkState = 0;
 			blinkMillis = millis();
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		mp.update();
 	}
+	mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 }
 void securityMenu() {
 
@@ -912,6 +935,7 @@ void securityMenu() {
 				break;
 			}
 		}
+		while(!mp.update());
 		return;
 	}
 	while (!mp.simReady)
@@ -921,14 +945,14 @@ void securityMenu() {
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.printCenter("GSM still booting...");
-		mp.update();
+		while(!mp.update());
 	}
 	mp.display.setCursor(0, mp.display.height()/2 - 16);
 	mp.display.setTextFont(2);
 	mp.display.setTextColor(TFT_WHITE);
 	mp.display.fillScreen(TFT_BLACK);
 	mp.display.printCenter("Loading SIM card...");
-	mp.update();
+	while(!mp.update());
 	while (reply.indexOf("+SPIC:") == -1)
 	{
 		mp.update();
@@ -940,9 +964,8 @@ void securityMenu() {
 	uint8_t foo = reply.indexOf(" ", reply.indexOf("+SPIC:"));
 	timesRemaining = reply.substring(foo, reply.indexOf(",", foo)).toInt();
 	Serial.println(timesRemaining);
-	delay(5);
-	if (timesRemaining == 0) //PUK lock WIP
-		mp.enterPUK();
+	// if (timesRemaining == 0) //PUK lock WIP
+		// mp.enterPUK();
 	//check if the SIM card is locked
 	while (reply.indexOf("+CLCK:") == -1)
 	{
@@ -1015,14 +1038,14 @@ void securityMenu() {
 					mp.display.drawRect(113, 12, 38, 11*2, TFT_BLACK);
 				if (mp.buttons.released(BTN_LEFT) && pinLockBuffer == 0)
 				{
-					osc->note(75, 0.05);
-					osc->play();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
 					pinLockBuffer = !pinLockBuffer;
 				}
 				if (mp.buttons.released(BTN_RIGHT) && pinLockBuffer == 1)
 				{
-					osc->note(75, 0.05);
-					osc->play();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
 					pinBuffer = "";
 					pinLockBuffer = !pinLockBuffer;
 					if (pinLock)
@@ -1052,14 +1075,14 @@ void securityMenu() {
 							if (mp.buttons.released(BTN_FUN_LEFT) && pinBuffer != "")
 							{
 								pinBuffer.remove(pinBuffer.length() - 1);
-								mp.update();
+								while(!mp.update());
 							}
 							if (key != NO_KEY && isDigit(key) && pinBuffer.length() != 4)
 								pinBuffer += key;
 
 							if (mp.buttons.released(BTN_A))//enter PIN
 							{
-								mp.update();
+								while(!mp.update());
 								reply = "";
 								Serial1.print(F("AT+CLCK=\"SC\", 0, \""));
 								Serial1.print(pinBuffer);
@@ -1073,7 +1096,7 @@ void securityMenu() {
 								if (reply.indexOf("OK", reply.indexOf("AT+CLCK")) != -1)
 								{
 									mp.display.printCenter("PIN OK :)");
-									mp.update();
+									while(!mp.update());
 									delay(1000);
 									pinLock = 0;
 									pinLockBuffer = 0;
@@ -1103,7 +1126,7 @@ void securityMenu() {
 									}
 									else
 										mp.display.printCenter("Invalid PIN");
-									mp.update();
+									while(!mp.update());
 									delay(1000);
 								}
 								pinBuffer = "";
@@ -1113,7 +1136,7 @@ void securityMenu() {
 							if (mp.buttons.released(BTN_B))
 							{
 								pinLockBuffer = 1;
-								mp.update();
+								while(!mp.update());
 								break;
 							}
 
@@ -1131,7 +1154,7 @@ void securityMenu() {
 				if (mp.buttons.released(BTN_FUN_LEFT))
 				{
 					pinBuffer.remove(pinBuffer.length() - 1);
-					mp.update();
+					while(!mp.update());
 				}
 				if (key != NO_KEY && isdigit(key) && pinBuffer.length() < 4)
 					pinBuffer += key;
@@ -1142,10 +1165,10 @@ void securityMenu() {
 					mp.display.drawFastVLine(mp.display.getCursorX()+1, mp.display.getCursorY()+2, 12, TFT_BLACK);
 				if (mp.buttons.released(BTN_A) && pinBuffer.length() == 4 && confirmMessage == 0)
 				{
-					osc->note(75, 0.05);
-					osc->play();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
 
-					mp.update();
+					while(!mp.update());
 					pinNumber = pinBuffer.toInt();
 
 					reply = "";
@@ -1178,17 +1201,17 @@ void securityMenu() {
 						if (mp.buttons.released(BTN_FUN_LEFT))
 						{
 							oldPin.remove(oldPin.length() - 1);
-							mp.update();
+							while(!mp.update());
 						}
 						if (key != NO_KEY && isDigit(key) && oldPin.length() != 4)
 							oldPin += key;
 
 						if ((mp.buttons.released(BTN_A) || mp.released(BTN_FUN_RIGHT)) && oldPin.length() == 4)//enter PIN
 						{
-							mp.update();
+							while(!mp.update());
+							reply = "";
 							if (pinLock)
 							{
-								reply = "";
 								Serial1.print(F("AT+CPWD=\"SC\", \""));
 								Serial1.print(oldPin);
 								Serial1.print("\", \"");
@@ -1230,7 +1253,7 @@ void securityMenu() {
 									}
 									else
 										mp.display.printCenter("Invalid PIN");
-									mp.update();
+									while(!mp.update());
 									delay(1000);
 								}
 							}
@@ -1275,7 +1298,7 @@ void securityMenu() {
 									else if (reply.indexOf("ERROR", reply.indexOf("AT+CPWD")) != -1)
 									{
 										oldPin = "";
-										mp.update();
+										while(!mp.update());
 										timesRemaining--;
 										saved = 0;
 										if (timesRemaining == 0)
@@ -1298,7 +1321,7 @@ void securityMenu() {
 									}
 									else
 										mp.display.printCenter("Invalid PIN");
-									mp.update();
+									while(!mp.update());
 									delay(1000);
 									Serial.println(timesRemaining);
 									delay(5);
@@ -1312,7 +1335,7 @@ void securityMenu() {
 						if (mp.buttons.released(BTN_B))
 						{
 							saved = 0;
-							mp.update();
+							while(!mp.update());
 							break;
 						}
 						if (timesRemaining == 0)
@@ -1343,9 +1366,9 @@ void securityMenu() {
 
 				if (mp.buttons.released(BTN_A) && pinBuffer.length() < 4 && errorMessage == 0)
 				{
-					osc->note(75, 0.05);
-					osc->play();
-					mp.update();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
 					mp.display.setCursor(2, 111);
 					mp.display.print("Pin must have 4+ digits");
 					elapsedMillis = millis();
@@ -1378,9 +1401,9 @@ void securityMenu() {
 
 			if (mp.buttons.released(BTN_UP))
 			{
-				osc->note(75, 0.05);
-				osc->play();
-				mp.update();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
+				while(!mp.update());
 				if (cursor == 0 && pinLockBuffer == 1)
 					cursor = 1;
 				else if (pinLockBuffer == 1 && cursor == 1)
@@ -1388,9 +1411,9 @@ void securityMenu() {
 			}
 			if (mp.buttons.released(BTN_DOWN))
 			{
-				osc->note(75, 0.05);
-				osc->play();
-				mp.update();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
+				while(!mp.update());
 				if (cursor == 1)
 					cursor = 0;
 				else if (pinLockBuffer == 1 && cursor == 0)
@@ -1462,9 +1485,9 @@ void timeMenu()
 				mp.display.drawRect(46,63, 68, 20, 0xFFED);
 			if(mp.buttons.released(BTN_A))
 			{
-				osc->note(75, 0.05);
-				osc->play();
-				mp.update();
+				mp.osc->note(75, 0.05);
+				mp.osc->play();
+				while(!mp.update());
 				String inputBuffer;
 				if(mp.clockHour == 0)
 					inputBuffer = "";
@@ -1684,7 +1707,7 @@ void timeMenu()
 					if (mp.buttons.released(BTN_FUN_LEFT))
 					{
 						inputBuffer.remove(inputBuffer.length() - 1);
-						mp.update();
+						while(!mp.update());
 					}
 					if (key != NO_KEY && isdigit(key) && inputBuffer.length() < 2)
 						inputBuffer += key;
@@ -1698,7 +1721,7 @@ void timeMenu()
 					{
 						blinkState = 1;
 						previousMillis = millis();
-						mp.update();
+						while(!mp.update());
 						if(inputBuffer == "")
 						{
 							switch (editCursor)
@@ -1785,7 +1808,7 @@ void timeMenu()
 					}
 					if(mp.buttons.released(BTN_LEFT) && editCursor > 0) //LEFT
 					{
-						mp.update();
+						while(!mp.update());
 						blinkState = 1;
 						previousMillis = millis();
 						if(inputBuffer == "")
@@ -1875,7 +1898,7 @@ void timeMenu()
 
 					if(mp.buttons.released(BTN_UP) && editCursor > 2) //UP
 					{
-						mp.update();
+						while(!mp.update());
 						blinkState = 1;
 						previousMillis = millis();
 						if(inputBuffer == "")
@@ -1951,7 +1974,7 @@ void timeMenu()
 					}
 					if(mp.buttons.released(BTN_DOWN) && editCursor < 3) //DOWN
 					{
-						mp.update();
+						while(!mp.update());
 						blinkState = 1;
 						previousMillis = millis();
 						if(inputBuffer == "")
@@ -2098,8 +2121,8 @@ void timeMenu()
 			{
 				if(mp.simInserted)
 				{
-					osc->note(75, 0.05);
-					osc->play();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
 					mp.clockYear = 0;
 					previousMillis = millis();
 					while(1)
@@ -2138,7 +2161,7 @@ void timeMenu()
 					mp.display.printCenter("Couldn't fetch time");
 					mp.display.setCursor(0, mp.display.height()/2);
 					mp.display.printCenter("SIM card missing");
-					mp.update();
+					while(!mp.update());
 					delay(1500);
 				}
 
@@ -2154,20 +2177,20 @@ void timeMenu()
 		}
 		if (mp.buttons.released(BTN_UP) && cursor > 0)
 		{
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			blinkState = 1;
 			previousMillis = millis() + 400;
-			mp.update();
+			while(!mp.update());
 			cursor--;
 		}
 		if (mp.buttons.released(BTN_DOWN) && cursor < 1)
 		{
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			blinkState = 1;
 			previousMillis = millis() + 400;
-			mp.update();
+			while(!mp.update());
 			cursor++;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
@@ -2232,8 +2255,8 @@ bool updateMenu()
 								break;
 							}
 						}
+						while(!mp.update());
 						break;
-						mp.update();
 					}
 					else
 					{
@@ -2273,7 +2296,7 @@ bool updateMenu()
 						// 	}
 						// }
 					}
-					mp.update();
+					while(!mp.update());
 				}
 			break;
 
@@ -2284,17 +2307,17 @@ bool updateMenu()
 					mp.display.drawRect(30, 33, 96, 20, 0xFD29);
 				if(mp.buttons.released(BTN_A))
 				{
-					mp.update();
+					while(!mp.update());
 					if(mp.SDinsertedFlag)
 					{
 						mp.display.fillScreen(0xFD29);
 						mp.display.setTextColor(TFT_BLACK);
 						mp.display.setCursor(10, 20);
 						mp.display.printCenter("Erasing in progress...");
-						mp.update();
+						while(!mp.update());
 
 						String contacts_default = "[]";
-						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"volume\" : 3, \"micGain\" : 15}";
+						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 15}";
 
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
@@ -2322,7 +2345,7 @@ bool updateMenu()
 						mp.backgroundIndex = settings["background_color"];
 						mp.notification = settings["notification"];
 						mp.ringtone_path = String(settings["ringtone"].as<char*>());
-						mp.volume = settings["volume"];
+						mp.ringVolume = settings["ringVolume"];
 						mp.micGain = settings["micGain"];
 						Serial.println("ERASED");
 						delay(5);
@@ -2336,7 +2359,8 @@ bool updateMenu()
 						mp.brightness = 5;
 						mp.sleepTime = 0;
 						mp.backgroundIndex = 0;
-						mp.volume = 10;
+						mp.ringVolume = 10;
+						mp.mediaVolume = 10;
 						mp.ringtone_path = "/Music/Default ringtone.wav";
 						mp.notification = 0;
 						mp.applySettings();
@@ -2361,6 +2385,7 @@ bool updateMenu()
 							break;
 						}
 					}
+					while(!mp.update());
 					return 1;
 
 				}
@@ -2392,27 +2417,27 @@ bool updateMenu()
 		}
 		if (mp.buttons.released(BTN_UP) && cursor > 0)
 		{
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			blinkState = 1;
 			previousMillis = millis();
-			mp.update();
+			while(!mp.update());
 			cursor--;
 		}
 		if (mp.buttons.released(BTN_DOWN) && cursor < 3)
 		{
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			blinkState = 1;
 			previousMillis = millis();
-			mp.update();
+			while(!mp.update());
 			cursor++;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			break;
 		mp.update();
 	}
-	mp.update();
+	while(!mp.update());
 	return false;
 }
 int8_t notificationsAudioMenu(String* items, uint8_t length) {
@@ -2450,17 +2475,17 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		mp.display.print("Play");
 		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{
-			mp.update();
+			while(!mp.update());
 			mp.playNotificationSound(cursor);
 		}
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 
-			mp.update();
+			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6*scale) {
@@ -2477,7 +2502,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			mp.update();
+			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 2) + cameraY + offset) > 54*scale) {
 				cameraY -= (boxHeight + 2);
@@ -2491,7 +2516,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			return -1;
 		}
 		mp.update();
@@ -2588,7 +2613,7 @@ void wifiConnect()
 				break;
 			}
 		}
-		mp.update();
+		while(!mp.update());
 
 	}
 	else
@@ -2618,7 +2643,7 @@ void wifiConnect()
 			int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
 			if(selection < 0)
 			{
-				mp.update();
+				while(!mp.update());
 				return;
 			}
 			
@@ -2628,7 +2653,7 @@ void wifiConnect()
 				prevContent = "";
 				content = "";
 				mp.textPointer = 0;
-				mp.update();
+				while(!mp.update());
 				while (1)
 				{
 					mp.display.fillScreen(TFT_BLACK);
@@ -2685,7 +2710,7 @@ void wifiConnect()
 						{
 							delay(750);
 							mp.display.print(".");
-							mp.update();
+							while(!mp.update());
 							counter++;
 							if (counter >= 8)
 							{
@@ -2703,7 +2728,7 @@ void wifiConnect()
 										return;
 									}
 								}
-								mp.update();
+								while(!mp.update());
 								return;
 							}
 						}
@@ -2726,7 +2751,7 @@ void wifiConnect()
 									break;
 								}
 							}
-							mp.update();
+							while(!mp.update());
 							break;
 						}
 						if(WiFi.status() == WL_CONNECTED)
@@ -2817,7 +2842,7 @@ void wifiConnect()
 					}
 					if(mp.buttons.released(BTN_B))
 					{
-						mp.update();
+						while(!mp.update());
 						break;
 					}
 					mp.update();
@@ -2826,11 +2851,11 @@ void wifiConnect()
 			else
 			{
 				while (WiFi.status() != WL_CONNECTED)
-					mp.update();
+					while(!mp.update());
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setCursor(30, 32);
 				mp.display.printCenter("CONNECTED!");
-				mp.update();
+				while(!mp.update());
 			}
 		}
 	}
@@ -2908,7 +2933,7 @@ int8_t checkForUpdate()
 				{
 					if(mp.buttons.released(BTN_B))
 					{
-						mp.update();
+						while(!mp.update());
 						return -1;
 					}
 					mp.update();
@@ -3013,25 +3038,25 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		mp.display.print("Networks");
 		if(mp.released(BTN_FUN_RIGHT))
 		{
-			mp.update();
+			while(!mp.update());
 			mp.playNotificationSound(cursor);
 		}
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			mp.update();
+			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 4) {
-					cameraY = -(cursor - 3) * (boxHeight + 1) - 1;
+					cameraY = -(cursor - 3) * (boxHeight + 1);
 				}
 			}
 			else {
-				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
-					cameraY += (boxHeight + 2);
+				if (cursor > 0 && (cursor * (boxHeight + 1)  + cameraY + offset) <= 30) {
+					cameraY += (boxHeight + 1);
 				}
 				cursor--;
 			}
@@ -3039,7 +3064,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			mp.update();
+			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 1) + cameraY + offset) > 100) {
 				cameraY -= (boxHeight + 1);
@@ -3053,7 +3078,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			return -1;
 		}
 		mp.update();

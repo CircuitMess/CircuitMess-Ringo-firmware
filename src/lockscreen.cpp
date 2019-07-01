@@ -129,7 +129,7 @@ void lockscreen() {
 		{
 			mp.display.drawBitmap(2, 2, airplaneModeIcon, TFT_BLACK, 2);
 		}
-		if (mp.volume == 0)
+		if (mp.ringVolume == 0)
 		{
 			mp.display.drawBitmap(helper*2, 2, silentModeIcon, TFT_BLACK, 2);
 			helper += 10;
@@ -292,8 +292,10 @@ void lockscreen() {
 						mp.leds[5] = CRGB::Red;
 						mp.leds[3] = CRGB::Red;
 						mp.leds[4] = CRGB::Red;
+						// while(!mp.update());
 						mp.update();
 					}
+					mp.update();
 					Serial.println(millis() - buttonHeld);
 					return;
 				}

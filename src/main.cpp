@@ -113,20 +113,20 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			osc->note(75, 0.05);
-			osc->play();
-			mp.update();// Exit when pressed
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
+			while(!mp.update());// Exit when pressed
 			break;
 		}
 		if (mp.buttons.released(BTN_B))   //BUTTON BACK
 			return -1;
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
-			mp.update();
+			while(!mp.update());
 
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -143,11 +143,11 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			osc->note(75, 0.05);
-			osc->play();
+			mp.osc->note(75, 0.05);
+			mp.osc->play();
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
-			mp.update();
+			while(!mp.update());
 
 
 			cursor++;
@@ -224,13 +224,13 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		mp.display.print(title);
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 
-			mp.update();
+			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -247,7 +247,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			mp.update();
+			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 1) + cameraY + offset) > 54*scale) {
 				cameraY -= (boxHeight + 1);
@@ -261,7 +261,7 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			mp.update();
+			while(!mp.update());
 			return -1;
 		}
 		mp.update();
@@ -1015,13 +1015,13 @@ bool startupWizard()
 			break;
 		else if(mp.buttons.released(BTN_A) && !cursor)
 		{
-			mp.update();
+			while(!mp.update());
 			playing = !playing;
 		}
 
 		mp.update();
 	}
-	mp.update();
+	while(!mp.update());
 
 
 	//SIM module testing
@@ -1203,12 +1203,14 @@ bool startupWizard()
 
 					if(mp.buttons.released(BTN_LEFT) && cursor)
 					{
+						while(!mp.update());
 						blinkState = 1;
 						blinkMillis = millis();
 						cursor = 0;
 					}
 					if(mp.buttons.released(BTN_RIGHT) && !cursor)
 					{
+						while(!mp.update());
 						blinkState = 1;
 						blinkMillis = millis();
 						cursor = 1;
@@ -1288,12 +1290,14 @@ bool startupWizard()
 
 					if(mp.buttons.released(BTN_LEFT) && cursor)
 					{
+						while(!mp.update());
 						blinkState = 1;
 						blinkMillis = millis();
 						cursor = 0;
 					}
 					if(mp.buttons.released(BTN_RIGHT) && !cursor)
 					{
+						while(!mp.update());
 						blinkState = 1;
 						blinkMillis = millis();
 						cursor = 1;
@@ -1302,7 +1306,7 @@ bool startupWizard()
 				}
 				if(!cursor)
 				{
-					mp.update();
+					while(!mp.update());
 					phoneApp();
 				}
 				break;
@@ -1474,6 +1478,7 @@ bool startupWizard()
 				}
 				mp.update();
 			}
+			while(!mp.update());
 			if(cursor)
 				break;
 		}
@@ -1592,11 +1597,11 @@ bool startupWizard()
 			}
 			mp.update();
 		}
-
+		while(!mp.update());
 		if(cursor)
 			break;
 	}
-	mp.update();
+	while(!mp.update());
 
 	// Wifi testing
 	// if(!mp.wifi)
@@ -1665,7 +1670,7 @@ void controlTry() //for debug purposes
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
 			Serial.println("B pressed");
-			mp.update();
+			while(!mp.update());
 			break;
 		}
 		if (mp.buttons.released(BTN_A) && content != "") // SEND SMS
@@ -1717,9 +1722,9 @@ void setup()
 
 	mp.begin(0);
 	mp.homePopupEnable(0);
-	osc = new Oscillator();
-	osc->setVolume(256*mp.volume/14);
-	addOscillator(osc);
+	// osc = new Oscillator();
+	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
+	// addOscillator(osc);
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
@@ -1729,8 +1734,6 @@ void setup()
 		startupWizard();
 	}
 	mp.shutdownPopupEnable(1);
-	// controlTry();
-	// mp.dataRefreshFlag = 1;
 }
 void loop()
 {
