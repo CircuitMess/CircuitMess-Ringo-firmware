@@ -920,7 +920,8 @@ bool startupWizard()
 		}
 		mp.update();
 	}
-
+	EEPROM.writeBool(33, 0);
+	EEPROM.commit();
 	//Speaker testing
 	bool state = 0;
 	bool playing = 0;
@@ -1708,11 +1709,7 @@ void setup()
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
-	{
-		EEPROM.writeBool(33, 0);
-		EEPROM.commit();
 		startupWizard();
-	}
 	mp.shutdownPopupEnable(1);
 }
 void loop()

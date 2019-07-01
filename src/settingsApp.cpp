@@ -1072,12 +1072,7 @@ void securityMenu() {
 							mp.display.printCenter(temp);
 
 							key = mp.buttons.getKey();
-							if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
-							{
-								pinBuffer = "";
-								while(!mp.update());
-							}
-							else if (mp.buttons.released(BTN_FUN_LEFT) && pinBuffer != "")
+							if (mp.buttons.released(BTN_FUN_LEFT) && pinBuffer != "")
 							{
 								pinBuffer.remove(pinBuffer.length() - 1);
 								while(!mp.update());
@@ -1156,12 +1151,7 @@ void securityMenu() {
 			else if (cursor == 1 && pinLockBuffer == 1)
 			{
 				key = mp.buttons.getKey();
-				if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
-				{
-					pinBuffer = "";
-					while(!mp.update());
-				}
-				else if (mp.buttons.released(BTN_FUN_LEFT))
+				if (mp.buttons.released(BTN_FUN_LEFT))
 				{
 					pinBuffer.remove(pinBuffer.length() - 1);
 					while(!mp.update());
@@ -1208,12 +1198,7 @@ void securityMenu() {
 						mp.display.printCenter(temp);
 
 						key = mp.buttons.getKey();
-						if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
-						{
-							oldPin = "";
-							while(!mp.update());
-						}
-						else if (mp.buttons.released(BTN_FUN_LEFT))
+						if (mp.buttons.released(BTN_FUN_LEFT))
 						{
 							oldPin.remove(oldPin.length() - 1);
 							while(!mp.update());
@@ -1719,12 +1704,7 @@ void timeMenu()
 
 					}
 					key = mp.buttons.getKey();
-					if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
-					{
-						inputBuffer = "";
-						while(!mp.update());
-					}
-					else if (mp.buttons.released(BTN_FUN_LEFT))
+					if (mp.buttons.released(BTN_FUN_LEFT))
 					{
 						inputBuffer.remove(inputBuffer.length() - 1);
 						while(!mp.update());

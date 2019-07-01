@@ -523,8 +523,6 @@ void composeSMS(JsonArray *messages)
 		if (cursor == 0) //inputting the contact number
 		{
 			key = mp.buttons.getKey();
-			// if (mp.buttons.released(BTN_FUN_RIGHT)) //clear number
-				// contact = "";
 			if (mp.buttons.released(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 16)
