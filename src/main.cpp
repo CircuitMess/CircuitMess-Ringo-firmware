@@ -1635,10 +1635,47 @@ void controlTry() //for debug purposes
 	bool blinkState = 1;
 	uint8_t scale;
 	String updateBuffer = "";
-	char c;
+	char c = ' ';
 	String outBuffer = "";
 	mp.dataRefreshFlag = 0;
-	// Serial1.print("AT+CPIN?\r\n");
+	mp.display.fillScreen(TFT_DARKGREY);
+	while(!mp.update());
+	Serial1.println("AT+COPS=?");
+	while(!Serial1.available());
+	String temp = Serial1.readString();
+	Serial.println(temp);
+	if(temp.indexOf("ERROR") == -1)
+	{
+		mp.display.fillScreen(TFT_DARKGREY);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,mp.display.height()/2-12);
+		mp.display.printCenter("Loading operators");
+		while(!mp.update());
+		while(!Serial1.available());
+		temp = Serial1.readString();
+		temp = temp.substring(2, temp.indexOf("\r", 2));
+		Serial.println(temp);
+		// while(c != '\r')
+		// {
+		// 	if(Serial1.available())
+		// 		c = Serial1.read();
+		// 	Serial.print(c);
+		// 	array[counter] = c;
+		// 	counter++;
+		// }
+	
+		mp.display.fillScreen(TFT_DARKGREY);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setTextFont(1);
+		mp.display.setCursor(0, 1);
+		mp.display.setTextWrap(1);
+		mp.display.print(temp);
+		while(!mp.buttons.released(BTN_A))
+			mp.update();
+		mp.display.setTextFont(2);
+		
+	}
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
