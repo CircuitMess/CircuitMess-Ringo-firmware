@@ -961,11 +961,10 @@ void securityMenu() {
 		Serial.println(reply);
 		delay(5);
 	}
-	uint8_t foo = reply.indexOf(" ", reply.indexOf("+SPIC:"));
+	uint16_t foo = reply.indexOf(" ", reply.indexOf("+SPIC:"));
 	timesRemaining = reply.substring(foo, reply.indexOf(",", foo)).toInt();
-	Serial.println(timesRemaining);
-	// if (timesRemaining == 0) //PUK lock WIP
-		// mp.enterPUK();
+	if (timesRemaining == 0) //PUK lock WIP
+		mp.enterPUK();
 	//check if the SIM card is locked
 	while (reply.indexOf("+CLCK:") == -1)
 	{
