@@ -344,7 +344,10 @@ int16_t audioPlayer(uint16_t index) {
 		
 		if(playState)
 			mp3->play();
-		mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+		if(mp.mediaVolume == 0)
+			mp3->setVolume(0);
+		else
+			mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
 		while (1) 
 		{
 			if (mp.buttons.released(BTN_B))
@@ -426,11 +429,14 @@ int16_t audioPlayer(uint16_t index) {
 				while(!mp.update());
 			}
 
-			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 1) //DOWN
+			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0) //DOWN
 			{
 				
 				mp.mediaVolume--;
-				mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				if(mp.mediaVolume == 0)
+					mp3->setVolume(0);
+				else
+					mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
 				// mp3->setVolume(256/14*mp.mediaVolume);
 				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
@@ -459,7 +465,10 @@ int16_t audioPlayer(uint16_t index) {
 			{
 				
 				mp.mediaVolume++;
-				mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				if(mp.mediaVolume == 0)
+					mp3->setVolume(0);
+				else
+					mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
 				// mp3->setVolume(256/14*mp.mediaVolume);
 				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
