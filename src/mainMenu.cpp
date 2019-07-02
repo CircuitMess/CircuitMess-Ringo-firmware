@@ -94,6 +94,7 @@ void listBinaries(const char * dirname, uint8_t levels) {
 int16_t scrollingMainMenu(uint16_t _cursor)
 {
 	bool previousButtonState = 0;
+	bool SDinserted = mp.SDinsertedFlag;
 	bool cursorState = 0;
 	uint16_t index = 0;
 	uint8_t cursorX = 0;
@@ -106,9 +107,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	if(elements < 6)
 		pageNumber = 0;
 	else
-
 		pageNumber = ceil((float)(elements - 6)/3);
-
 	cursorY = int(_cursor / x_elements);
 	cursorX = _cursor % x_elements;
 	Serial.println(cursorY);
@@ -181,7 +180,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 								mp.display.drawBmp(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp"), 4 + tempX * 52, 18 + tempY * 56, 2);
 							else
 								mp.display.drawIcon(defaultIcon, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
-
 						}
 						break;
 				}
@@ -361,209 +359,221 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			cameraY = 0;
 			return -2;
 		}
-		// if (passcode == "UPUPDOWNDOWNLEFTRIžGHTLEFTRIGHT")
+		// if (passcode == "UPUPDOWNDOWNLEFTRIGHTLEFTRIGHT")
 		// 	return -3;
+		if(SDinserted != mp.SDinsertedFlag)
+		{
+			SDinserted = mp.SDinsertedFlag;
+			pageIndex = 0;
+			cameraY = 0;
+			return -1;
+		}
 		mp.update();
 
 	}
 }
 void mainMenu()
 {
-	int16_t index = 0;
-	Serial.println(F("entered main menu"));
-	mp.dataRefreshFlag = 0;
-	listDirectories("/");
-	while (1)
+	while(1)
 	{
-		index = scrollingMainMenu(index);
-		Serial.println(index);
-		delay(5);
-		if(index < 9)
+		int16_t index = 0;
+		Serial.println(F("entered main menu"));
+		mp.dataRefreshFlag = 0;
+		listDirectories("/");
+		while (1)
 		{
-			if (titles[index] == "Apps")
-			{
-				mp.display.fillScreen(TFT_BLACK);
-				mp.display.setCursor(0, mp.display.height()/2 - 20);
-				mp.display.setTextFont(2);
-				mp.display.printCenter(F("PLACEHOLDER"));
-				mp.display.setCursor(0, mp.display.height()/2);
-				mp.display.printCenter(F("PLACEHOLDER"));
-				uint32_t tempMillis = millis();
-				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-					mp.update();
-				while(!mp.update());
-			}
-
-			if (titles[index] == "Messages")
-			{
-				mp.display.fillScreen(TFT_BLACK);
-				mp.display.setTextColor(TFT_WHITE);
-				if(mp.simInserted && !mp.airplaneMode && mp.SDinsertedFlag)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 16);
-					mp.display.printCenter(F("Loading messages..."));
-					while(!mp.update());
-					messagesApp();
-				}
-				else if(!mp.simInserted)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("No SIM inserted!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Insert SIM and reset"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-				else if(mp.airplaneMode)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("Can't access SMS!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Turn off airplane mode"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-				else if(!mp.SDinsertedFlag)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("Can't access SMS!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("SD card missing"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-
-			}
-
-			if (titles[index] == "Media")
-			{
-				mp.display.fillScreen(TFT_BLACK);
-				mp.display.setTextColor(TFT_WHITE);
-				if(mp.SDinsertedFlag)
-				mediaApp();
-				else
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("No SD inserted!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Insert SD card and reset"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-			}
-
-			if (titles[index] == "Phone")
-			{
-				mp.display.fillScreen(TFT_BLACK);
-				mp.display.setTextColor(TFT_WHITE);
-				if(mp.simInserted && !mp.airplaneMode)
-					phoneApp();
-				else if(!mp.simInserted)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("No SIM inserted!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Insert SIM and reset"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-				else if(mp.airplaneMode)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("Can't make calls"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Turn off airplane mode"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-			}
-
-			if (titles[index] == "Contacts") {
-				mp.display.fillScreen(TFT_BLACK);
-				mp.display.setTextColor(TFT_WHITE);
-				if(mp.SDinsertedFlag && !mp.airplaneMode)
-				{
-					mp.display.fillScreen(TFT_BLACK);
-					mp.display.setCursor(0,mp.display.height()/2 -16);
-					mp.display.printCenter(F("Loading contacts..."));
-					contactsAppSD();
-				}
-				else if(!mp.SDinsertedFlag)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("No SD inserted!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Insert SD and reset"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-				else if(mp.airplaneMode)
-				{
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.setTextFont(2);
-					mp.display.printCenter(F("Can't access contacts!"));
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter(F("Turn off airplane mode"));
-					uint32_t tempMillis = millis();
-					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					while(!mp.update());
-				}
-			}
-
-			if (titles[index] == "Settings")
-				if(settingsApp())
-				{
-					pageIndex = 0;
-					cameraY = 0;
-					return;
-				}
-			if(titles[index] == "Clock")
-				clockApp();
-			if(titles[index] == "Calculator")
-				calculatorApp();
-			if(titles[index] == "Flashlight")
-				flashlightApp();
-			if(titles[index] == "Calendar")
-				calendarApp();
+			index = scrollingMainMenu(index);
+			Serial.println(index);
+			delay(5);
 			if (index == -2)
 			{
 				Serial.println(F("pressed"));
-				break;
+				return;
 			}
-		}
-		else
-		{
-			mp.display.fillScreen(TFT_BLACK);
-			mp.display.setCursor(0,mp.display.height() / 2 - 16);
-			mp.display.printCenter(F("LOADING NOW..."));
-			while(!mp.update());
+			else if(index == -1)
+				break;
+			else if(index < 9)
+			{
+				if (titles[index] == "Apps")
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("PLACEHOLDER"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("PLACEHOLDER"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					while(!mp.update());
+				}
 
-			String foo = directories[index - 9]; //9 is the number of preloaded apps
-			initWavLib();
-			mp.updateFromFS(String("/" + foo + "/" + foo + ".bin"));
+				if (titles[index] == "Messages")
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextColor(TFT_WHITE);
+					if(mp.simInserted && !mp.airplaneMode && mp.SDinsertedFlag)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 16);
+						mp.display.printCenter(F("Loading messages..."));
+						while(!mp.update());
+						messagesApp();
+					}
+					else if(!mp.simInserted)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No SIM inserted!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Insert SIM and reset"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else if(mp.airplaneMode)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("Can't access SMS!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Turn off airplane mode"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else if(!mp.SDinsertedFlag)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("Can't access SMS!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("SD card missing"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+
+				}
+
+				if (titles[index] == "Media")
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextColor(TFT_WHITE);
+					if(mp.SDinsertedFlag)
+					mediaApp();
+					else
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No SD inserted!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Insert SD card and reset"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+				}
+
+				if (titles[index] == "Phone")
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextColor(TFT_WHITE);
+					if(mp.simInserted && !mp.airplaneMode)
+						phoneApp();
+					else if(!mp.simInserted)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No SIM inserted!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Insert SIM and reset"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else if(mp.airplaneMode)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("Can't make calls"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Turn off airplane mode"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+				}
+
+				if (titles[index] == "Contacts") {
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextColor(TFT_WHITE);
+					if(mp.SDinsertedFlag && !mp.airplaneMode)
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setCursor(0,mp.display.height()/2 -16);
+						mp.display.printCenter(F("Loading contacts..."));
+						contactsAppSD();
+					}
+					else if(!mp.SDinsertedFlag)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No SD inserted!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Insert SD and reset"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else if(mp.airplaneMode)
+					{
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("Can't access contacts!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Turn off airplane mode"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+				}
+
+				if (titles[index] == "Settings")
+					if(settingsApp())
+					{
+						pageIndex = 0;
+						cameraY = 0;
+						return;
+					}
+				if(titles[index] == "Clock")
+					clockApp();
+				if(titles[index] == "Calculator")
+					calculatorApp();
+				if(titles[index] == "Flashlight")
+					flashlightApp();
+				if(titles[index] == "Calendar")
+					calendarApp();
+			}
+			else
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setCursor(0,mp.display.height() / 2 - 16);
+				mp.display.printCenter(F("LOADING NOW..."));
+				while(!mp.update());
+
+				String foo = directories[index - 9]; //9 is the number of preloaded apps
+				initWavLib();
+				mp.updateFromFS(String("/" + foo + "/" + foo + ".bin"));
+			}
+			mp.update();
 		}
-		mp.update();
 	}
 }
