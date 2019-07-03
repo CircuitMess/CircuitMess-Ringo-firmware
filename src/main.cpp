@@ -614,7 +614,6 @@ void callNumber(String number) {
 }
 bool startupWizard()
 {
-	mp.shutdownPopupEnable(0);
 	mp.homePopupEnable(0);
 
 	// Connect charger
@@ -658,7 +657,8 @@ bool startupWizard()
 		mp.update();
 	}
 	while(!mp.update());
-
+ 
+	mp.shutdownPopupEnable(0);
 
 	// Buttons testing
 	bool buttonsArray[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -795,6 +795,7 @@ bool startupWizard()
 			break;
 		}
 	}
+	mp.shutdownPopupEnable(1);
 
 	// Joystick testing
 	bool tested[8] = {0,0,0,0,0,0,0,0};
@@ -1702,7 +1703,7 @@ void setup()
 	}
 
 	mp.begin(0);
-	mp.homePopupEnable(0);
+	// mp.homePopupEnable(1);
 	// osc = new Oscillator();
 	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
 	// addOscillator(osc);
@@ -1710,7 +1711,7 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
-	mp.shutdownPopupEnable(1);
+	
 }
 void loop()
 {
