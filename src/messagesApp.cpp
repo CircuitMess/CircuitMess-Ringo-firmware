@@ -149,7 +149,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 		mp.display.print(content);
 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
 			Serial.println(mp.display.cursor_y);
-			if (mp.display.cursor_y >= 110)
+			if (mp.display.cursor_y >= 94)
 			{
 
 				// if (!mp.buttons.released(BTN_DOWN))
