@@ -238,8 +238,8 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 				}
 			}
 			else {
-				if (cursor > 0 && (cursor * (boxHeight + 1) - 1 + cameraY + offset) <= boxHeight) {
-					cameraY += (boxHeight + 2);
+				if (cursor > 0 && (cursor * (boxHeight + 1) + cameraY + offset) < 20) {
+					cameraY += (boxHeight + 1);
 				}
 				cursor--;
 			}
