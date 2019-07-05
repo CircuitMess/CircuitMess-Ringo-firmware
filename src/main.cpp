@@ -330,6 +330,7 @@ void callNumber(String number) {
 	Serial1.print(F("ATD"));
 	Serial1.print(number);
 	Serial1.print(";\r\n");
+	mp.waitForOK();
 	mp.display.setFreeFont(TT1);
 	mp.display.setTextColor(TFT_BLACK);
 	bool firstPass = 1;
@@ -351,7 +352,7 @@ void callNumber(String number) {
 	digitalWrite(soundSwitchPin, 1);
 
 	mp.display.printCenter(number);
-
+	
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -376,6 +377,11 @@ void callNumber(String number) {
 			{
 				if (firstPass == 1)
 				{
+					if(mp.sim_module_version == 0)
+					{
+						Serial1.println("AT+CECH=0x0000");
+						Serial.println(mp.waitForOK());
+					}
 					timeOffset = millis();
 					firstPass = 0;
 				}
@@ -410,6 +416,7 @@ void callNumber(String number) {
 
 			else if (localBuffer.indexOf(",0,2,0") != -1)
 			{
+				
 				mp.display.setCursor(25, 9);
 				mp.display.printCenter("Calling...");
 				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
