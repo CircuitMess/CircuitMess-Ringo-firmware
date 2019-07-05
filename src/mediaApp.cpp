@@ -295,7 +295,6 @@ int16_t audioPlayer(uint16_t index) {
 	bool shuffleList[audioCount];
 	if(!firstPass)
 	{
-		firstPass = 1;
 		mp3 = new MPTrack((char*)audioFiles[index].c_str());
 		addTrack(mp3);
 	}
@@ -333,14 +332,16 @@ int16_t audioPlayer(uint16_t index) {
 			mp.display.printCenter(audioFiles[index]);
 		mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
-
-		// removeTrack(mp3);
-		// mp3 = trackArray[index];
-		if(mp3->reloadFile((char*)audioFiles[index].c_str()))
-			Serial.println("OK");
+		if(firstPass)
+		{
+			if(mp3->reloadFile((char*)audioFiles[index].c_str()))
+				Serial.println("OK");
+			else
+				Serial.println("ERROR");
+		}
 		else
-			Serial.println("ERROR");
-		delay(5);
+			firstPass = 1;
+		
 		
 		if(playState)
 			mp3->play();
