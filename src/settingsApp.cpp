@@ -2414,23 +2414,29 @@ bool updateMenu()
 			previousMillis = millis();
 			blinkState = !blinkState;
 		}
-		if (mp.buttons.released(BTN_UP) && cursor > 0)
+		if (mp.buttons.released(BTN_UP))
 		{
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			blinkState = 1;
 			previousMillis = millis();
 			while(!mp.update());
-			cursor--;
+			if(cursor == 0)
+				cursor = 3;
+			else
+				cursor--;
 		}
-		if (mp.buttons.released(BTN_DOWN) && cursor < 3)
+		if (mp.buttons.released(BTN_DOWN))
 		{
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			blinkState = 1;
 			previousMillis = millis();
 			while(!mp.update());
-			cursor++;
+			if(cursor == 3)
+				cursor = 0;
+			else
+				cursor++;
 		}
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			break;

@@ -63,7 +63,7 @@ void calculatorApp()
 	{
 		// key = mp.buttons.getKey();
 
-		if(input.length() < 8) {
+		if(input.length() < 8 || clear) {
 			for(int i = 0; i < 11; i++) {
 				if(i == 9) {
 					continue;
@@ -110,6 +110,7 @@ void calculatorApp()
 		mp.display.fillRect(7,6,147,38, TFT_LIGHTGREY);
 		mp.display.setTextSize(2);
 		mp.display.setTextFont(2);
+		mp.display.setTextWrap(0);
 		mp.display.setCursor(200, 200);
 		tempCursor = mp.display.cursor_x;
 		mp.display.print(input);
@@ -120,7 +121,7 @@ void calculatorApp()
 		mp.display.drawRect(7 + 37 * (cursor % 4), 48 + 27 * (int)(cursor / 4), 35, 25, blinkState ? TFT_RED : 0xA794);
 		mp.display.drawRect(6 + 37 * (cursor % 4), 47 + 27 * (int)(cursor / 4), 37, 27, blinkState ? TFT_RED : 0xA794);
 
-		if(mp.buttons.released(BTN_FUN_LEFT))
+		if(mp.buttons.held(BTN_FUN_LEFT, 40))
 		{
 			while(!mp.update());
 			result = 0;
@@ -128,6 +129,12 @@ void calculatorApp()
 			input = "0";
 			clear = 0;
 			helper = 0;
+		}
+		if(mp.buttons.released(BTN_FUN_LEFT))
+		{
+			input.remove(input.length() - 1);
+			if(input == "")
+				input = "0";
 		}
 		if(mp.buttons.released(BTN_LEFT))
 		{
@@ -182,7 +189,7 @@ void calculatorApp()
 			if(cursor == 4)
 			{
 				result = input.toDouble();
-				Serial.println(sqrt((double)(result)));
+				// Serial.println(sqrt((double)(result)));
 				result = sqrt(result);
 				if(result == int(result))
 					input = String((int)(round(result)));
@@ -223,7 +230,6 @@ void calculatorApp()
 				}
 
 				set = 0;
-				Serial.println(clear);
 				if(operation == cursor && !clear)
 				{
 					switch (operation)
@@ -256,6 +262,7 @@ void calculatorApp()
 
 			}
 			while(!mp.update());
+			Serial.println(operation);
 		}
 		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{

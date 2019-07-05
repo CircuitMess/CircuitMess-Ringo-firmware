@@ -986,7 +986,7 @@ void clockAlarmEdit(uint8_t index)
 			mp.display.setCursor(47, 48);
 			mp.display.printCenter("Exit without saving?");
 			mp.display.setCursor(47, 61);
-			mp.display.printCenter("A: yes      B: no");
+			mp.display.printCenter("A: Yes      B: No");
 			while(1)
 			{
 				if(mp.buttons.released(BTN_B))
