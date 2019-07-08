@@ -1614,14 +1614,64 @@ void controlTry() //for debug purposes
 {
 	mp.textInput("");
 	mp.textPointer = 0;
-    y = 16; //beginning point
+
 	String content = "";
 	String prevContent = "";
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	uint8_t scale;
 	String updateBuffer = "";
+	char c = ' ';
+	String outBuffer = "";
+	uint32_t cursorY = 1;
+	mp.dataRefreshFlag = 0;
+	mp.display.fillScreen(TFT_DARKGREY);
+	while(!mp.update());
+	Serial1.println("AT+COPS=?");
+	while(!Serial1.available());
+	String temp = Serial1.readString();
+	Serial.println(temp);
+	if(temp.indexOf("ERROR") == -1)
+	{
+		mp.display.fillScreen(TFT_DARKGREY);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,mp.display.height()/2-12);
+		mp.display.printCenter("Loading operators");
+		while(!mp.update());
+		while(!Serial1.available());
+		temp = Serial1.readString();
+		temp = temp.substring(2, temp.indexOf("\r", 2));
+		Serial.println(temp);
+		mp.display.fillScreen(TFT_DARKGREY);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setTextFont(1);
+		while(!mp.buttons.released(BTN_B))
+		{
+			mp.display.fillScreen(TFT_DARKGREY);
+			mp.display.setCursor(1, cursorY);
+			mp.display.setTextWrap(1);
+			mp.display.print(temp);
+			if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+				Serial.println(mp.display.cursor_y);
+				if (mp.display.cursor_y >= 110)
+				{
 
+					cursorY -= 4;
+				}
+			}
+
+			if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+				if (cursorY < 1)
+				{
+					cursorY += 4;
+				}
+			}
+			mp.update();
+		}
+		mp.display.setTextFont(2);
+		
+	}
 	// mp.dataRefreshFlag = 1;
 	while (1)
 	{
