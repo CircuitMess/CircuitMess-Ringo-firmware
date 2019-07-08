@@ -1671,6 +1671,7 @@ void controlTry() //for debug purposes
 		{
 			mp.display.fillScreen(TFT_DARKGREY);
 			mp.display.setCursor(1, cursorY);
+			mp.display.setTextWrap(1);
 			mp.display.print(temp);
 			if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
 				Serial.println(mp.display.cursor_y);
