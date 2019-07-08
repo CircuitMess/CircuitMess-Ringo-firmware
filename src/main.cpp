@@ -1632,6 +1632,7 @@ bool startupWizard()
 }
 void controlTry() //for debug purposes
 {
+	int32_t cursorY = 1;
 	mp.dataRefreshFlag = 0;
 	mp.textInput("");
 	mp.textPointer = 0;
@@ -1663,23 +1664,31 @@ void controlTry() //for debug purposes
 		temp = Serial1.readString();
 		temp = temp.substring(2, temp.indexOf("\r", 2));
 		Serial.println(temp);
-		// while(c != '\r')
-		// {
-		// 	if(Serial1.available())
-		// 		c = Serial1.read();
-		// 	Serial.print(c);
-		// 	array[counter] = c;
-		// 	counter++;
-		// }
-	
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setTextFont(1);
-		mp.display.setCursor(0, 1);
-		mp.display.setTextWrap(1);
-		mp.display.print(temp);
-		while(!mp.buttons.released(BTN_A))
+		while(!mp.buttons.released(BTN_B))
+		{
+			mp.display.fillScreen(TFT_DARKGREY);
+			mp.display.setCursor(1, cursorY);
+			mp.display.print(temp);
+			if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+				Serial.println(mp.display.cursor_y);
+				if (mp.display.cursor_y >= 110)
+				{
+
+					cursorY -= 4;
+				}
+			}
+
+			if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+				if (cursorY < 1)
+				{
+					cursorY += 4;
+				}
+			}
 			mp.update();
+		}
 		mp.display.setTextFont(2);
 		
 	}
