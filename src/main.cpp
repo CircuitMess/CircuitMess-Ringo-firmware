@@ -1690,6 +1690,7 @@ void controlTry() //for debug purposes
 			}
 			mp.update();
 		}
+		while(!mp.update());
 		mp.display.setTextFont(2);
 		
 	}
