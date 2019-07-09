@@ -569,10 +569,13 @@ void callNumber(String number) {
 			while(!mp.update());
 			mp.updateTimeRTC();
 			Serial.println("B PRESSED");
-			Serial1.println("ATH");
 			uint32_t curr_millis = millis();
-			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
-				Serial1.println("ATH");
+			buffer = "";
+			Serial1.println("ATH");
+			while (buffer.indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
+				// Serial1.println("ATH");
+				if(Serial1.available())
+					buffer+=(char)Serial1.read();
 			}
 			if(mp.SDinsertedFlag)
 				mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
@@ -1692,7 +1695,6 @@ void controlTry() //for debug purposes
 		}
 		while(!mp.update());
 		mp.display.setTextFont(2);
-		
 	}
 	while (1)
 	{
