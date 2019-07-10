@@ -124,7 +124,7 @@ void lockscreen() {
 				mp.display.drawBitmap(2, 2, signalErrorIcon, TFT_BLACK, 2);
 		}
 		else if(!mp.simInserted && !mp.airplaneMode)
-			mp.display.drawBitmap(2, 2, signalErrorIcon, TFT_BLACK, 2);
+			mp.display.drawBitmap(2, 2, noSimIcon, TFT_BLACK, 2);
 		else if(mp.airplaneMode)
 		{
 			mp.display.drawBitmap(2, 2, airplaneModeIcon, TFT_BLACK, 2);

@@ -1754,7 +1754,7 @@ void setup()
 	}
 
 	mp.begin(0);
-	// mp.homePopupEnable(1);
+	mp.homePopupEnable(0);
 	// osc = new Oscillator();
 	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
 	// addOscillator(osc);
