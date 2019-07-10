@@ -110,7 +110,9 @@ void lockscreen() {
 		mp.display.setCursor(10, 50);
 		mp.display.print("12:00");*/
 		uint8_t helper = 11;
-		if (mp.simInserted && !mp.airplaneMode)
+		if(mp.sim_module_version == 255)
+			helper = 1;
+		if (mp.simInserted && !mp.airplaneMode && mp.sim_module_version != 255)
 		{
 			if (mp.signalStrength <= 3)
 				mp.display.drawBitmap(2, 2, noSignalIcon, TFT_BLACK, 2);
@@ -123,7 +125,7 @@ void lockscreen() {
 			else if (mp.signalStrength == 99)
 				mp.display.drawBitmap(2, 2, signalErrorIcon, TFT_BLACK, 2);
 		}
-		else if(!mp.simInserted && !mp.airplaneMode)
+		else if(!mp.simInserted && !mp.airplaneMode && mp.sim_module_version != 255)
 			mp.display.drawBitmap(2, 2, noSimIcon, TFT_BLACK, 2);
 		else if(mp.airplaneMode)
 		{
@@ -170,7 +172,7 @@ void lockscreen() {
 		}
 		else if(mp.carrierName == "" && mp.simInserted && !mp.airplaneMode)
 			mp.display.print("loading...");
-		else if(mp.carrierName == "" && !mp.simInserted)
+		else if(mp.carrierName == "" && !mp.simInserted && mp.sim_module_version == 255)
 			mp.display.print("No module");	
 
 		if (mp.batteryVoltage > 4100)
