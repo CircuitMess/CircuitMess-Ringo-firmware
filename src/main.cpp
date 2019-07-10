@@ -931,6 +931,7 @@ bool startupWizard()
 	uint32_t blinkMillis = millis();
 	bool cursor = 0;
 	uint32_t callMillis = millis();
+	mp.ringVolume = 10;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -1752,7 +1753,6 @@ void setup()
 		mp.updateFromFS("/.core/LOADER.BIN");
 		ESP.restart();
 	}
-
 	mp.begin(0);
 	mp.homePopupEnable(0);
 	// osc = new Oscillator();
@@ -1762,6 +1762,10 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
+	// startupWizard();
+
+	// pinMode(39, INPUT_PULLUP);
+	// mp.buttons.activateInterrupt();
 	
 }
 void loop()
@@ -1781,6 +1785,22 @@ void loop()
 	// messagesApp();
 	// phoneApp();
 	// clockApp();
+
+	// mp.update();
+	// mp.display.fillScreen(TFT_BLACK);
+	// mp.display.setCursor(20,0);
+	// mp.display.printCenter("Buttons INT: ");
+	// mp.display.setCursor(20,20);
+	// mp.display.printCenter(digitalRead(BTN_INT));
+	// mp.display.setCursor(20,40);
+	// mp.display.printCenter("RTC INT");
+	// mp.display.setCursor(20,60);
+	// mp.display.printCenter(digitalRead(RTC_INT));
+	// mp.display.setCursor(20,80);
+	// mp.display.printCenter("   USB INT: ");
+	// mp.display.setCursor(20,100);
+	// mp.display.printCenter(digitalRead(39));
+
 	lockscreen();
 	mainMenu();
 	// mediaApp();
