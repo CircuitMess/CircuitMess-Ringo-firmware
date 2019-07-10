@@ -156,17 +156,22 @@ void lockscreen() {
 			mp.display.drawBitmap(helper * 2, 2, noSDIcon, TFT_BLACK, 2);
 			helper+=10;
 		}
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setCursor(helper*2, 4);
 		if(mp.carrierName != "")
 		{
 			// mp.display.setFreeFont(TT1);
 			// mp.display.setTextSize(2);
 			// mp.display.setCursor(helper*2, 15);
 
-			mp.display.setTextFont(2);
-			mp.display.setTextSize(1);
-			mp.display.setCursor(helper*2, 4);
+			
 			mp.display.print(mp.carrierName);
 		}
+		else if(mp.carrierName == "" && mp.simInserted && !mp.airplaneMode)
+			mp.display.print("loading...");
+		else if(mp.carrierName == "" && !mp.simInserted)
+			mp.display.print("No module");	
 
 		if (mp.batteryVoltage > 4100)
 			mp.display.drawBitmap(148, 2, batteryChargingIcon, TFT_BLACK, 2);
