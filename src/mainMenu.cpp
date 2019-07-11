@@ -410,41 +410,15 @@ void mainMenu()
 
 				if (titles[index] == "Messages")
 				{
-					mp.display.fillScreen(TFT_BLACK);
-					mp.display.setTextColor(TFT_WHITE);
-					if(mp.simInserted && !mp.airplaneMode && mp.SDinsertedFlag)
+					if(mp.SDinsertedFlag)
 					{
-						mp.display.setCursor(0, mp.display.height()/2 - 16);
-						mp.display.printCenter(F("Loading messages..."));
 						while(!mp.update());
 						messagesApp();
 					}
-					else if(!mp.simInserted)
-					{
-						mp.display.setCursor(0, mp.display.height()/2 - 20);
-						mp.display.setTextFont(2);
-						mp.display.printCenter(F("No SIM inserted!"));
-						mp.display.setCursor(0, mp.display.height()/2);
-						mp.display.printCenter(F("Insert SIM and reset"));
-						uint32_t tempMillis = millis();
-						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
-						while(!mp.update());
-					}
-					else if(mp.airplaneMode)
-					{
-						mp.display.setCursor(0, mp.display.height()/2 - 20);
-						mp.display.setTextFont(2);
-						mp.display.printCenter(F("Can't access SMS!"));
-						mp.display.setCursor(0, mp.display.height()/2);
-						mp.display.printCenter(F("Turn off airplane mode"));
-						uint32_t tempMillis = millis();
-						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
-						while(!mp.update());
-					}
 					else if(!mp.SDinsertedFlag)
 					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setTextColor(TFT_WHITE);
 						mp.display.setCursor(0, mp.display.height()/2 - 20);
 						mp.display.setTextFont(2);
 						mp.display.printCenter(F("Can't access SMS!"));
@@ -455,7 +429,6 @@ void mainMenu()
 							mp.update();
 						while(!mp.update());
 					}
-
 				}
 
 				if (titles[index] == "Media")

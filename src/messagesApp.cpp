@@ -48,7 +48,7 @@ void messagesApp() {
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, mp.display.height()/2 - 16);
 		mp.display.setTextFont(2);
-		mp.display.printCenter("Error: Messages - loading data");
+		mp.display.printCenter("Error loading data");
 
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 			mp.update();
@@ -66,7 +66,34 @@ void messagesApp() {
 
 			else if (menuChoice == -2)
 			{
-				composeSMS(&jarr);
+				if(!mp.simInserted)
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("No SIM inserted!"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("Insert SIM and reset"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					while(!mp.update());
+				}
+				else if(mp.airplaneMode)
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("Can't access SMS!"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("Turn off airplane mode"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					while(!mp.update());
+				}
+				else
+					composeSMS(&jarr);
 				menuChoice = -1;
 			}
 
