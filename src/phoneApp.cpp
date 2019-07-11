@@ -40,9 +40,10 @@ void phoneApp() {
 		if (mp.buttons.released(BTN_FUN_LEFT))
 		{
 			callBuffer.remove(callBuffer.length()-1);
-			while(!mp.update());
+			// while(!mp.update());
+			mp.buttons.update();
 		}
-		else if (mp.buttons.released(BTN_FUN_RIGHT))
+		if (mp.buttons.released(BTN_FUN_RIGHT))
 		{
 			while(!mp.update());
 			if(!mp.SDinsertedFlag)
@@ -61,7 +62,7 @@ void phoneApp() {
 			else
 				callLog();
 		}
-		else if (key != NO_KEY)
+		if (key != NO_KEY)
 		{
 			switch (key)
 			{
@@ -132,16 +133,50 @@ void phoneApp() {
 
 		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
 		{
-			if(callBuffer.startsWith("*"))
+			while(!mp.update());
+			if(!mp.simInserted)
 			{
-				sendMMI(callBuffer);
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("No SIM inserted!"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Insert SIM and reset"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
+			}
+			else if(mp.airplaneMode)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("Can't make calls"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Turn off airplane mode"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
 			}
 			else
 			{
-				callNumber(callBuffer);
-				while(!mp.update());
+				if(callBuffer.startsWith("*"))
+				{
+					sendMMI(callBuffer);
+				}
+				else
+				{
+					callNumber(callBuffer);
+					while(!mp.update());
+				}
+				callBuffer = "";
 			}
-			callBuffer = "";
 		}
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
 			break;
