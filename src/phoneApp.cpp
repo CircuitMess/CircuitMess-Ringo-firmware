@@ -502,7 +502,7 @@ void sendMMI(String code)
 	// delay(10);
 	Serial1.print("AT+CUSD=1,\"");
 	Serial1.print(code);
-	Serial1.println("\"");
+	Serial1.println("\", 15");
 	uint32_t tempMillis = millis();
 	bool cleared = 0;
 	while(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1 && millis() - tempMillis < 4000)
