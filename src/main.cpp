@@ -1621,7 +1621,6 @@ void controlTry() //for debug purposes
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	uint8_t scale;
-	String updateBuffer = "";
 	char c = ' ';
 	String outBuffer = "";
 	uint32_t cursorY = 1;
@@ -1672,7 +1671,6 @@ void controlTry() //for debug purposes
 		}
 		while(!mp.update());
 		mp.display.setTextFont(2);
-		
 	}
 	// mp.dataRefreshFlag = 1;
 	while (1)
@@ -1719,8 +1717,7 @@ void controlTry() //for debug purposes
 		}
 		if(Serial1.available())
 		{
-			updateBuffer+=(char)Serial1.read();
-			Serial.println(updateBuffer);
+			Serial.println(Serial1.readString());
 		}
 		if(Serial.available())
 		{
@@ -1763,7 +1760,7 @@ void setup()
 	if(EEPROM.readBool(33))
 		startupWizard();
 	// startupWizard();
-
+	// controlTry();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
 	
