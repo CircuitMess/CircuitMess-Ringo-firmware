@@ -166,16 +166,57 @@ void phoneApp() {
 			}
 			else
 			{
-				if(callBuffer.startsWith("*"))
+				if(mp.signalStrength == 99)
 				{
-					sendMMI(callBuffer);
+					Serial1.println("AT+CSQ");
+					String buffer = "";
+					uint32_t current = millis();
+					while(buffer.indexOf("+CSQ:") == -1 && millis() - current >= 2000)
+						buffer = Serial1.readString();
+					if(buffer.indexOf("+CSQ:") != -1)
+						mp.signalStrength = buffer.substring(buffer.indexOf(" ", buffer.indexOf("+CSQ:")) + 1, buffer.indexOf(",", buffer.indexOf(" ", buffer.indexOf("+CSQ:")))).toInt();
+					if(mp.signalStrength == 99)
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setTextColor(TFT_WHITE);
+						mp.display.setTextSize(1);
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No signal!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Check your antenna"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else
+					{
+						if(callBuffer.startsWith("*"))
+						{
+							sendMMI(callBuffer);
+						}
+						else
+						{
+							callNumber(callBuffer);
+							while(!mp.update());
+						}
+						callBuffer = "";
+					}
 				}
 				else
 				{
-					callNumber(callBuffer);
-					while(!mp.update());
+					if(callBuffer.startsWith("*"))
+					{
+						sendMMI(callBuffer);
+					}
+					else
+					{
+						callNumber(callBuffer);
+						while(!mp.update());
+					}
+					callBuffer = "";
 				}
-				callBuffer = "";
 			}
 		}
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
@@ -486,7 +527,69 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint
 		}
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // Call
 		{
-			callNumber(number);
+			while(!mp.update());
+			if(!mp.simInserted)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("No SIM inserted!"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Insert SIM and reset"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
+			}
+			else if(mp.airplaneMode)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("Can't make calls"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Turn off airplane mode"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
+			}
+			else
+			{
+				if(mp.signalStrength == 99)
+				{
+					Serial1.println("AT+CSQ");
+					String buffer = "";
+					uint32_t current = millis();
+					while(buffer.indexOf("+CSQ:") == -1 && millis() - current >= 2000)
+						buffer = Serial1.readString();
+					if(buffer.indexOf("+CSQ:") != -1)
+						mp.signalStrength = buffer.substring(buffer.indexOf(" ", buffer.indexOf("+CSQ:")) + 1, buffer.indexOf(",", buffer.indexOf(" ", buffer.indexOf("+CSQ:")))).toInt();
+					if(mp.signalStrength == 99)
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setTextColor(TFT_WHITE);
+						mp.display.setTextSize(1);
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No signal!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Check your antenna"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else
+						callNumber(number);
+				}
+				else
+					callNumber(number);
+			}
 			while(!mp.update());
 			return 0;
 		}

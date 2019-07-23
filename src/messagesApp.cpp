@@ -84,7 +84,7 @@ void messagesApp() {
 					mp.display.fillScreen(TFT_BLACK);
 					mp.display.setCursor(0, mp.display.height()/2 - 20);
 					mp.display.setTextFont(2);
-					mp.display.printCenter(F("Can't access SMS!"));
+					mp.display.printCenter(F("Can't send SMS!"));
 					mp.display.setCursor(0, mp.display.height()/2);
 					mp.display.printCenter(F("Turn off airplane mode"));
 					uint32_t tempMillis = millis();
