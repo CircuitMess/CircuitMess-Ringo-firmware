@@ -313,9 +313,22 @@ void contactsAppSD(){
 				}
 				else
 				{
-					if(mp.simInserted)
-						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
-					else
+					if(mp.sim_module_version == 255)
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setTextColor(TFT_WHITE);
+						mp.display.setTextSize(1);
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("No network board!"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Insert board and reset"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+					else if(!mp.simInserted)
 					{
 						mp.display.setTextColor(TFT_BLACK);
 						mp.display.setTextSize(1);
@@ -338,7 +351,8 @@ void contactsAppSD(){
 						}
 						while(!mp.update());
 					}
-
+					else
+						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
 					while(!mp.update());
 				}
 			}

@@ -134,7 +134,22 @@ void phoneApp() {
 		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
 		{
 			while(!mp.update());
-			if(!mp.simInserted)
+			if(mp.sim_module_version == 255)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("No network board!"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Insert board and reset"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
+			}
+			else if(!mp.simInserted)
 			{
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setTextColor(TFT_WHITE);
@@ -528,7 +543,22 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // Call
 		{
 			while(!mp.update());
-			if(!mp.simInserted)
+			if(mp.sim_module_version == 255)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(0, mp.display.height()/2 - 20);
+				mp.display.setTextFont(2);
+				mp.display.printCenter(F("No network board!"));
+				mp.display.setCursor(0, mp.display.height()/2);
+				mp.display.printCenter(F("Insert board and reset"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
+			}
+			else if(!mp.simInserted)
 			{
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setTextColor(TFT_WHITE);

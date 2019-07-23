@@ -913,7 +913,32 @@ void securityMenu() {
 	bool saved = 0;
 	char key = NO_KEY;
 	bool blinkState = 0;
-	if(!mp.simInserted)
+	if(mp.sim_module_version == 255)
+	{
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextSize(1);
+		mp.display.setTextFont(2);
+		mp.display.drawRect(14, 44, 134, 38, TFT_BLACK);
+		mp.display.drawRect(13, 43, 136, 40, TFT_BLACK);
+		mp.display.fillRect(15, 45, 132, 36, TFT_WHITE);
+		mp.display.setCursor(0, mp.display.height()/2 - 21);
+		mp.display.setCursor(47, 54);
+		mp.display.printCenter("No network board!");
+		uint32_t tempMillis = millis();
+		while(millis() < tempMillis + 2000)
+		{
+			mp.update();
+			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+			{
+				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				break;
+			}
+		}
+		while(!mp.update());
+		return;
+	}
+	else if(!mp.simInserted)
 	{
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setTextSize(1);
@@ -2118,7 +2143,37 @@ void timeMenu()
 				mp.display.drawRect(23, 93, 110, 20, 0xFFED);
 			if(mp.buttons.released(BTN_A))
 			{
-				if(mp.simInserted)
+				if(mp.sim_module_version == 255)
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextColor(TFT_WHITE);
+					mp.display.setTextSize(1);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("No network board!"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("Couldn't fetch time"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					while(!mp.update());
+				}
+				else if(!mp.simInserted)
+				{
+					mp.display.fillScreen(TFT_BLACK);
+					mp.display.setTextColor(TFT_WHITE);
+					mp.display.setTextSize(1);
+					mp.display.setCursor(0, mp.display.height()/2 - 20);
+					mp.display.setTextFont(2);
+					mp.display.printCenter(F("No SIM inserted!"));
+					mp.display.setCursor(0, mp.display.height()/2);
+					mp.display.printCenter(F("Couldn't fetch time"));
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						mp.update();
+					while(!mp.update());
+				}
+				else
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
@@ -2153,17 +2208,6 @@ void timeMenu()
 						}
 					}
 				}
-				else
-				{
-					mp.display.fillScreen(0xFFED);
-					mp.display.setCursor(0, mp.display.height()/2 - 20);
-					mp.display.printCenter("Couldn't fetch time");
-					mp.display.setCursor(0, mp.display.height()/2);
-					mp.display.printCenter("SIM card missing");
-					while(!mp.update());
-					delay(1500);
-				}
-
 			}
 		}
 
