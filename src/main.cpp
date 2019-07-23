@@ -365,6 +365,8 @@ void callNumber(String number) {
 			localBuffer = buffer;
 			buffer = "";
 		}
+		if(buffer.indexOf("\r") != -1)
+			buffer = "";
 		Serial.println("---------------");
 		Serial.println(buffer);
 		delay(5);
@@ -572,17 +574,32 @@ void callNumber(String number) {
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && mp.micGain < 15 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		if(mp.buttons.released(BTN_UP) && ((mp.micGain < 15 && mp.sim_module_version == 1) || (mp.micGain < 8 && mp.sim_module_version == 0))
+		&& (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			mp.micGain++;
-			Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			// Serial1.println("AT+CMICBIAS=1 ");
+			if(mp.sim_module_version == 1)
+				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
+			else if(mp.sim_module_version == 0)
+			{
+				String foo = "AT+CMICGAIN=";
+				foo+=mp.micGain;
+				Serial1.println(foo);
+				delay(10);
+			}
 		}
 		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
 		{
 			mp.micGain--;
-			Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			// Serial1.println("AT+CMICBIAS=0");
+			if(mp.sim_module_version == 1)
+				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
+			else if(mp.sim_module_version == 0)
+			{
+				String foo = "AT+CMICGAIN=";
+				foo+=mp.micGain;
+				Serial1.println(foo);
+				delay(10);
+			}
 		}
 
 		for(int i = 0; i < 12;i++)
