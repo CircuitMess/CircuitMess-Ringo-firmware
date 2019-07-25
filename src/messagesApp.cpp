@@ -382,7 +382,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		{
 			JsonObject& elem = messages[sortingArray[i]];
 			DateTime date = DateTime(elem["dateTime"].as<uint32_t>());
-
+			
 			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
 			elem["read"].as<bool>(), i+1, cameraY_actual);
 		}
@@ -617,24 +617,50 @@ void composeSMS(JsonArray *messages)
 				contact = String("+" + contact.substring(2));
 			while(!mp.update());
 
-			mp.saveMessage(content, contact, 1, 0, messages);
 
 			Serial1.print("AT+CMGS=\"");
 			Serial1.print(contact);
 			Serial1.println("\"");
-			while (!Serial1.available());
-			Serial.println(Serial1.readString());
-			delay(5);
-			Serial1.print(content);
-			while (!Serial1.available());
-			Serial.println(Serial1.readString());
-			delay(5);
-			Serial1.println((char)26);
-			while (Serial1.readString().indexOf("OK") != -1);
-			mp.display.fillScreen(TFT_BLACK);
-			mp.display.printCenter("Text sent!");
-			while(!mp.update());
-			delay(1000);
+			uint32_t temp = millis();
+			bool goAhead = 1;
+			while (!Serial1.available())
+			{
+				if(millis()-temp > 1000)
+				{
+					Serial1.print("AT+CMGS=\"");
+					Serial1.print(contact);
+					Serial1.println("\"");
+				}
+				if(millis() - temp > 2000)
+				{
+					goAhead = 0;
+					break;
+				}
+			}
+			if(goAhead)
+			{
+				Serial.println(Serial1.readString());
+				delay(5);
+				Serial1.print(content);
+				while (!Serial1.available());
+				Serial.println(Serial1.readString());
+				delay(5);
+				Serial1.println((char)26);
+				while (Serial1.readString().indexOf("OK") != -1);
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.printCenter("Text sent!");
+				while(!mp.update());
+				mp.saveMessage(content, contact, 1, 0, messages);
+				delay(1000);
+			}
+			else
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.printCenter("Error sending text!");
+				while(!mp.update());
+				delay(1000);
+			}
+			
 			break;
 		}
 		mp.display.setTextColor(TFT_WHITE);
