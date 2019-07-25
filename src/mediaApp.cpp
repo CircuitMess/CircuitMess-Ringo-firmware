@@ -46,6 +46,8 @@ void mediaApp() {
 					Serial.println(ESP.getFreeHeap());
 					delay(5);
 					index = audioPlayer(index);
+					if(!mp.SDinsertedFlag)
+						break;
 					Serial.print("after audio player: ");
 					Serial.println(ESP.getFreeHeap());
 					delay(5);
@@ -100,7 +102,8 @@ void mediaApp() {
 					while(!mp.update());
 					while(1)
 					{
-						
+						if(!mp.SDinsertedFlag)
+							break;
 						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B))
 							break;
 						if(mp.buttons.released(BTN_LEFT))
@@ -286,7 +289,6 @@ void mediaMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 
 int16_t audioPlayer(uint16_t index) {
 	uint8_t scale= 2;
-	char c = NO_KEY;
 	bool playState = 1;
 	bool loop = 0;
 	bool shuffleReset = 0;
@@ -300,6 +302,22 @@ int16_t audioPlayer(uint16_t index) {
 	}
 	while(1)
 	{
+		bool trackAdded = 0;
+		for(uint8_t i = 0; i < 4;i++)
+		{
+			if(tracks[i] == mp3)
+			{
+				trackAdded = 1;
+				break;
+			}
+		}
+		if(!trackAdded && mp.SDinsertedFlag)
+		{
+			addTrack(mp3);
+			Serial.println("Track added");
+		}
+		else if(!mp.SDinsertedFlag)
+			return 0;
 		uint8_t x = 1;
 		uint8_t y = 53;
 		int8_t i = 0;
@@ -351,19 +369,34 @@ int16_t audioPlayer(uint16_t index) {
 			mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
 		while (1) 
 		{
+			bool trackAdded = 0;
+			for(uint8_t i = 0; i < 4;i++)
+			{
+				if(tracks[i] == mp3)
+				{
+					trackAdded = 1;
+					break;
+				}
+			}
+			if(!trackAdded && mp.SDinsertedFlag)
+			{
+				addTrack(mp3);
+				Serial.println("Track added");
+			}
+			else if(!mp.SDinsertedFlag)
+				return 0;
 			if (mp.buttons.released(BTN_B))
 			{
-
+				while(!mp.update());
 				mp3->stop();
 				Serial.println(F("Stopped"));
 				delay(5);
-				while(!mp.update());
-
 				return index;
 			}
 
 			if (mp.buttons.released(BTN_A)) //PLAY/PAUSE BUTTON
 			{
+				while(!mp.update());
 				if(playState)
 				{
 					mp3->pause();
@@ -427,12 +460,11 @@ int16_t audioPlayer(uint16_t index) {
 					mp3->resume();
 				}
 				playState = !playState;
-				while(!mp.update());
 			}
 
 			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0) //DOWN
 			{
-				
+				while(!mp.update());
 				mp.mediaVolume--;
 				if(mp.mediaVolume == 0)
 					mp3->setVolume(0);
@@ -459,12 +491,11 @@ int16_t audioPlayer(uint16_t index) {
 				//drawtext
 				mp.display.setCursor(4, 2);
 				mp.display.print(mp.mediaVolume);
-				while(!mp.update());
 			}
 
 			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
 			{
-				
+				while(!mp.update());
 				mp.mediaVolume++;
 				if(mp.mediaVolume == 0)
 					mp3->setVolume(0);
@@ -490,10 +521,12 @@ int16_t audioPlayer(uint16_t index) {
 				//drawtext
 				mp.display.setCursor(4, 2);
 				mp.display.print(mp.mediaVolume);
-				while(!mp.update());
 			}
 			if(mp.buttons.released(BTN_LEFT)) //previous
 			{
+				Serial.println("previous");
+				while(!mp.update());
+
 				playState = 1;
 				if(shuffle && !shuffleReset)
 				{
@@ -533,11 +566,12 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				while(!mp.update());
 				break;
 			}
 			if(mp.buttons.released(BTN_RIGHT)) //next
 			{
+				Serial.println("next");
+				while(!mp.update());
 				playState = 1;
 				if(shuffle && !shuffleReset)
 				{
@@ -579,7 +613,6 @@ int16_t audioPlayer(uint16_t index) {
 				if(shuffleReset)
 					playState = 0;
 				mp3->stop();
-				while(!mp.update());
 				break;
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT)) //shuffle button
@@ -603,6 +636,7 @@ int16_t audioPlayer(uint16_t index) {
 			mp.update();
 			if(mp3->isPlaying() < 1 && playState) //if the current song is finished, play the next one
 			{
+				Serial.println("song end");
 				if(shuffle && !shuffleReset)
 				{
 					allTrue=1;

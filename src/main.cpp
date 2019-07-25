@@ -198,6 +198,8 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		cameraY = -cursor * (boxHeight + 1) - 1;
 	}
 	while (1) {
+		if(!mp.SDinsertedFlag)
+			return -1;
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
