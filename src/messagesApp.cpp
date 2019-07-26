@@ -37,11 +37,11 @@ void messagesApp() {
 		while(!file.available())
 			Serial.println("Messages ERROR");
 		Serial.println(file.size());
-		file.close();
 	}
 
 	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
+	jarr.prettyPrintTo(Serial);
 	if(!jarr.success())
 	{
 		Serial.println("Error");
@@ -49,7 +49,7 @@ void messagesApp() {
 		mp.display.setCursor(0, mp.display.height()/2 - 16);
 		mp.display.setTextFont(2);
 		mp.display.printCenter("Error loading data");
-
+		jb.clear();
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 			mp.update();
 		while(!mp.update());
@@ -123,7 +123,7 @@ void messagesApp() {
 					mp.display.fillScreen(TFT_BLACK);
 					mp.display.setCursor(0, mp.display.height()/2 - 16);
 					mp.display.setTextFont(2);
-					mp.display.printCenter("Error: Messages - loading data");
+					mp.display.printCenter("Error loading data");
 
 					while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 						mp.update();
@@ -302,9 +302,6 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	composeHeight=21;
 	boxHeight = 30;
 	mp.display.setTextSize(2);
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
@@ -315,6 +312,8 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
+	uint32_t blinkMillis = millis();
+	bool blinkState = 0;
 	int length = messages.size();
 	uint16_t sortingArray[length];
 	for(int i = 0; i < length; i++)
@@ -351,6 +350,17 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if(sortingArray[i] == prevCursor)
 			cursor = i + 1;
 	}
+	for(int i = 0; i < length; i++)
+	{
+		min = i;
+		for(int j = i + 1; j < length ; j++)
+			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
+			&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+				min = j;
+		uint16_t temp = sortingArray[min];
+		sortingArray[min] = sortingArray[i];
+		sortingArray[i] = temp;
+	}
 	Serial.print("Cursor: ");
 	Serial.println(cursor);
 	// messages.prettyPrintTo(Serial);
@@ -386,18 +396,35 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
 			elem["read"].as<bool>(), i+1, cameraY_actual);
 		}
-		if (cursor == 0)
-			smsMenuComposeBoxCursor(cursor, cameraY_actual);
-		else
-			smsMenuDrawCursor(cursor, cameraY_actual);
+		if(millis() - blinkMillis >= 300)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
+		if(blinkState)
+		{
+			if (cursor == 0)
+				smsMenuComposeBoxCursor(cursor, cameraY_actual);
+			else
+				smsMenuDrawCursor(cursor, cameraY_actual);
+		}
 
 		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
 		mp.display.setTextFont(2);
-		mp.display.setCursor(1,-2);
+		mp.display.setCursor(1,-1);
 		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Messages");
+		mp.display.print("          ");
+		mp.display.printf("%d/35", length);
+		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setCursor(5, 113);
+		mp.display.printCenter("Erase               View");
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+
 
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
@@ -407,6 +434,8 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkMillis = millis();
+			blinkState = 1;
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 
@@ -425,6 +454,8 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkMillis = millis();
+			blinkState = 1;
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 
@@ -479,11 +510,8 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 void smsMenuComposeBoxCursor(uint8_t i, int32_t y) {
 	uint8_t offset;
 	uint8_t boxHeight;
-		offset = 19;
-		boxHeight=21;
-	if (millis() % 500 <= 250) {
-		return;
-	}
+	offset = 19;
+	boxHeight=21;
 	y += offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight+1, TFT_RED);
 }
@@ -670,6 +698,26 @@ void composeSMS(JsonArray *messages)
 		mp.display.print("To: ");
 		mp.display.print(contact);
 		mp.update();
+		if(mp.newMessage)
+		{
+			File file = SD.open("/.core/messages.json", "r");
+			jb.clear();
+			JsonArray& jarr = jb.parseArray(file);
+			if(!jarr.success())
+			{
+				Serial.println("Error");
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setCursor(0, mp.display.height()/2 - 16);
+				mp.display.setTextFont(2);
+				mp.display.printCenter("Error loading data");
+
+				while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+					mp.update();
+				while(!mp.update());
+			}
+			mp.newMessage = 0;
+		}
+
 	}
 }
 
