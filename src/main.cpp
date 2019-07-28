@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "main.h"
-#include "lockscreen.h"
 #include "mainMenu.h"
 MAKERphone mp;
 Oscillator *osc;
@@ -1780,6 +1779,7 @@ void setup()
 		startupWizard();
 	// startupWizard();
 	// controlTry();
+	mp.lockscreen();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
 	
@@ -1817,7 +1817,6 @@ void loop()
 	// mp.display.setCursor(20,100);
 	// mp.display.printCenter(digitalRead(39));
 
-	lockscreen();
 	mainMenu();
 	// mediaApp();
 	// phoneApp();

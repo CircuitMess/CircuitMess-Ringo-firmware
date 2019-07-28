@@ -368,8 +368,66 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			cameraY = 0;
 			return -1;
 		}
+		if(mp.exitedLockscreen)
+		{
+			mp.display.fillScreen(TFT_BLACK);
+			for (int i = 0; i < 6;i++)
+			{
+				uint8_t tempX = i%x_elements;
+				uint8_t tempY = i/x_elements;
+				switch (pageIndex * 3 + i)
+				{
+					case 0:
+						// Serial.println(index);
+						// Serial.println(i);
+						// Serial.println(tempX);
+						// Serial.println(tempY);
+						// Serial.println(F("-------------"));
+						// delay(5);
+						mp.display.drawIcon(bigMessages, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 1:
+						mp.display.drawIcon(bigMedia, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 2:
+						mp.display.drawIcon(bigContacts, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 3:
+						mp.display.drawIcon(bigSettings, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 4:
+						mp.display.drawIcon(bigPhone, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					// case 5:
+					// 	mp.display.drawIcon(bigApps, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+					// 	break;
+					case 5:
+						mp.display.drawIcon(clock_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 6:
+						mp.display.drawIcon(calculator_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 7:
+						mp.display.drawIcon(flash_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 8:
+						mp.display.drawIcon(calendar_icon, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					default:
+						if(pageIndex * 3 + i < elements)
+						{
+							Serial.println(directories[pageIndex * 3 + i - 9]);
+							delay(5);
+							if(SD.exists(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp")))
+								mp.display.drawBmp(String("/" + directories[pageIndex * 3 + i - 9] + "/icon.bmp"), 4 + tempX * 52, 18 + tempY * 56, 2);
+							else
+								mp.display.drawIcon(defaultIcon, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
+						}
+						break;
+				}
+			}
+		}
 		mp.update();
-
 	}
 }
 void mainMenu()
@@ -388,7 +446,8 @@ void mainMenu()
 			if (index == -2)
 			{
 				Serial.println(F("pressed"));
-				return;
+				mp.lockscreen();
+				break;
 			}
 			else if(index == -1)
 				break;
