@@ -1768,7 +1768,7 @@ void setup()
 		mp.updateFromFS("/.core/LOADER.BIN");
 		ESP.restart();
 	}
-	mp.begin(0);
+	mp.begin();
 	mp.homePopupEnable(0);
 	// osc = new Oscillator();
 	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
