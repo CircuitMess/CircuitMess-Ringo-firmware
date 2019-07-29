@@ -2757,7 +2757,7 @@ void wifiConnect()
 						uint8_t counter = 0;
 						while (WiFi.status() != WL_CONNECTED)
 						{
-							delay(750);
+							delay(1000);
 							mp.display.print(".");
 							while(!mp.update());
 							counter++;
@@ -2774,35 +2774,35 @@ void wifiConnect()
 									{
 										while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 											mp.update();
-										return;
+										break;
 									}
 								}
 								while(!mp.update());
-								return;
+								break;
 							}
 						}
 						Serial.print("Wifi status: ");
 						Serial.println(WiFi.status());
-						if(WiFi.status() == WL_DISCONNECTED)
-						{
+						// if(WiFi.status() == WL_DISCONNECTED)
+						// {
 							
-							mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
-							mp.display.setCursor(0, 45);
-							mp.display.printCenter("Wrong password :(");
-							uint32_t tempMillis = millis();
-							while(millis() < tempMillis + 2000)
-							{
-								mp.update();
-								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-								{
-									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-										mp.update();
-									break;
-								}
-							}
-							while(!mp.update());
-							break;
-						}
+						// 	mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+						// 	mp.display.setCursor(0, 45);
+						// 	mp.display.printCenter("Wrong password :(");
+						// 	uint32_t tempMillis = millis();
+						// 	while(millis() < tempMillis + 2000)
+						// 	{
+						// 		mp.update();
+						// 		if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+						// 		{
+						// 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+						// 				mp.update();
+						// 			break;
+						// 		}
+						// 	}
+						// 	while(!mp.update());
+						// 	break;
+						// }
 						if(WiFi.status() == WL_CONNECTED)
 						{
 							// Serial.println(WiFi.status());
@@ -2868,6 +2868,8 @@ void wifiConnect()
 							}
 							else if(selection == -2)
 							{
+								mp.tft.setTextFont(2);
+								mp.tft.setTextSize(1);
 								mp.tft.fillRect(0, 40, mp.tft.width(), 50, TFT_BLACK);
 								mp.tft.setCursor(30, 45);
 								mp.tft.print("Server error!");
@@ -2879,6 +2881,8 @@ void wifiConnect()
 							}
 							else
 							{
+								mp.tft.setTextFont(2);
+								mp.tft.setTextSize(1);
 								mp.tft.fillRect(0,0,160,128, TFT_BLACK);
 								mp.tft.setCursor(30,mp.tft.height() / 2 - 16);
 								mp.tft.print(F("Restarting phone"));
@@ -2899,12 +2903,140 @@ void wifiConnect()
 			}
 			else
 			{
-				while (WiFi.status() != WL_CONNECTED)
-					while(!mp.update());
 				mp.display.fillScreen(TFT_BLACK);
-				mp.display.setCursor(30, 32);
-				mp.display.printCenter("CONNECTED!");
+				mp.display.setCursor(8, 8);
+				mp.display.printCenter(networkNames[selection]);
+				mp.display.setCursor(0,40);
+				mp.display.printCenter("Connecting");
+				mp.display.setCursor(60, 60);
 				while(!mp.update());
+
+				char temp[networkNames[selection].length()+1];
+				networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
+				Serial.println(temp);
+				WiFi.begin(temp);
+				uint8_t counter = 0;
+				while (WiFi.status() != WL_CONNECTED)
+				{
+					delay(1000);
+					mp.display.print(".");
+					while(!mp.update());
+					counter++;
+					if (counter >= 8)
+					{
+						mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+						mp.display.setCursor(0, 45);
+						mp.display.printCenter("Wi-Fi error!");
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000)
+						{
+							mp.update();
+							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+							{
+								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								break;
+							}
+						}
+						while(!mp.update());
+						break;
+					}
+				}
+				if(WiFi.status() == WL_DISCONNECTED)
+				{
+					
+					mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+					mp.display.setCursor(0, 45);
+					mp.display.printCenter("Wi-Fi error!");
+					uint32_t tempMillis = millis();
+					while(millis() < tempMillis + 2000)
+					{
+						mp.update();
+						if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+						{
+							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+								mp.update();
+							break;
+						}
+					}
+					while(!mp.update());
+					break;
+				}
+				else if(WiFi.status() == WL_CONNECTED)
+				{
+					mp.display.deleteSprite();
+					Serial.println("FREE HEAP:");
+					Serial.println(ESP.getFreeHeap());
+					int8_t selection = checkForUpdate();
+					Serial.println("OUT");
+					delay(5);
+					
+					if(selection == 1)
+					{
+						EEPROM.writeBool(34, 1);
+						EEPROM.writeString(35, temp);
+						EEPROM.writeString(100, "");
+						EEPROM.commit();
+						mp.tft.fillRect(0,0,160,128,TFT_BLACK);
+						mp.tft.setCursor(22,mp.tft.height()/2 - 26);
+						mp.tft.print("Updating software...");
+						mp.tft.setCursor(32,mp.tft.height()/2 - 5);
+						mp.tft.print("Don't turn off!");
+						delay(1000);
+
+						ESP.restart();
+						// mp.tft.fillRect(0,0,160,128, TFT_BLACK);
+						// mp.tft.setCursor(0,mp.tft.height() / 2 - 16);
+						// mp.tft.printCenter(F("Downloading update"));
+						// // while(!mp.update());
+						// Serial.println("FREE HEAP:");
+						// Serial.println(ESP.getFreeHeap());
+						// fetchUpdate();
+						// mp.tft.fillRect(0,0,160,128, TFT_BLACK);
+						// mp.tft.setCursor(0,mp.tft.height() / 2 - 16);
+						// mp.tft.printCenter(F("Installing update"));
+						// // while(!mp.update());
+						// Serial.println("FREE HEAP:");
+						// Serial.println(ESP.getFreeHeap());
+						// mp.updateFromFS("/.core/LOADER.BIN");
+					}
+
+					else if(selection == 0)
+					{
+						mp.tft.setTextFont(2);
+						mp.tft.setTextSize(1);
+						mp.tft.setTextColor(TFT_WHITE);
+						mp.tft.fillRect(0, 40, mp.tft.width(), 50, TFT_BLACK);
+						mp.tft.setCursor(20, 45);
+						mp.tft.print("No updates available");
+						mp.tft.setCursor(20, 65);
+						mp.tft.print("Restarting phone...");
+						delay(2000);
+						ESP.restart();
+					}
+					else if(selection == -2)
+					{
+						mp.tft.setTextFont(2);
+						mp.tft.setTextSize(1);
+						mp.tft.fillRect(0, 40, mp.tft.width(), 50, TFT_BLACK);
+						mp.tft.setCursor(30, 45);
+						mp.tft.print("Server error!");
+						mp.tft.setCursor(30, 65);
+						mp.tft.print("Restarting phone...");
+						delay(2000);
+						ESP.restart();
+					}
+					else
+					{
+						mp.tft.setTextFont(2);
+						mp.tft.setTextSize(1);
+						mp.tft.fillRect(0,0,160,128, TFT_BLACK);
+						mp.tft.setCursor(30,mp.tft.height() / 2 - 16);
+						mp.tft.print(F("Restarting phone"));
+						delay(750);
+						ESP.restart();
+					}
+				}
 			}
 		}
 	}
@@ -3144,7 +3276,16 @@ void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y) {
 	}
 	mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 1, TFT_DARKGREY);
 	mp.display.setTextColor(TFT_WHITE);
-	mp.display.drawString(text, 5, y+2);
+	mp.display.setCursor(5, y+2);
+	for(uint16_t i = 0; i < text.length(); i++)
+	{
+		mp.display.print(text[i]);
+		if(mp.display.getCursorX() > 120)
+		{
+			mp.display.print("...");
+			break;
+		}
+	}
 	int strength = signalStrength.toInt();
 	//> -50 full
 	// < -40 && > -60 high
