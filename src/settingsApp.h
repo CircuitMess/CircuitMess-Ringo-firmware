@@ -23,6 +23,7 @@ void notificationsDrawCursor(uint8_t i, int32_t y);
 int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length);
 void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y);
 void wifiDrawCursor(uint8_t i, int32_t y);
+int16_t ringtoneAudioMenu(String* items, uint16_t length);
 
 extern String settingsItems[6];
 extern uint16_t pinNumber;

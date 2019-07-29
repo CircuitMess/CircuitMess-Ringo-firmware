@@ -33,7 +33,7 @@ String titles[9] PROGMEM = {
 	"Calendar"
 };
 StaticJsonBuffer<capacity> jb;
-uint8_t audioCount = 0;
+uint16_t audioCount = 0;
 String audioFiles[100];
 
 void menuDrawBox(String text, uint8_t i, int32_t y) {
@@ -59,10 +59,7 @@ void menuDrawBox(String text, uint8_t i, int32_t y) {
 	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - (scale-1), TFT_DARKGREY);
 	mp.display.setTextColor(TFT_WHITE);
 	mp.display.setCursor(2, y + 2);
-	if(mp.resolutionMode)
-		mp.display.drawString(text, 3, y + 2);
-	else
-		mp.display.drawString(text, 3, y);
+	mp.display.drawString(text, 3, y - 1);
 }
 int8_t menu(const char* title, String* items, uint8_t length) {
 	int32_t cameraY = 0;
@@ -1779,6 +1776,8 @@ void setup()
 		startupWizard();
 	// startupWizard();
 	// controlTry();
+	// settingsApp();
+	soundMenu();
 	mp.lockscreen();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
@@ -1816,7 +1815,6 @@ void loop()
 	// mp.display.printCenter("   USB INT: ");
 	// mp.display.setCursor(20,100);
 	// mp.display.printCenter(digitalRead(39));
-
 	mainMenu();
 	// mediaApp();
 	// phoneApp();

@@ -11,7 +11,7 @@ extern String titles[9];
 extern int textPointer;
 extern StaticJsonBuffer<capacity> jb;
 extern String audioFiles[100];
-extern uint8_t audioCount;
+extern uint16_t audioCount;
 
 void menuDrawBox(String text, uint8_t i, int32_t y);
 int8_t menu(const char* title, String* items, uint8_t length);

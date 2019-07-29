@@ -709,7 +709,7 @@ void soundMenu() {
 		audioCount += tempCount;
 	}
 	String parsedRingtone;
-	uint8_t start = 0;
+	uint16_t start = 0;
 	int8_t i;
 	mp.display.setTextFont(1);
 	mp.display.setTextColor(TFT_BLACK);
@@ -814,9 +814,9 @@ void soundMenu() {
 					{
 						mp.osc->note(75, 0.05);
 						mp.osc->play();
-						i = audioPlayerMenu("Select ringtone:", audioFiles, audioCount);
+						i = ringtoneAudioMenu(audioFiles, audioCount);
 						mp.display.setTextColor(TFT_BLACK);
-						if (i >= 0)
+						if (i > -1)
 							mp.ringtone_path = audioFiles[i];
 						else
 							Serial.println("pressed B in menu");
@@ -3309,4 +3309,133 @@ void wifiDrawCursor(uint8_t i, int32_t y) {
 	y += i * (boxHeight + 2) + offset;
 	mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
 	mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
+}
+int16_t ringtoneAudioMenu(String* items, uint16_t length) {
+	MPTrack *ringtonePreview = nullptr;
+	int32_t cameraY = 0;
+	int32_t cameraY_actual = 0;
+	String Name;
+	uint8_t scale = 2;
+	uint8_t offset = 17;
+	uint8_t boxHeight = 15;
+	uint16_t start = 0;
+	int16_t cursor = 0;
+	if (length > 6) {
+		cameraY = -cursor * (boxHeight + 1) - 1;
+	}
+	while (1) {
+		if(!mp.SDinsertedFlag)
+			return -1;
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(0, 0);
+		cameraY_actual = (cameraY_actual + cameraY) / 2;
+		if (cameraY_actual - cameraY == 1) {
+			cameraY_actual = cameraY;
+		}
+
+		for (uint8_t i = 0; i < length; i++) {
+			Name = items[i];
+			while (Name.indexOf("/", start) != -1)
+				start = Name.indexOf("/", start) + 1;
+			Name = Name.substring(start, Name.indexOf("."));
+			start = 0;
+			menuDrawBox(Name, i, cameraY_actual);
+		}
+		menuDrawCursor(cursor, cameraY_actual);
+
+			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+			mp.display.setTextFont(2);
+			mp.display.setCursor(0,-2);
+			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Ringtones");
+		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setCursor(130, 111);
+		if(ringtonePreview != nullptr)
+		{
+			if(ringtonePreview->isPlaying())
+				mp.display.print("Stop");
+			else
+				mp.display.print("Play");
+		}
+		else
+			mp.display.print("Play");
+
+		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+			while(!mp.update());
+			break;
+		}
+
+		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+
+			while(!mp.update());
+			if (cursor == 0) {
+				cursor = length - 1;
+				if (length > 5) {
+					cameraY = -(cursor - 4) * (boxHeight + 1) - 1;
+				}
+			}
+			else {
+				if (cursor > 0 && (cursor * (boxHeight + 1) + cameraY + offset) < 20) {
+					cameraY += (boxHeight + 1);
+				}
+				cursor--;
+			}
+
+		}
+
+		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			while(!mp.update());
+			cursor++;
+			if ((cursor * (boxHeight + 1) + cameraY + offset) > 90) {
+				cameraY -= (boxHeight + 1);
+			}
+			if (cursor >= length) {
+				cursor = 0;
+				cameraY = 0;
+
+			}
+
+		}
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			while(!mp.update());
+			return -1;
+		}
+		if(mp.buttons.released(BTN_FUN_RIGHT))
+		{
+			if(ringtonePreview == nullptr)
+			{
+				ringtonePreview = new MPTrack(audioFiles[cursor].c_str());
+				if(mp.mediaVolume == 0)
+					ringtonePreview->setVolume(0);
+				else
+					ringtonePreview->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				ringtonePreview->setRepeat(1);
+				ringtonePreview->play();
+				addTrack(ringtonePreview);
+			}
+			else
+			{
+				if(ringtonePreview->isPlaying())
+					ringtonePreview->stop();
+				else
+				{
+					ringtonePreview->reloadFile((char*)audioFiles[cursor].c_str());
+					ringtonePreview->setRepeat(1);
+					ringtonePreview->play();
+				}
+			}
+			
+		}
+		mp.update();
+	}
+	if(ringtonePreview != nullptr)
+	{
+		ringtonePreview->stop();
+		removeTrack(ringtonePreview);
+	}
+	return cursor;
 }
