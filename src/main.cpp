@@ -1750,6 +1750,12 @@ void setup()
 		EEPROM.writeBool(34, 0);
 		EEPROM.commit();
 		SD.begin(5, SPI, 8000000);
+		mp.tft.init();
+		mp.tft.invertDisplay(0);
+		mp.tft.setRotation(3);
+		mp.tft.setTextColor(TFT_WHITE);
+		mp.tft.setTextSize(1);
+		mp.tft.setTextFont(2);
 		Serial.println(EEPROM.readString(35).c_str());
 		Serial.println(EEPROM.readString(100).c_str());
 		delay(1000);
@@ -1761,7 +1767,19 @@ void setup()
 		Serial.println(ESP.getFreeHeap());
 		delay(5);
 		if(!fetchUpdate())
+		{
+			mp.tft.fillRect(0,0,160,128,TFT_BLACK);
+			mp.tft.setCursor(10,mp.tft.height()/2 - 26);
+			mp.tft.print("Error while downloading");
+			mp.tft.setCursor(22,mp.tft.height()/2 - 5);
+			mp.tft.print("Reverting firmware!");
 			ESP.restart();
+		}
+		mp.tft.fillRect(0,0,160,128,TFT_BLACK);
+		mp.tft.setCursor(20,mp.tft.height()/2 - 26);
+		mp.tft.print("Installing firmware...");
+		mp.tft.setCursor(32,mp.tft.height()/2 - 5);
+		mp.tft.print("Don't turn off!");
 		mp.updateFromFS("/.core/LOADER.BIN");
 		ESP.restart();
 	}
@@ -1777,7 +1795,6 @@ void setup()
 	// startupWizard();
 	// controlTry();
 	// settingsApp();
-	soundMenu();
 	mp.lockscreen();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();

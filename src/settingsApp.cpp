@@ -2829,11 +2829,11 @@ void wifiConnect()
 								EEPROM.writeString(100, temp2);
 								EEPROM.commit();
 								mp.tft.fillRect(0,0,160,128,TFT_BLACK);
-								mp.tft.setCursor(22,mp.tft.height()/2 - 26);
-								mp.tft.print("Updating software...");
+								mp.tft.setCursor(8,mp.tft.height()/2 - 26);
+								mp.tft.print("Downloading firmware...");
 								mp.tft.setCursor(32,mp.tft.height()/2 - 5);
 								mp.tft.print("Don't turn off!");
-								delay(1000);
+								// delay(1000);
 
 								ESP.restart();
 								// mp.tft.fillRect(0,0,160,128, TFT_BLACK);
@@ -2978,11 +2978,11 @@ void wifiConnect()
 						EEPROM.writeString(100, "");
 						EEPROM.commit();
 						mp.tft.fillRect(0,0,160,128,TFT_BLACK);
-						mp.tft.setCursor(22,mp.tft.height()/2 - 26);
-						mp.tft.print("Updating software...");
+						mp.tft.setCursor(8,mp.tft.height()/2 - 26);
+						mp.tft.print("Downloading firmware...");
 						mp.tft.setCursor(32,mp.tft.height()/2 - 5);
 						mp.tft.print("Don't turn off!");
-						delay(1000);
+						// delay(1000);
 
 						ESP.restart();
 						// mp.tft.fillRect(0,0,160,128, TFT_BLACK);
@@ -3093,6 +3093,7 @@ int8_t checkForUpdate()
 		if (httpCode == HTTP_CODE_OK) {
 			String payload = http.getString();
 			http.end();
+			mp.firmware_version = 1;
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
 			if (version > mp.firmware_version)
 			{
