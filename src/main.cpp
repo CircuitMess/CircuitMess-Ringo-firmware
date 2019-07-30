@@ -67,6 +67,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 	int16_t cursor = 0;
 	uint8_t offset;
 	uint8_t boxHeight;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	if(mp.resolutionMode)
 	{
 		offset = menuYOffset;
@@ -79,17 +81,23 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 	}
 	while (1) {
 		mp.update();
+		
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++) {
 			menuDrawBox(items[i], i, cameraY_actual);
 		}
-		menuDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+			menuDrawCursor(cursor, cameraY_actual);
 
 		// last draw the top entry thing
 		if(mp.resolutionMode)
@@ -118,6 +126,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 			return -1;
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			mp.leds[3] = CRGB::Blue;
@@ -139,6 +149,8 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			mp.leds[0] = CRGB::Blue;
@@ -174,14 +186,10 @@ void menuDrawCursor(uint8_t i, int32_t y) {
 		offset = 17;
 		boxHeight = 15;
 	}
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += i * (boxHeight + 1) + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 2, TFT_RED);
 }
 int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint16_t index) {
-
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	String Name;
@@ -190,6 +198,8 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 	uint8_t boxHeight = 15;
 	uint16_t start = 0;
 	int16_t cursor = index;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	if (length > 6) {
 		cameraY = -cursor * (boxHeight + 1) - 1;
 	}
@@ -202,7 +212,11 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++) {
 			Name = items[i];
 			while (Name.indexOf("/", start) != -1)
@@ -211,12 +225,13 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 			start = 0;
 			menuDrawBox(Name, i, cameraY_actual);
 		}
-		menuDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+			menuDrawCursor(cursor, cameraY_actual);
 
-			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(0,-2);
-			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print(title);
@@ -227,7 +242,8 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -245,6 +261,8 @@ int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint1
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 1) + cameraY + offset) > 54*scale) {

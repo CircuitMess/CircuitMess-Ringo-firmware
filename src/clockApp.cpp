@@ -460,6 +460,8 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 	mp.dataRefreshFlag = 0;
 	uint8_t boxHeight;
 	boxHeight = 28; //actually 2 less than that
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	while (1) {
 		mp.update();
 		mp.display.fillScreen(0xFC92);
@@ -490,8 +492,12 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		}
 		uint8_t y = cameraY_actual;
 		uint8_t i = cursor;
-		if (millis() % 500 <= 250);
-		else
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
+		if(blinkState)
 		{
 			y += i * boxHeight + offset;
 			mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
@@ -511,6 +517,8 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkMillis = millis();
+			blinkState = 1;
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			if (cursor == 0) {
@@ -528,6 +536,8 @@ int8_t clockAlarmMenu(uint8_t* alarmsArray, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkMillis = millis();
+			blinkState = 1;
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			cursor++;

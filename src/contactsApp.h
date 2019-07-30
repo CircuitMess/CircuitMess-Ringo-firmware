@@ -2,7 +2,6 @@
 #define contacts_h
 #include "main.h"
 //Contacts app
-void contactsMenuDrawBox(String contact, String number, uint8_t i, int32_t y);
 void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y);
 uint8_t deleteContactSD(String name, String number);
 uint8_t newContactSD(String *name, String *number);

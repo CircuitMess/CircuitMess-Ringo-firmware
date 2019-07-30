@@ -65,9 +65,6 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
 }
 void settingsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 	uint8_t	boxHeight = 20;
-	if (millis() % 500 <= 250 && pressed == 0) {
-		return;
-	}
 	y += i * boxHeight + settingsMenuYOffset;
 	mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
 	mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
@@ -78,6 +75,8 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t	boxHeight = 20;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	while (1) {
 		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
@@ -86,11 +85,16 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++) {
 			settingsMenuDrawBox(title[i], i, cameraY_actual);
 		}
-		settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
+		if(blinkState)
+			settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
 
 		if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
 			pressed = 0;
@@ -104,6 +108,8 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			if (cursor == 0) {
@@ -122,6 +128,8 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			cursor++;
@@ -467,6 +475,8 @@ void displayMenu() {
 	uint8_t sleepTimeBuffer = mp.sleepTime;
 	uint16_t sleepTimeActualBuffer = mp.sleepTimeActual;
 	uint8_t cursor = 0;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	while (1)
 	{
 		mp.display.setTextFont(2);
@@ -483,7 +493,11 @@ void displayMenu() {
 		mp.display.printCenter("LED brightness");
 		mp.display.drawRect(33, 50, 47*2, 4*2, TFT_BLACK);
 		mp.display.fillRect(35, 52, mp.pixelsBrightness * 9*2, 2*2, TFT_BLACK);
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		String foo = "Sleep: ";
 		if (sleepTimeActualBuffer > 60)
 		{
@@ -516,7 +530,7 @@ void displayMenu() {
 
 		if (cursor == 0)
 		{
-			if (millis() % 1000 <= 500)
+			if (blinkState)
 			{
 				mp.display.drawBitmap(12, 20, noBrightness, TFT_BLACK, 2);
 				mp.display.drawBitmap(132, 14, fullBrightness, TFT_BLACK, 2);
@@ -563,7 +577,7 @@ void displayMenu() {
 		}
 		if (cursor == 2)
 		{
-			if (millis() % 1000 <= 500)
+			if(blinkState)
 			{
 				mp.display.setCursor(12, 72);
 				mp.display.print("0s");
@@ -596,7 +610,7 @@ void displayMenu() {
 		}
 		if (cursor == 3)
 		{
-			if (millis() % 1000 <= 500)
+			if(blinkState)
 			{
 				if (mp.backgroundIndex == 0)
 				{
@@ -641,6 +655,8 @@ void displayMenu() {
 
 		if (mp.buttons.released(BTN_UP))
 		{
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			while(!mp.update());
@@ -651,6 +667,8 @@ void displayMenu() {
 		}
 		if (mp.buttons.released(BTN_DOWN))
 		{
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			while(!mp.update());
@@ -1048,7 +1066,7 @@ void securityMenu() {
 			mp.display.setCursor(2, 111);
 			if (cursor == 1 && !errorMessage && !confirmMessage)
 				mp.display.print("Press A to save PIN");
-			if (millis() - blinkMillis >= multi_tap_threshold) //cursor blinking routine
+			if (millis() - blinkMillis >= 350) //cursor blinking routine
 			{
 				blinkMillis = millis();
 				blinkState = !blinkState;
@@ -1056,9 +1074,9 @@ void securityMenu() {
 
 			if (cursor == 0)
 			{
-				if (millis() % 500 <= 250 && pinLockBuffer == 1)
+				if (blinkState && pinLockBuffer == 1)
 					mp.display.drawRect(69, 12, 17*2, 11*2, TFT_BLACK);
-				else if (millis() % 500 <= 250 && pinLockBuffer == 0)
+				else if (blinkState && pinLockBuffer == 0)
 					mp.display.drawRect(113, 12, 38, 11*2, TFT_BLACK);
 				if (mp.buttons.released(BTN_LEFT) && pinLockBuffer == 0)
 				{
@@ -1425,6 +1443,8 @@ void securityMenu() {
 
 			if (mp.buttons.released(BTN_UP))
 			{
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				while(!mp.update());
@@ -1435,6 +1455,8 @@ void securityMenu() {
 			}
 			if (mp.buttons.released(BTN_DOWN))
 			{
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				while(!mp.update());
@@ -2496,6 +2518,8 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 	uint8_t offset = 23;
 	uint8_t boxHeight = 20;
 	int16_t cursor = mp.notification;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	if (length > 12) {
 		cameraY = -cursor * (boxHeight + 2) - 1;
 	}
@@ -2507,7 +2531,11 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++)
 			notificationsDrawBox(items[i], i, cameraY_actual);
 
@@ -2533,7 +2561,8 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -2551,6 +2580,8 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 2) + cameraY + offset) > 54*scale) {
@@ -2579,9 +2610,6 @@ void notificationsDrawCursor(uint8_t i, int32_t y) {
 	uint8_t boxHeight;
 	offset = 23;
 	boxHeight = 20;
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += i * (boxHeight + 2) + offset;
 	mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
 	mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
@@ -3194,6 +3222,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 	uint8_t offset = 22;
 	uint8_t boxHeight = 20;
 	int16_t cursor = 0;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	if (length > 12) {
 		cameraY = -cursor * (boxHeight + 2) - 1;
 	}
@@ -3205,7 +3235,11 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++)
 			wifiDrawBox(items[i], signals[i], i, cameraY_actual);
 
@@ -3229,6 +3263,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 			break;
 		}
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -3246,6 +3282,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 1) + cameraY + offset) > 100) {
@@ -3304,9 +3342,6 @@ void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y) {
 void wifiDrawCursor(uint8_t i, int32_t y) {
 	uint8_t offset = 23;
 	uint8_t boxHeight = 20;
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += i * (boxHeight + 2) + offset;
 	mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
 	mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
@@ -3321,6 +3356,8 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 	uint8_t boxHeight = 15;
 	uint16_t start = 0;
 	int16_t cursor = 0;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	if (length > 6) {
 		cameraY = -cursor * (boxHeight + 1) - 1;
 	}
@@ -3333,7 +3370,11 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++) {
 			Name = items[i];
 			while (Name.indexOf("/", start) != -1)
@@ -3342,12 +3383,13 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 			start = 0;
 			menuDrawBox(Name, i, cameraY_actual);
 		}
-		menuDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+			menuDrawCursor(cursor, cameraY_actual);
 
-			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(0,-2);
-			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
+		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(0,-2);
+		mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Ringtones");
@@ -3370,7 +3412,8 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length - 1;
@@ -3388,6 +3431,8 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			cursor++;
 			if ((cursor * (boxHeight + 1) + cameraY + offset) > 90) {

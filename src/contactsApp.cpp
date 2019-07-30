@@ -1,37 +1,15 @@
 #include "contactsApp.h"
 //Contacts app
 
-void contactsMenuDrawBox(String contact, String number, uint8_t i, int32_t y) {
-    uint8_t offset = 19;
-    uint8_t boxHeight = 28;
-	y += i * boxHeight + offset;
-	if (y < 0 || y > mp.display.height()) {
-		return;
-	}
-    mp.display.setTextSize(1);
-    mp.display.setTextFont(2);
-    mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
-    mp.display.setTextColor(TFT_WHITE);
-    mp.display.setCursor(2, y + 2);
-    mp.display.drawString(contact, 4, y);
-    mp.display.drawString(number, 4, y + 12);
-
-}
 void contactsMenuDrawCursor(uint8_t i, int32_t y) {
     uint8_t offset = 19;
     uint8_t boxHeight = 28;
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
 }
 void contactsMenuNewBoxCursor(uint8_t i, int32_t y) {
 	uint8_t offset = 19;
     uint8_t boxHeight = 28;
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += offset + 1;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
@@ -57,92 +35,6 @@ void contactsMenuNewBox(uint8_t i, int32_t y) {
     mp.display.setTextFont(2);
     mp.display.print("New contact");
 
-}
-int contactsMenu(const char* title, String* contact, String *number, uint8_t length) {
-	Serial.println("contactsMenu()");
-	uint8_t cursor = 0;
-	int32_t cameraY = 0;
-	int32_t cameraY_actual = 0;
-	uint8_t offset = 19;
-    uint8_t boxHeight = 28;
-	while (1) {
-		mp.update();
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, 0);
-		cameraY_actual = (cameraY_actual + cameraY) / 2;
-		if (cameraY_actual - cameraY == 1) {
-		cameraY_actual = cameraY;
-		}
-
-		for (uint8_t i = 0; i < length + 1; i++) {
-		if(i == 0){
-			contactsMenuNewBox(i, cameraY_actual);
-		} else {
-			contactsMenuDrawBox(contact[i-1], number[i-1], i, cameraY_actual);
-		}
-		}
-		if(cursor == 0){
-		contactsMenuNewBoxCursor(cursor, cameraY_actual);
-		} else {
-		contactsMenuDrawCursor(cursor, cameraY_actual);
-		}
-
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-        mp.display.setTextFont(2);
-        mp.display.setCursor(0,-2);
-        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
-		mp.display.setTextSize(1);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print(title);
-
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-		while(!mp.update());// Exit when pressed
-		break;
-		}
-		if (mp.buttons.released(BTN_LEFT) && cursor != 0) {
-		while(!mp.update()); // Delete
-		return -1000 + cursor;
-		}
-		if (mp.buttons.released(BTN_RIGHT) && cursor != 0) {
-		while(!mp.update()); // Edit contact
-		return -3000 + cursor;
-		}
-
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-		while(!mp.update());
-		if (cursor == 0) {
-			cursor = length;
-			if (length > 2) {
-			cameraY = -(cursor - 2) * (boxHeight+1);
-			}
-		}
-		else {
-			cursor--;
-			if (cursor > 0 && (cursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
-			cameraY += (boxHeight+1);
-			}
-		}
-		}
-
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-		while(!mp.update());
-		cursor++;
-		if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
-			cameraY -= (boxHeight+1);
-		}
-		if (cursor >= length + 1) {
-			cursor = 0;
-			cameraY = 0;
-
-		}
-		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
-		{
-		while(!mp.update());
-		return -2;
-		}
-	}
-	return cursor;
 }
 
 uint8_t deleteContactSD(String name, String number)
@@ -487,6 +379,8 @@ int contactsMenuSD(JsonArray *contacts){
 	uint8_t length = contacts->size();
 	uint8_t offset = 19;
 	uint8_t boxHeight = 28;
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	while (1) {
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
@@ -494,7 +388,11 @@ int contactsMenuSD(JsonArray *contacts){
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		contactsMenuNewBox(0, cameraY_actual);
 
 		int i = 0;
@@ -502,10 +400,12 @@ int contactsMenuSD(JsonArray *contacts){
 			contactsMenuDrawBoxSD(elem["name"].as<char*>(), elem["number"].as<char*>(), i+1, cameraY_actual);
 			i++;
 		}
-		if(cursor == 0){
-			contactsMenuNewBoxCursor(cursor, cameraY_actual);
-		} else {
-			contactsMenuDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+		{
+			if(cursor == 0)
+				contactsMenuNewBoxCursor(cursor, cameraY_actual);
+			else
+				contactsMenuDrawCursor(cursor, cameraY_actual);
 		}
 
 		// last draw the top entry thing
@@ -534,6 +434,8 @@ int contactsMenuSD(JsonArray *contacts){
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 			if (cursor == 0) {
 				cursor = length;
@@ -550,6 +452,8 @@ int contactsMenuSD(JsonArray *contacts){
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			while(!mp.update());
 
 			cursor++;

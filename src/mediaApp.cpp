@@ -168,7 +168,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	mp.dataRefreshFlag = 0;
-
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	uint8_t boxHeight;
 	boxHeight = 54; //actually 2 less than that
 	while (1) {
@@ -181,11 +182,16 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 		}
-
+		if(millis() - blinkMillis > 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		for (uint8_t i = 0; i < length; i++) {
 			mediaMenuDrawBox(title[i], i, cameraY_actual);
 		}
-		mediaMenuDrawCursor(cursor, cameraY_actual, pressed);
+		if(blinkState)
+			mediaMenuDrawCursor(cursor, cameraY_actual, pressed);
 
 		if (!mp.buttons.pressed(BTN_DOWN) && !mp.buttons.pressed(BTN_UP))
 			pressed = 0;
@@ -198,6 +204,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			if (cursor == 0) {
@@ -216,6 +224,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+			blinkState = 1;
+			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			cursor++;
@@ -277,9 +287,6 @@ void mediaMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
 	uint8_t boxHeight;
 	boxHeight = 54;
 	uint8_t offset = 11;
-	if (millis() % 500 <= 250 && pressed == 0) {
-		return;
-	}
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
 	mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);

@@ -331,6 +331,8 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
     uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	uint16_t sortingArray[length];
+	bool blinkState = 0;
+	uint32_t blinkMillis = millis();
 	for(int i = 0; i < length; i++)
 		sortingArray[i] = i;
 	uint16_t min;
@@ -370,14 +372,19 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			if (cameraY_actual - cameraY == 1) {
 			cameraY_actual = cameraY;
 			}
-
+			if(millis() - blinkMillis > 350)
+			{
+				blinkMillis = millis();
+				blinkState = !blinkState;
+			}
 			for(int i = 0; i < length; i++)
 			{
 				JsonObject& elem = call_log[sortingArray[i]];
 				callLogDrawBoxSD(elem, i, cameraY_actual);
 
 			}
-			callLogMenuDrawCursor(cursor, cameraY_actual);
+			if(blinkState)
+				callLogMenuDrawCursor(cursor, cameraY_actual);
 
 			if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {
 				mp.buttons.update();
@@ -394,6 +401,8 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			}
 
 			if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.buttons.update();
 				if (cursor == 0) {
 					cursor = length - 1;
@@ -409,6 +418,8 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 				}
 			}
 			if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+				blinkState = 1;
+				blinkMillis = millis();
 				mp.buttons.update();
 				cursor++;
 				if ((cursor * (boxHeight) + cameraY + offset) > 80) {
@@ -482,9 +493,6 @@ void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
 void callLogMenuDrawCursor(uint8_t i, int32_t y) {
     uint8_t offset = 20;
     uint8_t boxHeight = 28;
-	if (millis() % 500 <= 250) {
-		return;
-	}
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
 }
