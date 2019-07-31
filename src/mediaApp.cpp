@@ -328,35 +328,7 @@ int16_t audioPlayer(uint16_t index) {
 		uint8_t x = 1;
 		uint8_t y = 53;
 		int8_t i = 0;
-
 		
-		mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
-		//draw bitmaps
-		mp.display.drawBitmap(2*scale, 20*scale, previous, TFT_BLACK, scale);
-		mp.display.drawBitmap(65*scale, 20*scale, next, TFT_BLACK, scale);
-		mp.display.drawBitmap(2*scale, 75, repeatSprite, TFT_BLACK, scale);
-		mp.display.drawBitmap(66*scale, 37*scale, shuffleIcon, TFT_BLACK, scale);
-		if(playState)
-			mp.display.drawBitmap(37*scale, 19*scale, play, TFT_BLACK, scale);
-		else
-			mp.display.drawBitmap(72, 40, pause2, TFT_BLACK, scale);
-		mp.display.drawBitmap(17*scale, 2*scale, cover2, TFT_BLACK, scale);
-		//prepare for text printing
-		mp.display.setTextColor(TFT_BLACK);
-
-
-		mp.display.setTextSize(1);
-		mp.display.setTextWrap(0);
-		//drawtext
-		mp.display.setCursor(4, 2);
-		mp.display.print(mp.mediaVolume);
-		mp.display.setCursor(1, 111);
-		if(audioFiles[index].length() > 20)
-			mp.display.print(audioFiles[index]);
-		else
-			mp.display.printCenter(audioFiles[index]);
-		mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
-		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 		if(firstPass)
 		{
 			if(mp3->reloadFile((char*)audioFiles[index].c_str()))
@@ -367,15 +339,43 @@ int16_t audioPlayer(uint16_t index) {
 		else
 			firstPass = 1;
 		
-		
 		if(playState)
 			mp3->play();
 		if(mp.mediaVolume == 0)
 			mp3->setVolume(0);
 		else
 			mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+
 		while (1) 
 		{
+			mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
+			//draw bitmaps
+			mp.display.drawBitmap(2*scale, 20*scale, previous, TFT_BLACK, scale);
+			mp.display.drawBitmap(65*scale, 20*scale, next, TFT_BLACK, scale);
+			mp.display.drawBitmap(2*scale, 75, repeatSprite, TFT_BLACK, scale);
+			mp.display.drawBitmap(66*scale, 37*scale, shuffleIcon, TFT_BLACK, scale);
+			if(playState)
+				mp.display.drawBitmap(37*scale, 19*scale, play, TFT_BLACK, scale);
+			else
+				mp.display.drawBitmap(72, 40, pause2, TFT_BLACK, scale);
+			mp.display.drawBitmap(17*scale, 2*scale, cover2, TFT_BLACK, scale);
+			//prepare for text printing
+			mp.display.setTextColor(TFT_BLACK);
+
+
+			mp.display.setTextSize(1);
+			mp.display.setTextWrap(0);
+			//drawtext
+			mp.display.setCursor(4, 2);
+			mp.display.print(mp.mediaVolume);
+			mp.display.setCursor(1, 111);
+			if(audioFiles[index].length() > 20)
+				mp.display.print(audioFiles[index]);
+			else
+				mp.display.printCenter(audioFiles[index]);
+			mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
+			mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
+			
 			bool trackAdded = 0;
 			for(uint8_t i = 0; i < 4;i++)
 			{
