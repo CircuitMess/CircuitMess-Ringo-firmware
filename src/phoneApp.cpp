@@ -5,9 +5,16 @@ void phoneApp() {
 	char key = NO_KEY;
 	mp.display.setTextWrap(0);
 	mp.display.setTextFont(2);
-
+	bool plusSign = 0;
+	uint32_t blinkMillis = millis();
+	bool blinkState = 1;
 	while (1)
 	{
+		if(millis() - blinkMillis >= 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setTextSize(1);
@@ -36,7 +43,15 @@ void phoneApp() {
 				break;
 			}
 		}
-
+		if(mp.buttons.held(BTN_0, 20))
+		{
+			callBuffer+="+";
+			plusSign = 1;
+		}
+		if(key == '0' && plusSign)
+			key = NO_KEY;
+		if(plusSign && mp.buttons.released(BTN_0))
+			plusSign = 0;
 		if (mp.buttons.released(BTN_FUN_LEFT))
 		{
 			callBuffer.remove(callBuffer.length()-1);
@@ -129,6 +144,11 @@ void phoneApp() {
 			mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
 			mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, 76);
 			mp.display.print(callBuffer);
+		}
+		if (blinkState)
+		{
+			mp.display.drawFastVLine(mp.display.getCursorX() + 1, mp.display.getCursorY() + 6, 20, TFT_WHITE);
+			mp.display.drawFastVLine(mp.display.getCursorX() + 2, mp.display.getCursorY() + 6, 20, TFT_WHITE);
 		}
 
 		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
@@ -300,7 +320,7 @@ void callLog() {
 				if(menuChoice >= 0)
 				{
 					if(showCall(menuChoice, jarr[menuChoice]["number"], jarr[menuChoice]["dateTime"],
-					 jarr[menuChoice]["duration"], jarr[menuChoice]["direction"].as<uint8_t>())){
+					jarr[menuChoice]["contact"], jarr[menuChoice]["duration"], jarr[menuChoice]["direction"].as<uint8_t>())){
 						jarr.remove(menuChoice);
 						File file = SD.open("/.core/call_log.json", "w");
 						jarr.prettyPrintTo(file);
@@ -475,7 +495,12 @@ void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
 	char buf[100];
 	strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
     mp.display.drawString(date.format(buf), 24, y);
-    mp.display.drawString(object["number"].as<char*>(), 24, y + 12);
+	String temp = object["contact"].as<char*>();
+	if(temp == "")
+   		mp.display.drawString(object["number"].as<char*>(), 24, y + 12);
+	else
+   		mp.display.drawString(temp, 24, y + 12);
+	
 	switch (object["direction"].as<uint8_t>())
 	{
 	case 0:
@@ -497,7 +522,7 @@ void callLogMenuDrawCursor(uint8_t i, int32_t y) {
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
 }
 
-uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint8_t direction)
+uint8_t showCall(int id, String number, uint32_t dateTime, String contact, String duration, uint8_t direction)
 {
 	DateTime time = DateTime(dateTime);
 	while (1)
@@ -513,13 +538,22 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String duration, uint
 		strncpy(buf, "DD.MM.YYYY hh:mm:ss\0", 100);
 		mp.display.setCursor(5,20);
 		mp.display.print(time.format(buf));
-		mp.display.setCursor(5, 40);
-		mp.display.println(number);
-
+		if(contact == "")
+		{
+			mp.display.setCursor(5, 40);
+			mp.display.println(number);
+			mp.display.setCursor(5, 60);
+		}
+		else
+		{
+			mp.display.setCursor(5, 40);
+			mp.display.println(contact);
+			mp.display.setCursor(5, 60);
+			mp.display.println(number);
+			mp.display.setCursor(5, 80);
+		}
 		int seconds = duration.toInt() % 60;
 		int minutes = duration.toInt() / 60;
-
-		mp.display.setCursor(5, 60);
 		mp.display.print("Duration: ");
 		if(minutes < 10)
 			mp.display.print("0");
