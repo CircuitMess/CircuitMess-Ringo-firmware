@@ -666,9 +666,9 @@ void callNumber(String number) {
 bool startupWizard()
 {
 	mp.homePopupEnable(0);
-
+	mp.display.fillScreen(TFT_WHITE);
 	// Connect charger
-	while(1)
+	while(digitalRead(CHRG_INT))
 	{
 		mp.display.fillScreen(TFT_WHITE);
 		mp.display.setTextFont(2);
@@ -679,33 +679,27 @@ bool startupWizard()
 		mp.display.setCursor(0, mp.display.height()/2 - 14);
 		mp.display.printCenter("Connect your charger");
 		mp.display.drawBitmap(72, 74, batteryChargingIcon, TFT_BLACK, 3);
-		if(mp.batteryVoltage > 4100)
+		Serial.println(mp.batteryVoltage);
+		mp.update();
+	}
+	mp.display.setTextColor(TFT_BLACK);
+	mp.display.setTextSize(1);
+	mp.display.setTextFont(2);
+	mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+	mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+	mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+	mp.display.setCursor(47, 55);
+	mp.display.printCenter("Charger connected!");
+	uint32_t tMillis = millis();
+	while(millis() < tMillis + 1500)
+	{
+		mp.update();
+		if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
 		{
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 55);
-			mp.display.printCenter("Charger connected!");
-			uint32_t tempMillis = millis();
-			while(millis() < tempMillis + 1500)
-			{
+			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 				mp.update();
-				if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-				{
-					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					break;
-				}
-			}
-			while(!mp.update());
 			break;
 		}
-		else
-			Serial.println(mp.batteryVoltage);
-		mp.update();
 	}
 	while(!mp.update());
  
@@ -1831,7 +1825,7 @@ void setup()
 	// startupWizard();
 	// controlTry();
 	// settingsApp();
-	// mp.lockscreen();
+	mp.lockscreen();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
 }
