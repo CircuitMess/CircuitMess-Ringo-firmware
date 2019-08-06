@@ -338,6 +338,7 @@ uint16_t countSubstring(String string, String substring) {
 	return count;
 }
 void callNumber(String number) {
+	String contact = mp.checkContact(number);
 	mp.inCall = 1;
 	mp.dataRefreshFlag = 0;
 	char c;
@@ -365,8 +366,10 @@ void callNumber(String number) {
 	}
 	mp.display.setTextSize(1);
 	digitalWrite(soundSwitchPin, 1);
-
-	mp.display.printCenter(number);
+	if(contact == "")
+		mp.display.printCenter(number);
+	else
+		mp.display.printCenter(contact);
 
 	while (1)
 	{
@@ -465,7 +468,10 @@ void callNumber(String number) {
 					mp.display.setCursor(11, 20);
 				else
 					mp.display.setCursor(11, 28);
-				mp.display.printCenter(number);
+				if(contact == "")
+					mp.display.printCenter(number);
+				else
+					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				if(mp.resolutionMode)
 					mp.display.setCursor(2, 62);
@@ -477,14 +483,17 @@ void callNumber(String number) {
 
 				mp.updateTimeRTC();
 				if(mp.SDinsertedFlag)
-					mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
+					mp.addCall(number, mp.checkContact(number), mp.RTC.now().unixtime(), tmp_time, 1);
 
 				delay(1000);
 				break;
 			}
 			
 			mp.display.setCursor(11, 28);
-			mp.display.printCenter(number);
+			if(contact == "")
+				mp.display.printCenter(number);
+			else
+				mp.display.printCenter(contact);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 			mp.display.setCursor(5, 109);
 			mp.display.print("Mic gain: ");
@@ -507,7 +516,10 @@ void callNumber(String number) {
 					mp.display.setCursor(11, 20);
 				else
 					mp.display.setCursor(11, 28);
-				mp.display.printCenter(number);
+				if(contact == "")
+					mp.display.printCenter(number);
+				else
+					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				if(mp.resolutionMode)
 				{
@@ -536,7 +548,10 @@ void callNumber(String number) {
 					mp.display.setCursor(11, 20);
 				else
 					mp.display.setCursor(11, 28);
-				mp.display.printCenter(number);
+				if(contact == "")
+					mp.display.printCenter(number);
+				else
+					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(105, 109);
 				mp.display.print("Hang up");
@@ -572,7 +587,10 @@ void callNumber(String number) {
 			}
 			mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
 			mp.display.setCursor(11, 28);
-			mp.display.printCenter(number);
+			if(contact == "")
+				mp.display.printCenter(number);
+			else
+				mp.display.printCenter(contact);
 			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 			mp.display.setCursor(2, 112);
 			mp.display.print("Call ended");
@@ -586,7 +604,7 @@ void callNumber(String number) {
 				Serial1.println("ATH");
 			}
 			if(mp.SDinsertedFlag)
-				mp.addCall(number, mp.RTC.now().unixtime(), tmp_time, 1);
+				mp.addCall(number, mp.checkContact(number), mp.RTC.now().unixtime(), tmp_time, 1);
 			delay(1000);
 			break;
 		}
@@ -1660,53 +1678,53 @@ void controlTry() //for debug purposes
 	mp.dataRefreshFlag = 0;
 	mp.display.fillScreen(TFT_DARKGREY);
 	while(!mp.update());
-	Serial1.println("AT+COPS=?");
-	while(!Serial1.available());
-	String temp = Serial1.readString();
-	Serial.println(temp);
-	if(temp.indexOf("ERROR") == -1)
-	{
-		mp.display.fillScreen(TFT_DARKGREY);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setCursor(0,mp.display.height()/2-12);
-		mp.display.printCenter("Loading operators");
-		while(!mp.update());
-		while(!Serial1.available());
-		temp = Serial1.readString();
-		temp = temp.substring(2, temp.indexOf("\r", 2));
-		Serial.println(temp);
-		mp.display.fillScreen(TFT_DARKGREY);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setTextFont(1);
-		while(!mp.buttons.released(BTN_B))
-		{
-			mp.display.fillScreen(TFT_DARKGREY);
-			mp.display.setCursor(1, cursorY);
-			mp.display.setTextWrap(1);
-			mp.display.print(temp);
-			if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
-				Serial.println(mp.display.cursor_y);
-				if (mp.display.cursor_y >= 110)
-				{
+	// Serial1.println("AT+COPS=?");
+	// while(!Serial1.available());
+	// String temp = Serial1.readString();
+	// Serial.println(temp);
+	// if(temp.indexOf("ERROR") == -1)
+	// {
+	// 	mp.display.fillScreen(TFT_DARKGREY);
+	// 	mp.display.setTextColor(TFT_WHITE);
+	// 	mp.display.setTextFont(2);
+	// 	mp.display.setCursor(0,mp.display.height()/2-12);
+	// 	mp.display.printCenter("Loading operators");
+	// 	while(!mp.update());
+	// 	while(!Serial1.available());
+	// 	temp = Serial1.readString();
+	// 	temp = temp.substring(2, temp.indexOf("\r", 2));
+	// 	Serial.println(temp);
+	// 	mp.display.fillScreen(TFT_DARKGREY);
+	// 	mp.display.setTextColor(TFT_WHITE);
+	// 	mp.display.setTextFont(1);
+	// 	while(!mp.buttons.released(BTN_B))
+	// 	{
+	// 		mp.display.fillScreen(TFT_DARKGREY);
+	// 		mp.display.setCursor(1, cursorY);
+	// 		mp.display.setTextWrap(1);
+	// 		mp.display.print(temp);
+	// 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+	// 			Serial.println(mp.display.cursor_y);
+	// 			if (mp.display.cursor_y >= 110)
+	// 			{
 
-					cursorY -= 4;
-				}
-			}
+	// 				cursorY -= 4;
+	// 			}
+	// 		}
 
-			if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
-				if (cursorY < 1)
-				{
-					cursorY += 4;
-				}
-			}
-			mp.update();
-		}
-		while(!mp.update());
-		mp.display.setTextFont(2);
-	}
+	// 		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+	// 			if (cursorY < 1)
+	// 			{
+	// 				cursorY += 4;
+	// 			}
+	// 		}
+	// 		mp.update();
+	// 	}
+	// 	while(!mp.update());
+	// 	mp.display.setTextFont(2);
+	// }
 	// mp.dataRefreshFlag = 1;
-	while (1)
+	while (1)//+CLCC: 1,1,4,0,0,"+385953866578",145,""
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
 
@@ -1813,10 +1831,9 @@ void setup()
 	// startupWizard();
 	// controlTry();
 	// settingsApp();
-	mp.lockscreen();
+	// mp.lockscreen();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
-	
 }
 void loop()
 {

@@ -108,7 +108,6 @@ void contactsAppSD(){
 		Serial.println("Override");
 		file.close();
 		jb.clear();
-		// JsonArray& jarr = jb.parseArray("[{\"name\":\"foo\", \"number\":\"099\"}]");
 		JsonArray& jarr = jb.createArray();
 		delay(10);
 		File file1 = SD.open("/.core/contacts.json", "w");
@@ -155,7 +154,8 @@ void contactsAppSD(){
 			{
 				if (menuChoice == 0)
 				{
-					String name, number;
+					String name;
+					String number = "+";
 					if(newContactSD(&name, &number))
 					{
 						JsonObject& newContact = jb.createObject();
@@ -265,6 +265,7 @@ uint8_t newContactSD(String *name, String *number)
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
+	// bool plusSign = 0;
 	while (1) {
 
 		mp.display.fillScreen(TFT_BLACK);
@@ -274,6 +275,12 @@ uint8_t newContactSD(String *name, String *number)
 		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
+		mp.display.fillRect(0,60,160,45, TFT_DARKGREY);
+		mp.display.setCursor(4, 65);
+		mp.display.print("Enter your country code");
+		mp.display.setCursor(4, 83);
+		mp.display.printCenter("(example: +001 for USA)");
+
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
@@ -282,7 +289,16 @@ uint8_t newContactSD(String *name, String *number)
 		if (cursor == 0) //inputting the contact number
 		{
 			key = mp.buttons.getKey();
-			if (mp.buttons.released(BTN_FUN_LEFT))
+			// if(mp.buttons.held(BTN_0, 20))
+			// {
+			// 	contact+="+";
+			// 	plusSign = 1;
+			// }
+			// if(key == '0' && plusSign)
+				// key = NO_KEY;
+			// if(plusSign && mp.buttons.released(BTN_0))
+				// plusSign = 0;
+			if (mp.buttons.released(BTN_FUN_LEFT) && contact.length() > 1)
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 14)
 				contact += key;
@@ -309,10 +325,10 @@ uint8_t newContactSD(String *name, String *number)
 			mp.display.setTextColor(TFT_WHITE);
 			mp.display.setCursor(2*2, 38);
 			mp.display.print("Num: ");
-			if (contact == "")
+			if (contact == "+")
 			{
 				mp.display.setTextColor(TFT_LIGHTGREY);
-				mp.display.print(F("xxxxxxxx"));
+				mp.display.print(F("+XXXXXXXXXXXX"));
 				mp.display.setTextColor(TFT_WHITE);
 			}
 			else
@@ -360,7 +376,7 @@ uint8_t newContactSD(String *name, String *number)
 		if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
 			while(!mp.update());
-			if(contact != "" && content != "")
+			if(contact != "+" && content != "")
 			{
 				*name = content;
 				*number = contact;

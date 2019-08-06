@@ -135,8 +135,19 @@ void messagesApp() {
 
 			else if(menuChoice > -1)
 			{
-				if(viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
-				jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>()))
+				bool helper = 0;
+				String temp = jarr[menuChoice]["contact"].as<char*>();
+				if(temp == "")
+				{
+					helper = viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
+					jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>());
+				}
+				else
+				{
+					helper = viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["contact"].as<char*>(),
+					jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>());
+				}
+				if(helper)
 				{
 					jarr.remove(menuChoice);
 					File file = SD.open("/.core/messages.json", "w");
@@ -392,9 +403,13 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		{
 			JsonObject& elem = messages[sortingArray[i]];
 			DateTime date = DateTime(elem["dateTime"].as<uint32_t>());
-			
-			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
-			elem["read"].as<bool>(), i+1, cameraY_actual);
+			String temp = elem["contact"].as<char*>();
+			if(temp == "")
+				smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
+				elem["read"].as<bool>(), i+1, cameraY_actual);
+			else
+				smsMenuDrawBox(elem["contact"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
+				elem["read"].as<bool>(), i+1, cameraY_actual);
 		}
 		if(millis() - blinkMillis >= 300)
 		{
@@ -541,13 +556,14 @@ void composeSMS(JsonArray *messages)
 	mp.textPointer = 0;
     y = 16; //beginning point
 	String content = "";
-	String contact = "";
+	String contact = "+";
 	String prevContent = "";
 	char key = NO_KEY;
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	uint8_t scale = 2;
+	bool plusSign = 0;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
@@ -593,6 +609,15 @@ void composeSMS(JsonArray *messages)
 		if (cursor == 0) //inputting the contact number
 		{
 			key = mp.buttons.getKey();
+			if(mp.buttons.held(BTN_0, 20))
+			{
+				contact+="+";
+				plusSign = 1;
+			}
+			if(key == '0' && plusSign)
+				key = NO_KEY;
+			if(plusSign && mp.buttons.released(BTN_0))
+				plusSign = 0;
 			if (mp.buttons.released(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 16)
@@ -678,7 +703,8 @@ void composeSMS(JsonArray *messages)
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.printCenter("Text sent!");
 				while(!mp.update());
-				mp.saveMessage(content, contact, 1, 0, messages);
+				// String temp = mp.checkContact(contact);
+				mp.saveMessage(content, mp.checkContact(contact), contact, 1, 0, messages);
 				delay(1000);
 			}
 			else
