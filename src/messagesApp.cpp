@@ -704,7 +704,7 @@ void composeSMS(JsonArray *messages)
 				mp.display.printCenter("Text sent!");
 				while(!mp.update());
 				// String temp = mp.checkContact(contact);
-				mp.saveMessage(content, mp.checkContact(contact), contact, 1, 0, messages);
+				mp.saveMessage(content, mp.checkContact(contact), contact, 1, 0);
 				delay(1000);
 			}
 			else
