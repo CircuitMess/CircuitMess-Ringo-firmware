@@ -2471,7 +2471,10 @@ bool updateMenu()
 				else
 					mp.display.drawRect(20,83,117, 20, 0xFD29);
 				if(mp.buttons.released(BTN_A))
+				{
+					while(!mp.update());
 					controlTry();
+				}
 			break;
 		}
 		
