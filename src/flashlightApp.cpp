@@ -40,6 +40,8 @@ void flashlightApp()
 		mp.display.setTextSize(1);
 		mp.display.setCursor(2, 110);
 		mp.display.print("Color");
+		mp.display.setCursor(112, 110);
+		mp.display.print("On/Off");
 		// mp.display.setCursor(95, 110);
 		// mp.display.print("Brightness");
 		if(!state)
@@ -50,7 +52,7 @@ void flashlightApp()
 		else
 			mp.display.drawIcon(flashlightOn, 46, 10, 34, 50, 2, TFT_GREEN);
 
-		if(mp.buttons.released(BTN_A))
+		if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 		{
 			state = !state;
 			Serial.println(state);

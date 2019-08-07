@@ -441,7 +441,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		mp.display.setTextColor(TFT_WHITE);
 
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			while(!mp.update());// Exit when pressed
