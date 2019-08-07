@@ -1670,53 +1670,99 @@ void controlTry() //for debug purposes
 	String outBuffer = "";
 	uint32_t cursorY = 1;
 	mp.dataRefreshFlag = 0;
-	mp.display.fillScreen(TFT_DARKGREY);
+	uint32_t blinkMillis = millis();
+	bool cursor = 0;
+	while(!mp.buttons.released(BTN_A))
+	{
+		if(millis() - blinkMillis >= 350)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
+		mp.display.fillScreen(TFT_DARKGREY);
+		mp.display.setTextSize(1);
+		mp.display.setTextFont(2);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(0, 32);
+		mp.display.printCenter("List operators?");
+		mp.display.setCursor(0,70);
+		mp.display.printCenter("Yes        No");
+		mp.display.setCursor(4, 110);
+		mp.display.print("Press A to confirm");
+		if(cursor)
+		{
+			mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_DARKGREY);
+			mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_DARKGREY);
+		}
+		else
+		{
+			mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_DARKGREY);
+			mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_DARKGREY);
+		}
+
+		if(mp.buttons.released(BTN_LEFT) && cursor)
+		{
+			blinkState = 1;
+			blinkMillis = millis();
+			cursor = 0;
+		}
+		if(mp.buttons.released(BTN_RIGHT) && !cursor)
+		{
+			blinkState = 1;
+			blinkMillis = millis();
+			cursor = 1;
+		}
+		mp.update();
+	}
 	while(!mp.update());
-	// Serial1.println("AT+COPS=?");
-	// while(!Serial1.available());
-	// String temp = Serial1.readString();
-	// Serial.println(temp);
-	// if(temp.indexOf("ERROR") == -1)
-	// {
-	// 	mp.display.fillScreen(TFT_DARKGREY);
-	// 	mp.display.setTextColor(TFT_WHITE);
-	// 	mp.display.setTextFont(2);
-	// 	mp.display.setCursor(0,mp.display.height()/2-12);
-	// 	mp.display.printCenter("Loading operators");
-	// 	while(!mp.update());
-	// 	while(!Serial1.available());
-	// 	temp = Serial1.readString();
-	// 	temp = temp.substring(2, temp.indexOf("\r", 2));
-	// 	Serial.println(temp);
-	// 	mp.display.fillScreen(TFT_DARKGREY);
-	// 	mp.display.setTextColor(TFT_WHITE);
-	// 	mp.display.setTextFont(1);
-	// 	while(!mp.buttons.released(BTN_B))
-	// 	{
-	// 		mp.display.fillScreen(TFT_DARKGREY);
-	// 		mp.display.setCursor(1, cursorY);
-	// 		mp.display.setTextWrap(1);
-	// 		mp.display.print(temp);
-	// 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
-	// 			Serial.println(mp.display.cursor_y);
-	// 			if (mp.display.cursor_y >= 110)
-	// 			{
+	if(!cursor)
+	{
+		Serial1.println("AT+COPS=?");
+		while(!Serial1.available());
+		String temp = Serial1.readString();
+		Serial.println(temp);
+		if(temp.indexOf("ERROR") == -1)
+		{
+			mp.display.fillScreen(TFT_DARKGREY);
+			mp.display.setTextColor(TFT_WHITE);
+			mp.display.setTextFont(2);
+			mp.display.setCursor(0,mp.display.height()/2-12);
+			mp.display.printCenter("Loading operators");
+			while(!mp.update());
+			while(!Serial1.available());
+			temp = Serial1.readString();
+			temp = temp.substring(2, temp.indexOf("\r", 2));
+			Serial.println(temp);
+			mp.display.fillScreen(TFT_DARKGREY);
+			mp.display.setTextColor(TFT_WHITE);
+			mp.display.setTextFont(1);
+			while(!mp.buttons.released(BTN_B))
+			{
+				mp.display.fillScreen(TFT_DARKGREY);
+				mp.display.setCursor(1, cursorY);
+				mp.display.setTextWrap(1);
+				mp.display.print(temp);
+				if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+					Serial.println(mp.display.cursor_y);
+					if (mp.display.cursor_y >= 110)
+					{
 
-	// 				cursorY -= 4;
-	// 			}
-	// 		}
+						cursorY -= 4;
+					}
+				}
 
-	// 		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
-	// 			if (cursorY < 1)
-	// 			{
-	// 				cursorY += 4;
-	// 			}
-	// 		}
-	// 		mp.update();
-	// 	}
-	// 	while(!mp.update());
-	// 	mp.display.setTextFont(2);
-	// }
+				if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+					if (cursorY < 1)
+					{
+						cursorY += 4;
+					}
+				}
+				mp.update();
+			}
+			while(!mp.update());
+			mp.display.setTextFont(2);
+		}
+	}
 	// mp.dataRefreshFlag = 1;
 	while (1)//+CLCC: 1,1,4,0,0,"+385953866578",145,""
 	{
