@@ -25,6 +25,10 @@ Here are some examples of how the current version of the firmware looks:
 
 <br/>
 
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_46.png)
+
+<br/>
+
  ### **Main menu**
 
 <img src="https://www.circuitmess.com/wp-content/uploads/screenshot_39.png" width="450"/>
