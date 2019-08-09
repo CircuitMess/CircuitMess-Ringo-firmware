@@ -1868,6 +1868,7 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
+	mp.pduDecode("0791839515001000040C9183953577164500009180906190928006325ACD76C301");
 	// startupWizard();
 	// controlTry();
 	// settingsApp();
