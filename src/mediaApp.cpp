@@ -102,9 +102,7 @@ void mediaApp() {
 					while(!mp.update());
 					while(1)
 					{
-						if(!mp.SDinsertedFlag)
-							break;
-						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B))
+						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B) || !mp.SDinsertedFlag)
 							break;
 						if(mp.buttons.released(BTN_LEFT))
 						{
@@ -124,6 +122,14 @@ void mediaApp() {
 								index++;
 							else
 								index = 0;
+							if(photoFiles[index].endsWith(".bmp") || photoFiles[index].endsWith(".BMP"))
+								mp.display.drawBmp(photoFiles[index], 0,0);
+							else
+								mp.drawJpeg(photoFiles[index], 0, 0);
+							while(!mp.update());
+						}
+						if(mp.buttons.holdForUnlock)
+						{
 							if(photoFiles[index].endsWith(".bmp") || photoFiles[index].endsWith(".BMP"))
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else

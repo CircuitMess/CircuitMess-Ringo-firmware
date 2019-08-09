@@ -119,7 +119,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	bool newScreen = 1;
 	mp.display.fillScreen(TFT_BLACK);
 	Serial.println(mp.buttons.timeHeld(BTN_A));
-	bool buttonHeld = mp.buttons.timeHeld(BTN_A) >= 30;
 	// while(!mp.update());
 	while (1)
 	{
@@ -227,15 +226,10 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		///////////////////////////////////////
 		if (mp.buttons.released(BTN_A) ) //CONFIRM
 		{
-			if(buttonHeld)
-				buttonHeld = 0;
-			else
-			{
-				// mp.osc->note(75, 0.05);
-				// mp.osc->play();
-				while(!mp.update());
-				return cursorY * x_elements + cursorX;  //returns index of selected icon
-			}
+			// mp.osc->note(75, 0.05);
+			// mp.osc->play();
+			while(!mp.update());
+			return cursorY * x_elements + cursorX;  //returns index of selected icon
 		}
 		if (mp.buttons.released(BTN_UP)) //UP
 		{
