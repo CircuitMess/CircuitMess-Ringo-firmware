@@ -1477,7 +1477,6 @@ void timeMenu()
 	bool blinkState = 0;
 	uint32_t previousMillis = millis();
 	uint8_t cursor = 0;
-	uint8_t editCursor = 0;
 	String foo="";
 	char key;
 	mp.display.setTextWrap(0);
@@ -1531,6 +1530,7 @@ void timeMenu()
 				mp.display.drawRect(46,63, 68, 20, 0xFFED);
 			if(mp.buttons.released(BTN_A))
 			{
+				uint8_t editCursor = 0;
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				while(!mp.update());
@@ -1543,10 +1543,10 @@ void timeMenu()
 				while(1)
 				{
 					mp.display.fillScreen(0xFFED);
-					mp.display.setCursor(2, 98);
-					mp.display.print("Press A to save");
 					mp.display.setCursor(2, 110);
-					mp.display.print("Press B to cancel");
+					mp.display.print("Erase");
+					mp.display.setCursor(120, 110);
+					mp.display.print("Save");
 					switch (editCursor)
 					{
 						case 0:
@@ -1788,7 +1788,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1812,7 +1812,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -1844,7 +1844,7 @@ void timeMenu()
 								break;
 							case 4:
 								if(mp.clockYear != 0)
-									inputBuffer = String(mp.clockYear);
+									inputBuffer = String(mp.clockYear % 100);
 								else
 									inputBuffer = "";
 								break;
@@ -1877,7 +1877,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1901,7 +1901,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000+inputBuffer.toInt();
 									break;
 							}
 						}
@@ -1967,7 +1967,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1991,7 +1991,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -2043,7 +2043,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -2067,7 +2067,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -2087,7 +2087,7 @@ void timeMenu()
 								break;
 							case 2:
 								if(mp.clockYear != 0)
-									inputBuffer = String(mp.clockYear);
+									inputBuffer = String(mp.clockYear % 100);
 								else
 									inputBuffer = "";
 								break;
@@ -2095,7 +2095,7 @@ void timeMenu()
 						editCursor+=3;
 					}
 
-					if(mp.buttons.released(BTN_A))
+					if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 					{
 						if(inputBuffer == "")
 						{
@@ -2117,7 +2117,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -2141,12 +2141,12 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
 						DateTime now = DateTime(mp.clockYear, mp.clockMonth, mp.clockDay,
-							mp.clockHour, mp.clockMinute, mp.clockSecond);
+						mp.clockHour, mp.clockMinute, mp.clockSecond);
 						mp.RTC.adjust(now);
 						break;
 					}
@@ -2199,7 +2199,7 @@ void timeMenu()
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
-					mp.clockYear = 0;
+					mp.clockYear = 2000;
 					previousMillis = millis();
 					while(1)
 					{
