@@ -666,6 +666,7 @@ void callNumber(String number) {
 bool startupWizard()
 {
 	mp.homePopupEnable(0);
+	mp.shutdownPopupEnable(0);
 	mp.display.fillScreen(TFT_WHITE);
 	// Connect charger
 	while(digitalRead(CHRG_INT))
@@ -1654,6 +1655,7 @@ bool startupWizard()
 	mp.display.printCenter("Searching Wifi networks");
 	while(!mp.update());
 	wifiConnect();
+	mp.shutdownPopupEnable(1);
 	return 1;
 }
 void controlTry() //for debug purposes
@@ -1821,6 +1823,8 @@ void setup()
 {
 	Serial.begin(115200);	
 	EEPROM.begin(256);
+	mp.homePopupEnable(0);
+
 	if(EEPROM.readBool(34))
 	{
 		EEPROM.writeBool(34, 0);
@@ -1860,7 +1864,6 @@ void setup()
 		ESP.restart();
 	}
 	mp.begin();
-	mp.homePopupEnable(0);
 	// osc = new Oscillator();
 	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
 	// addOscillator(osc);

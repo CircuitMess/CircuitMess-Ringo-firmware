@@ -295,8 +295,24 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 		mp.display.drawBitmap(3, y + 6, outgoingMessageIcon, TFT_GREEN, 2);
 	
 	mp.display.setTextColor(TFT_WHITE);
-	mp.display.setCursor(4, y + 2);
-	mp.display.drawString(contact, 22, y-1);
+	mp.display.setCursor(22, y - 1);
+	
+	if(contact.length() > 13)
+	{
+		for(int i = 0; i < contact.length(); i++)
+		{
+			mp.display.print(contact[i]);
+			if(mp.display.getCursorX() > 105)
+			{
+				mp.display.print("...");
+				break;
+			}
+		}
+	}
+	else
+		mp.display.print(contact);
+
+	// mp.display.drawString(contact, 22, y-1);
 	mp.display.drawString(content, 22, y + 13);
 
 	mp.display.setTextFont(1);
