@@ -650,6 +650,9 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 			}
+			// Serial.print("joystick X: ");
+			// Serial.println(mp.buttons.getJoystickX());
+			// Serial.println("--------");
 			mp.update();
 			if(mp3->isPlaying() < 1 && playState) //if the current song is finished, play the next one
 			{

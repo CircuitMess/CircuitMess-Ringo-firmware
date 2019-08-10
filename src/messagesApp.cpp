@@ -41,6 +41,7 @@ void messagesApp() {
 
 	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
+	file.close();
 	jarr.prettyPrintTo(Serial);
 	if(!jarr.success())
 	{
@@ -108,7 +109,26 @@ void messagesApp() {
 					while(!mp.update());
 				}
 				else
+				{
 					composeSMS(&jarr);
+					File file = SD.open("/.core/messages.json", "r");
+					jb.clear();
+					JsonArray& jarr = jb.parseArray(file);
+					file.close();
+					if(!jarr.success())
+					{
+						Serial.println("Error");
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setCursor(0, mp.display.height()/2 - 16);
+						mp.display.setTextFont(2);
+						mp.display.printCenter("Error loading data");
+
+						while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+							mp.update();
+						while(!mp.update());
+					}
+					mp.newMessage = 0;
+				}
 				menuChoice = -1;
 			}
 
@@ -117,6 +137,7 @@ void messagesApp() {
 				File file = SD.open("/.core/messages.json", "r");
 				jb.clear();
 				JsonArray& jarr = jb.parseArray(file);
+				file.close();
 				if(!jarr.success())
 				{
 					Serial.println("Error");
@@ -346,20 +367,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	for(int i = 0; i < length; i++)
 		sortingArray[i] = i;
 	uint16_t min;
-	for(int i = 0; i < length - 1; i++)
-	{
-		min = i;
-		for(int j = i + 1; j < length ; j++)
-			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>())
-				min = j;
-		uint16_t temp = sortingArray[min];
-		sortingArray[min] = sortingArray[i];
-		sortingArray[i] = temp;
-	}
-	Serial.print("Prevcursor: ");
-	Serial.println(prevCursor);
-	Serial.println(length);
-	for(int i = 0; i < length; i++)
+	for(int i = 0; i < length; i++) // sorting by unread
 	{
 		if(!messages[sortingArray[i]]["read"].as<bool>())
 		{
@@ -377,17 +385,33 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if(sortingArray[i] == prevCursor)
 			cursor = i + 1;
 	}
-	for(int i = 0; i < length; i++)
+	for(int i = 0; i < length - 1; i++) //sorting all by latest
 	{
 		min = i;
 		for(int j = i + 1; j < length ; j++)
 			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
-			&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+			&& ((!messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+			|| (messages[sortingArray[i]]["read"].as<bool>() && messages[sortingArray[j]]["read"].as<bool>())))
 				min = j;
 		uint16_t temp = sortingArray[min];
 		sortingArray[min] = sortingArray[i];
 		sortingArray[i] = temp;
 	}
+	Serial.print("Prevcursor: ");
+	Serial.println(prevCursor);
+	Serial.println(length);
+	
+	// for(int i = 0; i < length; i++) // sorting unread by latest
+	// {
+	// 	min = i;
+	// 	for(int j = i + 1; j < length ; j++)
+	// 		if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
+	// 		&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+	// 			min = j;
+	// 	uint16_t temp = sortingArray[min];
+	// 	sortingArray[min] = sortingArray[i];
+	// 	sortingArray[i] = temp;
+	// }
 	Serial.print("Cursor: ");
 	Serial.println(cursor);
 	// messages.prettyPrintTo(Serial);
