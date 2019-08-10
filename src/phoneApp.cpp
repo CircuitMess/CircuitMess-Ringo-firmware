@@ -21,6 +21,8 @@ void phoneApp() {
 		mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
 		mp.display.drawRect(108, 110, 52, 17, TFT_WHITE);
 		mp.display.setCursor(110, 110);
+		mp.display.setTextFont(2);
+		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Call log");
 		mp.display.setCursor(2, 110);
 		mp.display.print("Press A to call");
@@ -458,6 +460,9 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			return -2;
 		}
 		mp.display.setCursor(0, 0);
+		mp.display.setTextFont(2);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setTextSize(1);
 		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
 		mp.display.setTextFont(2);
 		mp.display.setCursor(0,-2);

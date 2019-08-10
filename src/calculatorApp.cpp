@@ -12,55 +12,56 @@ void calculatorApp()
 	bool blinkState = 0;
 	bool clear = 0;
 	bool set = 0;
-	mp.display.fillScreen(0xA794);
-	mp.display.drawRect(6,5, 149, 40, TFT_BLACK);
-	mp.display.fillRect(7,6,147,38, TFT_LIGHTGREY);
-	for (int y = 0; y < 2; y++)
-	{
-		for (int x = 0; x < 4; x++)
-		{
-			mp.display.drawRect(8 + 37 * x, 49 + 27 * y, 33, 23, TFT_BLACK);
-			mp.display.fillRect(9 + 37 * x, 50 + 27 * y, 31, 21, TFT_LIGHTGREY);
-			switch (y*4 + x)
-			{
-				case 0:
-					mp.display.drawBitmap(18, 54, calculatorPlus);
-					break;
-				case 1:
-					mp.display.drawBitmap(55, 59, calculatorMinus);
-					break;
-				case 2:
-					mp.display.drawBitmap(92, 54, calculatorMultiply);
-					break;
-				case 3:
-					mp.display.drawBitmap(128, 54, calculatorDivide);
-					break;
-				case 4:
-					mp.display.drawBitmap(15, 79, calculatorRoot);
-					break;
-				case 5:
-					mp.display.drawBitmap(55, 80, calculatorPotency);
-					break;
-				case 6:
-					mp.display.drawBitmap(87, 79, calculatorReciprocal);
-					break;
-				case 7:
-					mp.display.drawBitmap(133, 91, calculatorDecimalPoint);
-					break;
-			}
-		}
-	}
-	// mp.display.drawRect(119, 103, 33, 23, TFT_BLACK);
-	// mp.display.fillRect(120, 104, 31, 21, 0x4D42);
-	mp.display.setCursor(7, 110);
-	mp.display.setTextFont(2);
-	mp.display.setTextSize(1);
-	mp.display.setTextColor(TFT_BLACK);
-	mp.display.print("Erase");
-	mp.display.setCursor(110, 110);
-	mp.display.println("Equals");
+
 	while(1)
 	{
+		mp.display.fillScreen(0xA794);
+		mp.display.drawRect(6,5, 149, 40, TFT_BLACK);
+		mp.display.fillRect(7,6,147,38, TFT_LIGHTGREY);
+		for (int y = 0; y < 2; y++)
+		{
+			for (int x = 0; x < 4; x++)
+			{
+				mp.display.drawRect(8 + 37 * x, 49 + 27 * y, 33, 23, TFT_BLACK);
+				mp.display.fillRect(9 + 37 * x, 50 + 27 * y, 31, 21, TFT_LIGHTGREY);
+				switch (y*4 + x)
+				{
+					case 0:
+						mp.display.drawBitmap(18, 54, calculatorPlus);
+						break;
+					case 1:
+						mp.display.drawBitmap(55, 59, calculatorMinus);
+						break;
+					case 2:
+						mp.display.drawBitmap(92, 54, calculatorMultiply);
+						break;
+					case 3:
+						mp.display.drawBitmap(128, 54, calculatorDivide);
+						break;
+					case 4:
+						mp.display.drawBitmap(15, 79, calculatorRoot);
+						break;
+					case 5:
+						mp.display.drawBitmap(55, 80, calculatorPotency);
+						break;
+					case 6:
+						mp.display.drawBitmap(87, 79, calculatorReciprocal);
+						break;
+					case 7:
+						mp.display.drawBitmap(133, 91, calculatorDecimalPoint);
+						break;
+				}
+			}
+		}
+		// mp.display.drawRect(119, 103, 33, 23, TFT_BLACK);
+		// mp.display.fillRect(120, 104, 31, 21, 0x4D42);
+		mp.display.setCursor(7, 110);
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.print("Erase");
+		mp.display.setCursor(110, 110);
+		mp.display.println("Equals");
 		// key = mp.buttons.getKey();
 
 		if(input.length() < 8 || clear) {
