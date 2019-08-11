@@ -21,33 +21,28 @@ Functionalities that are currently available:
 Here are some examples of how the current version of the firmware looks:
 
  ### **Home**
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_46.png" width="450"/>
-
-<br/>
-
-<!---
-// ![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_46.png)
--->
+ 
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_46-export.png)
 
 <br/>
 
  ### **Main menu**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_39.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_28-export.png)
 
 <br/>
 
 ### **Apps**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_30.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_30-export.png)
 
 ### **Wi-Fi**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_44.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_44-export.png)
 
 ## **Settings**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_45.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_45-export.png)
 
 #
 
