@@ -687,11 +687,13 @@ void composeSMS(JsonArray *messages)
 			if (blinkState == 1)
                 mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
 		}
-		if (mp.buttons.released(BTN_UP) && cursor == 1) { //BUTTON UP
+		if ((mp.buttons.released(BTN_UP) || mp.buttons.released(BTN_A)) && cursor) { //BUTTON UP
+			mp.buttons.update();
 			cursor = 0;
 		}
 
-		if (mp.buttons.released(BTN_DOWN) && cursor == 0) { //BUTTON DOWN
+		if ((mp.buttons.released(BTN_DOWN) || mp.buttons.released(BTN_A)) && !cursor) { //BUTTON DOWN
+			mp.buttons.update();
 			cursor = 1;
 		}
 
@@ -700,7 +702,7 @@ void composeSMS(JsonArray *messages)
 			while(!mp.update());
 			break;
 		}
-		if (mp.buttons.released(BTN_A) && contact != "" && content != "") // SEND SMS
+		if (mp.buttons.released(BTN_FUN_RIGHT) && contact.length() > 1 && content != "") // SEND SMS
 		{
 			mp.display.fillScreen(TFT_BLACK);
             mp.display.setCursor(0, mp.display.height()/2 - 16);
@@ -763,12 +765,19 @@ void composeSMS(JsonArray *messages)
         mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.print("To: ");
 		mp.display.print(contact);
+		mp.display.fillRect(0,110, 160, 18, TFT_DARKGREY);
+		mp.display.drawFastHLine(0,111, 160, TFT_WHITE);
+		mp.display.setCursor(4, 112);
+		mp.display.print("Erase");
+		mp.display.setCursor(125,112);
+		mp.display.print("Send");
 		mp.update();
 		if(mp.newMessage)
 		{
 			File file = SD.open("/.core/messages.json", "r");
 			jb.clear();
 			JsonArray& jarr = jb.parseArray(file);
+			file.close();
 			if(!jarr.success())
 			{
 				Serial.println("Error");
@@ -783,7 +792,6 @@ void composeSMS(JsonArray *messages)
 			}
 			mp.newMessage = 0;
 		}
-
 	}
 }
 
