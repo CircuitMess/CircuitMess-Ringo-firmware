@@ -3126,7 +3126,6 @@ int8_t checkForUpdate()
 		if (httpCode == HTTP_CODE_OK) {
 			String payload = http.getString();
 			http.end();
-			mp.firmware_version = 1;
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
 			if (version > mp.firmware_version)
 			{

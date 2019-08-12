@@ -669,6 +669,7 @@ bool startupWizard()
 	mp.shutdownPopupEnable(0);
 	mp.display.fillScreen(TFT_WHITE);
 	uint32_t tMillis = millis();
+	bool goOut = 1;
 	// Connect charger
 	while(digitalRead(CHRG_INT))
 	{
@@ -858,7 +859,6 @@ bool startupWizard()
 			break;
 		}
 	}
-	mp.shutdownPopupEnable(1);
 
 	// Joystick testing
 	bool tested[8] = {0,0,0,0,0,0,0,0};
@@ -996,7 +996,7 @@ bool startupWizard()
 	uint8_t cursor = 0;
 	uint32_t callMillis = millis();
 	mp.ringVolume = 10;
-	bool goOut = 1;
+	goOut = 1;
 	while (goOut)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -1113,6 +1113,7 @@ bool startupWizard()
 					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
 					goOut = 0;
+					break;
 				}
 				else
 				{
@@ -1129,58 +1130,37 @@ bool startupWizard()
 
 
 	//SIM module testing
-	mp.display.fillScreen(TFT_WHITE);
-	mp.display.setTextFont(2);
-	mp.display.setTextSize(1);
-	mp.display.setCursor(4,4);
-	mp.display.setTextColor(TFT_BLACK);
-	mp.display.printCenter("Network module test");
-	mp.display.setCursor(0,mp.display.height()/2 - 22);
-	mp.display.printCenter("SIM functionality test");
-	mp.display.setCursor(0,mp.display.height()/2 - 2);
-	mp.display.printCenter("Performing test 1/3");
-	while(!mp.update());
-	uint32_t tempMillis = millis();
-	String reply = "";
+	goOut = 1;
 	bool response = 0;
-	while(millis() < tempMillis + 1500)
+	uint32_t tempMillis = millis();
+		String reply = "";
+	while(goOut)
 	{
-		Serial1.println("AT");
-
-		reply = Serial1.readString();
-		Serial.println(reply);
-		if(reply.indexOf("OK") != -1)
-		{
-			response = 1;
-			break;
-		}
-	}
-	if(response)
-	{
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.setTextSize(1);
+		mp.display.fillScreen(TFT_WHITE);
 		mp.display.setTextFont(2);
-		mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-		mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-		mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-		mp.display.setCursor(47, 55);
-		mp.display.printCenter("AT OK!");
+		mp.display.setTextSize(1);
+		mp.display.setCursor(4,4);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.printCenter("Network module test");
+		mp.display.setCursor(0,mp.display.height()/2 - 22);
+		mp.display.printCenter("SIM functionality test");
+		mp.display.setCursor(0,mp.display.height()/2 - 2);
+		mp.display.printCenter("Performing test 1/3");
+		while(!mp.update());
 		tempMillis = millis();
-		while(millis() < tempMillis + 1000)
-			mp.update();
-	}
-	else
-	{
-		Serial1.begin(9600, SERIAL_8N1, 17, 16);
+		reply = "";
+		response = 0;
 		while(millis() < tempMillis + 1500)
 		{
 			Serial1.println("AT");
+
+			reply = Serial1.readString();
+			Serial.println(reply);
 			if(reply.indexOf("OK") != -1)
 			{
 				response = 1;
 				break;
 			}
-			reply = Serial1.readString();
 		}
 		if(response)
 		{
@@ -1195,26 +1175,121 @@ bool startupWizard()
 			tempMillis = millis();
 			while(millis() < tempMillis + 1000)
 				mp.update();
+			break;
 		}
 		else
 		{
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 48);
-			mp.display.printCenter("Network module");
-			mp.display.setCursor(47, 63);
-			mp.display.printCenter("not inserted!");
-			tempMillis = millis();
-			while(millis() < tempMillis + 2000)
-				mp.update();
+			Serial1.begin(9600, SERIAL_8N1, 17, 16);
+			while(millis() < tempMillis + 1500)
+			{
+				Serial1.println("AT");
+				if(reply.indexOf("OK") != -1)
+				{
+					response = 1;
+					break;
+				}
+				reply = Serial1.readString();
+			}
+			if(response)
+			{
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+				mp.display.setCursor(47, 55);
+				mp.display.printCenter("AT OK!");
+				tempMillis = millis();
+				while(millis() < tempMillis + 1000)
+					mp.update();
+				break;
+			}
+			else
+			{
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+				mp.display.setCursor(47, 48);
+				mp.display.printCenter("Network module");
+				mp.display.setCursor(47, 63);
+				mp.display.printCenter("not inserted!");
+				tempMillis = millis();
+				while(millis() < tempMillis + 1000)
+					mp.update();
+				tempMillis = millis();
+				bool blinkState = 0;
+				uint32_t blinkMillis = millis();
+				uint8_t cursor = 0;
+				while(1)
+				{
+					mp.display.fillScreen(TFT_WHITE);
+					mp.display.setTextFont(2);
+					mp.display.setTextSize(1);
+					mp.display.setTextColor(TFT_BLACK);
+					mp.display.setCursor(4, 110);
+					mp.display.print("Press A to confirm");
+
+					if(millis() - blinkMillis >= 350)
+					{
+						blinkMillis = millis();
+						blinkState = !blinkState;
+					}
+					mp.display.setCursor(0,6);
+					mp.display.printCenter("Reinsert the");
+					mp.display.setCursor(0,22);
+					mp.display.printCenter("network module");
+
+					mp.display.setCursor(4, 110);
+					mp.display.print("Press A to confirm");
+					switch (cursor)
+					{
+						case 0:
+							mp.display.drawRect(28, 50, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
+							mp.display.drawRect(27, 49, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
+							break;
+						case 1:
+							mp.display.drawRect(98, 50, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
+							mp.display.drawRect(97, 49, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
+							break;
+					}
+
+					if(mp.buttons.released(BTN_LEFT) && cursor == 1)
+					{
+						blinkState = 1;
+						blinkMillis = millis();
+						cursor = 0;
+					}
+					if(mp.buttons.released(BTN_RIGHT) && cursor == 0)
+					{
+						blinkState = 1;
+						blinkMillis = millis();
+						cursor = 1;
+					}
+					mp.display.setCursor(0,50);
+					mp.display.printCenter("Retry      Skip");
+					if(mp.buttons.released(BTN_A))
+					{
+						while(!mp.update());
+						if(cursor == 1)
+						{
+							goOut = 0;
+							break;
+						}
+						else
+							break;
+					}
+					mp.update();
+				}
+			}
 		}
 	}
 	if(response)
 	{
+		mp.sim_module_version = 1;
 		while(1)
 		{
 			mp.display.fillScreen(TFT_WHITE);
@@ -1780,6 +1855,7 @@ bool startupWizard()
 					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
 					goOut = 0;
+					break;
 				}
 				else
 				{
@@ -1994,6 +2070,7 @@ void setup()
 	Serial.begin(115200);	
 	EEPROM.begin(256);
 	mp.homePopupEnable(0);
+	mp.shutdownPopupEnable(0);
 
 	if(EEPROM.readBool(34))
 	{
@@ -2041,6 +2118,7 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
+	mp.shutdownPopupEnable(1);
 	// startupWizard();
 	// controlTry();
 	// settingsApp();
