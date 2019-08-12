@@ -2852,7 +2852,8 @@ void wifiConnect()
 							int8_t selection = checkForUpdate();
 							Serial.println("OUT");
 							delay(5);
-							
+							EEPROM.writeBool(33, 0);
+							EEPROM.commit();
 							if(selection == 1)
 							{
 								EEPROM.writeBool(34, 1);
@@ -3245,8 +3246,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 		for (uint8_t i = 0; i < length; i++)
 			wifiDrawBox(items[i], signals[i], i, cameraY_actual);
-
-		wifiDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+			wifiDrawCursor(cursor, cameraY_actual);
 
 		mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
 		mp.display.setTextFont(2);
@@ -3254,14 +3255,19 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print("Networks");
+		mp.display.print("Choose a network");
+		mp.display.fillRect(0, 111, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(2,112);
+		mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
+		mp.display.printCenter("Cancel            Select");
 		if(mp.released(BTN_FUN_RIGHT))
 		{
 			while(!mp.update());
 			mp.playNotificationSound(cursor);
 		}
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
 			while(!mp.update());
 			break;
 		}
@@ -3299,7 +3305,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 			}
 
 		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
 			while(!mp.update());
 			return -1;
