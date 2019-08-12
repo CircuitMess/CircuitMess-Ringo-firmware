@@ -171,7 +171,7 @@ void phoneApp() {
 					mp.update();
 				while(!mp.update());
 			}
-			else if(!mp.simInserted)
+			else if(!mp.simInserted && callBuffer != "112")
 			{
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.setTextColor(TFT_WHITE);

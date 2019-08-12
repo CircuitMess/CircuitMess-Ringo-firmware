@@ -1112,6 +1112,7 @@ bool startupWizard()
 					mp.display.print("Press A to continue");
 					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
+					goOut = 0;
 				}
 				else
 				{
@@ -1778,6 +1779,7 @@ bool startupWizard()
 					mp.display.print("Press A to continue");
 					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
+					goOut = 0;
 				}
 				else
 				{

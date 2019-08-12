@@ -2270,11 +2270,12 @@ bool updateMenu()
 	uint32_t previousMillis = millis();
 	uint8_t cursor = 0;
 	String foo="";
-	mp.display.setTextWrap(0);
-	mp.display.setTextFont(2);
+	
 
 	while(1)
 	{
+		mp.display.setTextWrap(0);
+		mp.display.setTextFont(2);
 		mp.display.fillScreen(0xFD29);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setCursor(10, 10);
