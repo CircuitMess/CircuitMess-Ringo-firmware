@@ -44,7 +44,6 @@ Here are some examples of how the current version of the firmware looks:
 
 ![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_45-export.png)
 
-#
 
 ## Meta
 
