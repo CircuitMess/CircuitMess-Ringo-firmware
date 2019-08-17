@@ -21,35 +21,49 @@ Functionalities that are currently available:
 Here are some examples of how the current version of the firmware looks:
 
  ### **Home**
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_46.png" width="450"/>
+ 
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_46-export.png)
 
 <br/>
 
  ### **Main menu**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_39.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_28-export.png)
 
 <br/>
 
 ### **Apps**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_30.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_30-export.png)
 
 ### **Wi-Fi**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_44.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_44-export.png)
 
 ## **Settings**
 
-<img src="https://www.circuitmess.com/wp-content/uploads/screenshot_45.png" width="450"/>
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_45-export.png)
 
-#
+<br/>
+
+## Meta
+
+
+<img src="https://www.circuitmess.com/wp-content/uploads/CM-Meta-BlackHQ2.png">
+
+
+**CircuitMess** - https://www.circuitmess.com/ - @circuitmess.com
+
+**Facebook** - https://www.facebook.com/makerbuino/
+
+**Instagram** - https://www.instagram.com/thecircuitmess/
+
+**Twitter** - https://twitter.com/circuitmess 
+
+**YouTube** - https://www.youtube.com/channel/UCVUvt1CeoZpCSnwg3oBMsOQ
 
 Copyright © 2019 CircuitMess
 
 Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
 
-[Circuitmess Ringo's kickstarter page](https://www.kickstarter.com/projects/albertgajsak/makerphone-an-educational-diy-mobile-phone/updates)
 
-
-version=2
