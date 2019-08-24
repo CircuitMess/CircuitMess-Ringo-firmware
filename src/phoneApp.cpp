@@ -878,23 +878,25 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String contact, Strin
 }
 void sendMMI(String code)
 {
+	mp.inCall = 1;
 	String buffer = "";
 	// Serial1.println("AT+CUSD=1");
 	// delay(10);
-	Serial1.print("AT+CUSD=1,\"");
+	Serial1.print("AT+CUSD=1,\"");// at+cusd=1,"*101#", 15
 	Serial1.print(code);
 	Serial1.println("\", 15");
 	uint32_t tempMillis = millis();
 	bool cleared = 0;
-	while(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1 && millis() - tempMillis < 4000)
+	while(buffer.indexOf("\r", buffer.indexOf("+CUSD: 0")) == -1 && millis() - tempMillis < 4000)
 	{
 		if(Serial1.available())
 		{
 			tempMillis = millis();
 			buffer+=(char)Serial1.read();
-			if(buffer.indexOf("+CUSD:") != -1 && !cleared)
+			Serial.println(buffer);
+			if(buffer.indexOf("+CUSD: 0") != -1 && !cleared)
 			{
-				buffer = "+CUSD:";
+				buffer = "+CUSD: 0";
 				cleared = 1;
 			}
 		}
@@ -909,11 +911,28 @@ void sendMMI(String code)
 		mp.display.printCenter("Sending USSD code");
 		while(!mp.update());
 	}
-	if(buffer.indexOf("\r", buffer.indexOf("+CUSD:")) == -1)
+	if(buffer.indexOf("\r", buffer.indexOf("+CUSD: 0")) == -1)
+	{
+		mp.inCall = 0;
+		mp.display.fillScreen(TFT_WHITE);
+		mp.display.drawRect(9, 34, 142, 60, TFT_BLACK);
+		mp.display.drawRect(10, 35, 140, 58, TFT_BLACK);
+		mp.display.fillRect(11, 36, 138, 56, TFT_WHITE);
+		mp.display.setTextColor(TFT_BLACK);
+		mp.display.setTextFont(2);
+		mp.display.setTextSize(1);
+		mp.display.setCursor(55, 54);
+		mp.display.printCenter("Invalid USSD code!");
+		while(!mp.update());
+		uint32_t tempMillis = millis();
+		while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+			mp.update();
 		return;
+	}
 	uint16_t helper = buffer.indexOf("\"") + 1;
 	buffer = buffer.substring(helper, buffer.indexOf("\"", helper + 1));
 	Serial.println(buffer);
+	int32_t y = 1;
 	while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -923,17 +942,30 @@ void sendMMI(String code)
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(10, 10);
+		mp.display.setCursor(5, y);
 		for(int i = 0; i < buffer.length();i++)
 		{
 			mp.display.print(buffer[i]);
 			if(mp.display.getCursorX() > 150)
 			{
 				mp.display.print("\n");
-				mp.display.setCursor(10, mp.display.getCursorY());
+				mp.display.setCursor(5, mp.display.getCursorY());
 			}
+		}
+		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+			Serial.println(mp.display.cursor_y);
+			if (mp.display.cursor_y >= 110)
+			{
+				y -= 4;
+			}
+		}
+		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+			Serial.println(y);
+			if (y < 1)
+				y += 4;
 		}
 		mp.update();
 	}
 	while(!mp.update());
+	mp.inCall = 0;
 }
