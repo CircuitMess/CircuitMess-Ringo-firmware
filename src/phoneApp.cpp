@@ -516,6 +516,8 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Call log");
+		mp.display.setCursor(0,-1);
+		mp.display.printf("                   %d/40", length);
 		mp.display.fillRect(0, 105, 160, 23, TFT_BLACK);
 		mp.display.setCursor(5, 110);
 		mp.display.print("Erase");
