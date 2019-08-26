@@ -1477,7 +1477,6 @@ void timeMenu()
 	bool blinkState = 0;
 	uint32_t previousMillis = millis();
 	uint8_t cursor = 0;
-	uint8_t editCursor = 0;
 	String foo="";
 	char key;
 	mp.display.setTextWrap(0);
@@ -1531,6 +1530,7 @@ void timeMenu()
 				mp.display.drawRect(46,63, 68, 20, 0xFFED);
 			if(mp.buttons.released(BTN_A))
 			{
+				uint8_t editCursor = 0;
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				while(!mp.update());
@@ -1543,10 +1543,10 @@ void timeMenu()
 				while(1)
 				{
 					mp.display.fillScreen(0xFFED);
-					mp.display.setCursor(2, 98);
-					mp.display.print("Press A to save");
 					mp.display.setCursor(2, 110);
-					mp.display.print("Press B to cancel");
+					mp.display.print("Erase");
+					mp.display.setCursor(120, 110);
+					mp.display.print("Save");
 					switch (editCursor)
 					{
 						case 0:
@@ -1788,7 +1788,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1812,7 +1812,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -1844,7 +1844,7 @@ void timeMenu()
 								break;
 							case 4:
 								if(mp.clockYear != 0)
-									inputBuffer = String(mp.clockYear);
+									inputBuffer = String(mp.clockYear % 100);
 								else
 									inputBuffer = "";
 								break;
@@ -1877,7 +1877,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1901,7 +1901,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000+inputBuffer.toInt();
 									break;
 							}
 						}
@@ -1967,7 +1967,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1991,7 +1991,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -2043,7 +2043,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -2067,7 +2067,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -2087,7 +2087,7 @@ void timeMenu()
 								break;
 							case 2:
 								if(mp.clockYear != 0)
-									inputBuffer = String(mp.clockYear);
+									inputBuffer = String(mp.clockYear % 100);
 								else
 									inputBuffer = "";
 								break;
@@ -2095,7 +2095,7 @@ void timeMenu()
 						editCursor+=3;
 					}
 
-					if(mp.buttons.released(BTN_A))
+					if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 					{
 						if(inputBuffer == "")
 						{
@@ -2117,7 +2117,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -2141,12 +2141,12 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
 						DateTime now = DateTime(mp.clockYear, mp.clockMonth, mp.clockDay,
-							mp.clockHour, mp.clockMinute, mp.clockSecond);
+						mp.clockHour, mp.clockMinute, mp.clockSecond);
 						mp.RTC.adjust(now);
 						break;
 					}
@@ -2199,7 +2199,7 @@ void timeMenu()
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
-					mp.clockYear = 0;
+					mp.clockYear = 2000;
 					previousMillis = millis();
 					while(1)
 					{
@@ -2270,11 +2270,12 @@ bool updateMenu()
 	uint32_t previousMillis = millis();
 	uint8_t cursor = 0;
 	String foo="";
-	mp.display.setTextWrap(0);
-	mp.display.setTextFont(2);
+	
 
 	while(1)
 	{
+		mp.display.setTextWrap(0);
+		mp.display.setTextFont(2);
 		mp.display.fillScreen(0xFD29);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setCursor(10, 10);
@@ -2852,7 +2853,8 @@ void wifiConnect()
 							int8_t selection = checkForUpdate();
 							Serial.println("OUT");
 							delay(5);
-							
+							EEPROM.writeBool(33, 0);
+							EEPROM.commit();
 							if(selection == 1)
 							{
 								EEPROM.writeBool(34, 1);
@@ -3124,7 +3126,6 @@ int8_t checkForUpdate()
 		if (httpCode == HTTP_CODE_OK) {
 			String payload = http.getString();
 			http.end();
-			mp.firmware_version = 1;
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
 			if (version > mp.firmware_version)
 			{
@@ -3245,8 +3246,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 		for (uint8_t i = 0; i < length; i++)
 			wifiDrawBox(items[i], signals[i], i, cameraY_actual);
-
-		wifiDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+			wifiDrawCursor(cursor, cameraY_actual);
 
 		mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
 		mp.display.setTextFont(2);
@@ -3254,14 +3255,19 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print("Networks");
+		mp.display.print("Choose a network");
+		mp.display.fillRect(0, 111, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(2,112);
+		mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
+		mp.display.printCenter("Cancel            Select");
 		if(mp.released(BTN_FUN_RIGHT))
 		{
 			while(!mp.update());
 			mp.playNotificationSound(cursor);
 		}
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
 			while(!mp.update());
 			break;
 		}
@@ -3299,7 +3305,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 			}
 
 		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
 			while(!mp.update());
 			return -1;

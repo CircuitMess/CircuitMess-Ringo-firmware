@@ -41,6 +41,7 @@ void messagesApp() {
 
 	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
+	file.close();
 	jarr.prettyPrintTo(Serial);
 	if(!jarr.success())
 	{
@@ -108,7 +109,120 @@ void messagesApp() {
 					while(!mp.update());
 				}
 				else
-					composeSMS(&jarr);
+				{
+					bool readyForCall = 0;
+					uint32_t timeoutMillis = millis(); 
+					while(Serial1.available())
+						Serial1.read();
+					while(!readyForCall && millis() - timeoutMillis < 10000)
+					{
+						Serial1.println("AT+CCALR?");
+						String input = mp.waitForOK();
+
+						uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
+						readyForCall = input.substring(helper + 1, helper + 2).toInt();
+						Serial.println(input);
+						if(!readyForCall)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Registering to network"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Please wait..."));
+							while(!mp.update());
+							delay(1000);
+						}
+					}
+					mp.networkRegistered = readyForCall;
+					if(readyForCall)
+					{
+						if(mp.signalStrength == 99)
+						{
+							Serial1.println("AT+CSQ");
+							String buffer = "";
+							uint32_t current = millis();
+							while(buffer.indexOf("+CSQ:") == -1 && millis() - current >= 2000)
+								buffer = Serial1.readString();
+							if(buffer.indexOf("+CSQ:") != -1)
+								mp.signalStrength = buffer.substring(buffer.indexOf(" ", buffer.indexOf("+CSQ:")) + 1, buffer.indexOf(",", buffer.indexOf(" ", buffer.indexOf("+CSQ:")))).toInt();
+							if(mp.signalStrength == 99)
+							{
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setTextColor(TFT_WHITE);
+								mp.display.setTextSize(1);
+								mp.display.setCursor(0, mp.display.height()/2 - 20);
+								mp.display.setTextFont(2);
+								mp.display.printCenter(F("No signal!"));
+								mp.display.setCursor(0, mp.display.height()/2);
+								mp.display.printCenter(F("Check your antenna"));
+								uint32_t tempMillis = millis();
+								while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								while(!mp.update());
+							}
+							else
+							{
+								composeSMS(&jarr);
+								File file = SD.open("/.core/messages.json", "r");
+								jb.clear();
+								JsonArray& jarr = jb.parseArray(file);
+								file.close();
+								if(!jarr.success())
+								{
+									Serial.println("Error");
+									mp.display.fillScreen(TFT_BLACK);
+									mp.display.setCursor(0, mp.display.height()/2 - 16);
+									mp.display.setTextFont(2);
+									mp.display.printCenter("Error loading data");
+
+									while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+										mp.update();
+									while(!mp.update());
+								}
+								mp.newMessage = 0;
+							}
+						}
+						else
+						{
+							composeSMS(&jarr);
+							File file = SD.open("/.core/messages.json", "r");
+							jb.clear();
+							JsonArray& jarr = jb.parseArray(file);
+							file.close();
+							if(!jarr.success())
+							{
+								Serial.println("Error");
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setCursor(0, mp.display.height()/2 - 16);
+								mp.display.setTextFont(2);
+								mp.display.printCenter("Error loading data");
+
+								while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+									mp.update();
+								while(!mp.update());
+							}
+							mp.newMessage = 0;
+						}
+					}
+					else
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setTextColor(TFT_WHITE);
+						mp.display.setTextSize(1);
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("Network unavailable"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Try again later"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+							mp.update();
+						while(!mp.update());
+					}
+				}
 				menuChoice = -1;
 			}
 
@@ -117,6 +231,7 @@ void messagesApp() {
 				File file = SD.open("/.core/messages.json", "r");
 				jb.clear();
 				JsonArray& jarr = jb.parseArray(file);
+				file.close();
 				if(!jarr.success())
 				{
 					Serial.println("Error");
@@ -295,8 +410,24 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 		mp.display.drawBitmap(3, y + 6, outgoingMessageIcon, TFT_GREEN, 2);
 	
 	mp.display.setTextColor(TFT_WHITE);
-	mp.display.setCursor(4, y + 2);
-	mp.display.drawString(contact, 22, y-1);
+	mp.display.setCursor(22, y - 1);
+	
+	if(contact.length() > 13)
+	{
+		for(int i = 0; i < contact.length(); i++)
+		{
+			mp.display.print(contact[i]);
+			if(mp.display.getCursorX() > 105)
+			{
+				mp.display.print("...");
+				break;
+			}
+		}
+	}
+	else
+		mp.display.print(contact);
+
+	// mp.display.drawString(contact, 22, y-1);
 	mp.display.drawString(content, 22, y + 13);
 
 	mp.display.setTextFont(1);
@@ -330,20 +461,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	for(int i = 0; i < length; i++)
 		sortingArray[i] = i;
 	uint16_t min;
-	for(int i = 0; i < length - 1; i++)
-	{
-		min = i;
-		for(int j = i + 1; j < length ; j++)
-			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>())
-				min = j;
-		uint16_t temp = sortingArray[min];
-		sortingArray[min] = sortingArray[i];
-		sortingArray[i] = temp;
-	}
-	Serial.print("Prevcursor: ");
-	Serial.println(prevCursor);
-	Serial.println(length);
-	for(int i = 0; i < length; i++)
+	for(int i = 0; i < length; i++) // sorting by unread
 	{
 		if(!messages[sortingArray[i]]["read"].as<bool>())
 		{
@@ -361,17 +479,33 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if(sortingArray[i] == prevCursor)
 			cursor = i + 1;
 	}
-	for(int i = 0; i < length; i++)
+	for(int i = 0; i < length - 1; i++) //sorting all by latest
 	{
 		min = i;
 		for(int j = i + 1; j < length ; j++)
 			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
-			&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+			&& ((!messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+			|| (messages[sortingArray[i]]["read"].as<bool>() && messages[sortingArray[j]]["read"].as<bool>())))
 				min = j;
 		uint16_t temp = sortingArray[min];
 		sortingArray[min] = sortingArray[i];
 		sortingArray[i] = temp;
 	}
+	Serial.print("Prevcursor: ");
+	Serial.println(prevCursor);
+	Serial.println(length);
+	
+	// for(int i = 0; i < length; i++) // sorting unread by latest
+	// {
+	// 	min = i;
+	// 	for(int j = i + 1; j < length ; j++)
+	// 		if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
+	// 		&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+	// 			min = j;
+	// 	uint16_t temp = sortingArray[min];
+	// 	sortingArray[min] = sortingArray[i];
+	// 	sortingArray[i] = temp;
+	// }
 	Serial.print("Cursor: ");
 	Serial.println(cursor);
 	// messages.prettyPrintTo(Serial);
@@ -647,11 +781,13 @@ void composeSMS(JsonArray *messages)
 			if (blinkState == 1)
                 mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
 		}
-		if (mp.buttons.released(BTN_UP) && cursor == 1) { //BUTTON UP
+		if ((mp.buttons.released(BTN_UP) || mp.buttons.released(BTN_A)) && cursor) { //BUTTON UP
+			mp.buttons.update();
 			cursor = 0;
 		}
 
-		if (mp.buttons.released(BTN_DOWN) && cursor == 0) { //BUTTON DOWN
+		if ((mp.buttons.released(BTN_DOWN) || mp.buttons.released(BTN_A)) && !cursor) { //BUTTON DOWN
+			mp.buttons.update();
 			cursor = 1;
 		}
 
@@ -660,7 +796,7 @@ void composeSMS(JsonArray *messages)
 			while(!mp.update());
 			break;
 		}
-		if (mp.buttons.released(BTN_A) && contact != "" && content != "") // SEND SMS
+		if (mp.buttons.released(BTN_FUN_RIGHT) && contact.length() > 1 && content != "") // SEND SMS
 		{
 			mp.display.fillScreen(TFT_BLACK);
             mp.display.setCursor(0, mp.display.height()/2 - 16);
@@ -723,12 +859,19 @@ void composeSMS(JsonArray *messages)
         mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.print("To: ");
 		mp.display.print(contact);
+		mp.display.fillRect(0,110, 160, 18, TFT_DARKGREY);
+		mp.display.drawFastHLine(0,111, 160, TFT_WHITE);
+		mp.display.setCursor(4, 112);
+		mp.display.print("Erase");
+		mp.display.setCursor(125,112);
+		mp.display.print("Send");
 		mp.update();
 		if(mp.newMessage)
 		{
 			File file = SD.open("/.core/messages.json", "r");
 			jb.clear();
 			JsonArray& jarr = jb.parseArray(file);
+			file.close();
 			if(!jarr.success())
 			{
 				Serial.println("Error");
@@ -743,7 +886,6 @@ void composeSMS(JsonArray *messages)
 			}
 			mp.newMessage = 0;
 		}
-
 	}
 }
 

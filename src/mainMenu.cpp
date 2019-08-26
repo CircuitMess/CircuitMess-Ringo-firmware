@@ -118,7 +118,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	uint32_t elapsedMillis2 = millis();
 	bool newScreen = 1;
 	mp.display.fillScreen(TFT_BLACK);
-	while(!mp.update());
+	Serial.println(mp.buttons.timeHeld(BTN_A));
+	// while(!mp.update());
 	while (1)
 	{
 		mp.display.fillRect(0,0,mp.display.width(), 14, TFT_BLACK);
@@ -223,7 +224,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		///////////////////////////////////////
 		//////Checking for button input////////
 		///////////////////////////////////////
-		if (mp.buttons.released(BTN_A)) //CONFIRM
+		if (mp.buttons.released(BTN_A) ) //CONFIRM
 		{
 			// mp.osc->note(75, 0.05);
 			// mp.osc->play();

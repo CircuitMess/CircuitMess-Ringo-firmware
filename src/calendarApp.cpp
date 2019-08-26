@@ -24,6 +24,8 @@ void calendarApp()
 		//printing the month
 		{
 			mp.display.setTextFont(2);
+			mp.display.setTextSize(1);
+			mp.display.setTextColor(TFT_BLACK);
 			mp.display.fillScreen(TFT_WHITE);
 			mp.display.setTextColor(TFT_BLACK);
 			mp.display.drawString("Mo Tu We Th Fr Sa Su", 5,9 - offset); 
@@ -130,7 +132,7 @@ void calendarApp()
 				mp.display.print(week6.c_str());
 				week6 = "";
 			}
-			mp.display.setCursor(0, 112);
+			mp.display.setCursor(0, 110);
 			mp.display.printCenter(String(monthNames.substring((month - 1) * 3, month * 3)) + " " + year);
 			mp.display.fillRect(2 + 111, 18, 44, 90, TFT_LIGHTGREY);
 			for (int y = 0; y < 5;y++)
