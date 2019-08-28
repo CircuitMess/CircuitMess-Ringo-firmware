@@ -2142,12 +2142,26 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
-	mp.pduDecode("0791839515001000040C9183953577164500009180906190928006325ACD76C301");
+	// mp.pduDecode("069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202");
+	PDU pdu = PDU("069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202");
+	if(pdu.parse())
+	{
+		Serial.printf("PDU: %s\n", pdu.getPDU());
+		Serial.printf("SMSC: %s\n", pdu.getSMSC());
+		Serial.printf("Sender: %s\n", pdu.getNumber());
+		Serial.printf("Sender Number Type: %s\n", pdu.getNumberType());
+		Serial.printf("Date: %s\n", pdu.getDate());
+		Serial.printf("Time: %s\n", pdu.getTime());
+		Serial.printf("UDH Type: %s\n", pdu.getUDHType());
+		Serial.printf("UDH Data: %s\n", pdu.getUDHData());
+		Serial.printf("Message: %s\n", pdu.getMessage());
+	}
 	mp.shutdownPopupEnable(1);
+	//069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202
 	// startupWizard();
 	// controlTry();
 	// settingsApp();
-	mp.lockscreen();
+	// mp.lockscreen();
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
 }
