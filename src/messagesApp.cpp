@@ -110,24 +110,118 @@ void messagesApp() {
 				}
 				else
 				{
-					composeSMS(&jarr);
-					File file = SD.open("/.core/messages.json", "r");
-					jb.clear();
-					JsonArray& jarr = jb.parseArray(file);
-					file.close();
-					if(!jarr.success())
+					bool readyForCall = 0;
+					uint32_t timeoutMillis = millis(); 
+					while(Serial1.available())
+						Serial1.read();
+					while(!readyForCall && millis() - timeoutMillis < 10000)
 					{
-						Serial.println("Error");
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setCursor(0, mp.display.height()/2 - 16);
-						mp.display.setTextFont(2);
-						mp.display.printCenter("Error loading data");
+						Serial1.println("AT+CCALR?");
+						String input = mp.waitForOK();
 
-						while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+						uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
+						readyForCall = input.substring(helper + 1, helper + 2).toInt();
+						Serial.println(input);
+						if(!readyForCall)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Registering to network"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Please wait..."));
+							while(!mp.update());
+							delay(1000);
+						}
+					}
+					mp.networkRegistered = readyForCall;
+					if(readyForCall)
+					{
+						if(mp.signalStrength == 99)
+						{
+							Serial1.println("AT+CSQ");
+							String buffer = "";
+							uint32_t current = millis();
+							while(buffer.indexOf("+CSQ:") == -1 && millis() - current >= 2000)
+								buffer = Serial1.readString();
+							if(buffer.indexOf("+CSQ:") != -1)
+								mp.signalStrength = buffer.substring(buffer.indexOf(" ", buffer.indexOf("+CSQ:")) + 1, buffer.indexOf(",", buffer.indexOf(" ", buffer.indexOf("+CSQ:")))).toInt();
+							if(mp.signalStrength == 99)
+							{
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setTextColor(TFT_WHITE);
+								mp.display.setTextSize(1);
+								mp.display.setCursor(0, mp.display.height()/2 - 20);
+								mp.display.setTextFont(2);
+								mp.display.printCenter(F("No signal!"));
+								mp.display.setCursor(0, mp.display.height()/2);
+								mp.display.printCenter(F("Check your antenna"));
+								uint32_t tempMillis = millis();
+								while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+									mp.update();
+								while(!mp.update());
+							}
+							else
+							{
+								composeSMS(&jarr);
+								File file = SD.open("/.core/messages.json", "r");
+								jb.clear();
+								JsonArray& jarr = jb.parseArray(file);
+								file.close();
+								if(!jarr.success())
+								{
+									Serial.println("Error");
+									mp.display.fillScreen(TFT_BLACK);
+									mp.display.setCursor(0, mp.display.height()/2 - 16);
+									mp.display.setTextFont(2);
+									mp.display.printCenter("Error loading data");
+
+									while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+										mp.update();
+									while(!mp.update());
+								}
+								mp.newMessage = 0;
+							}
+						}
+						else
+						{
+							composeSMS(&jarr);
+							File file = SD.open("/.core/messages.json", "r");
+							jb.clear();
+							JsonArray& jarr = jb.parseArray(file);
+							file.close();
+							if(!jarr.success())
+							{
+								Serial.println("Error");
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setCursor(0, mp.display.height()/2 - 16);
+								mp.display.setTextFont(2);
+								mp.display.printCenter("Error loading data");
+
+								while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+									mp.update();
+								while(!mp.update());
+							}
+							mp.newMessage = 0;
+						}
+					}
+					else
+					{
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setTextColor(TFT_WHITE);
+						mp.display.setTextSize(1);
+						mp.display.setCursor(0, mp.display.height()/2 - 20);
+						mp.display.setTextFont(2);
+						mp.display.printCenter(F("Network unavailable"));
+						mp.display.setCursor(0, mp.display.height()/2);
+						mp.display.printCenter(F("Try again later"));
+						uint32_t tempMillis = millis();
+						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 							mp.update();
 						while(!mp.update());
 					}
-					mp.newMessage = 0;
 				}
 				menuChoice = -1;
 			}

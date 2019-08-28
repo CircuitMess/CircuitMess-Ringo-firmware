@@ -352,8 +352,8 @@ void callNumber(String number) {
 	bool firstPass = 1;
 	uint32_t timeOffset = 0;
 	uint8_t scale;
-	unsigned int tmp_time = 0;
 	String temp;
+	unsigned int tmp_time = 0;
 	if(mp.resolutionMode)
 	{
 		scale = 1;
@@ -370,7 +370,7 @@ void callNumber(String number) {
 		mp.display.printCenter(number);
 	else
 		mp.display.printCenter(contact);
-
+	uint8_t callState = 1;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -391,52 +391,27 @@ void callNumber(String number) {
 		delay(5);
 		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
 			buffer = "";
-		if (localBuffer.indexOf("CLCC:") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
+		if (localBuffer.indexOf("+CLCC: 1") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
-			if (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
+			if (localBuffer.indexOf("1,0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 			{
-				if (firstPass == 1)
-				{
-					timeOffset = millis();
-					firstPass = 0;
-				}
-
-				temp = "";
-				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
-					temp += (int((millis() - timeOffset) / 1000) / 60) ;
-				else
-				{
-					temp += "0";
-					temp += (int((millis() - timeOffset) / 1000) / 60);
-				}
-				temp += ":";
-				if (int((millis() - timeOffset) / 1000) % 60 > 9)
-					temp += (int((millis() - timeOffset) / 1000) % 60);
-				else
-				{
-					temp += "0";
-					temp += (int((millis() - timeOffset) / 1000) % 60);
-				}
-				mp.display.setCursor(9, 9);
-				mp.display.printCenter(temp);
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
+				callState = 2;
+				
 			}
 
-			else if (localBuffer.indexOf(",0,3,0") != -1)
+			else if (localBuffer.indexOf("1,0,3,0,0") != -1)
 			{
-				mp.display.setCursor(25, 9);
-				mp.display.printCenter("Ringing...");
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+				callState = 0;
+				
 			}
 
-			else if (localBuffer.indexOf(",0,2,0") != -1)
+			else if (localBuffer.indexOf("1,0,2,0,0") != -1)
 			{
-				mp.display.setCursor(25, 9);
-				mp.display.printCenter("Calling...");
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+				callState = 1;
+
 			}
 
-			else if (localBuffer.indexOf(",0,6,0") != -1)
+			else if (localBuffer.indexOf("1,0,6,0,0") != -1)
 			{
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
@@ -489,17 +464,7 @@ void callNumber(String number) {
 				break;
 			}
 			
-			mp.display.setCursor(11, 28);
-			if(contact == "")
-				mp.display.printCenter(number);
-			else
-				mp.display.printCenter(contact);
-			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-			mp.display.setCursor(5, 109);
-			mp.display.print("Mic gain: ");
-			mp.display.print(mp.micGain);
-			mp.display.setCursor(100, 109);
-			mp.display.print("Hang up");
+			
 
 		}
 
@@ -541,20 +506,7 @@ void callNumber(String number) {
 			}
 			else
 			{
-				mp.display.setCursor(25, 9);
-				mp.display.printCenter("Calling...");
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
-				if(mp.resolutionMode)
-					mp.display.setCursor(11, 20);
-				else
-					mp.display.setCursor(11, 28);
-				if(contact == "")
-					mp.display.printCenter(number);
-				else
-					mp.display.printCenter(contact);
-				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				mp.display.setCursor(105, 109);
-				mp.display.print("Hang up");
+				callState = 1;
 			}
 		}
 		if (mp.buttons.pressed(BTN_FUN_RIGHT)) // hanging up
@@ -600,7 +552,7 @@ void callNumber(String number) {
 			Serial.println("B PRESSED");
 			Serial1.println("ATH");
 			uint32_t curr_millis = millis();
-			while (readSerial().indexOf(",0,6,") == -1 && millis() - curr_millis < 2000)	{
+			while (readSerial().indexOf("1,0,6,0,0") == -1 && millis() - curr_millis < 2000)	{
 				Serial1.println("ATH");
 			}
 			if(mp.SDinsertedFlag)
@@ -608,8 +560,8 @@ void callNumber(String number) {
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && ((mp.micGain < 15 && mp.sim_module_version == 1) || (mp.micGain < 8 && mp.sim_module_version == 0))
-		&& (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		if(mp.buttons.released(BTN_UP) && ((mp.micGain < 15 && mp.sim_module_version == 1) ||
+		(mp.micGain < 8 && mp.sim_module_version == 0)) && callState == 2)
 		{
 			mp.micGain++;
 			if(mp.sim_module_version == 1)
@@ -622,7 +574,7 @@ void callNumber(String number) {
 				delay(10);
 			}
 		}
-		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && (localBuffer.indexOf(",0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1))
+		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && callState == 2)
 		{
 			mp.micGain--;
 			if(mp.sim_module_version == 1)
@@ -635,7 +587,79 @@ void callNumber(String number) {
 				delay(10);
 			}
 		}
+		switch (callState)
+		{
+			case 0:
+				mp.display.setCursor(25, 9);
+				mp.display.printCenter("Ringing...");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+				mp.display.setCursor(11, 28);
+				if(contact == "")
+					mp.display.printCenter(number);
+				else
+					mp.display.printCenter(contact);
+				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+				mp.display.setCursor(5, 109);
+				mp.display.print("Mic gain: ");
+				mp.display.print(mp.micGain);
+				mp.display.setCursor(100, 109);
+				mp.display.print("Hang up");
+				break;
+			case 1:
+				mp.display.setCursor(25, 9);
+				mp.display.printCenter("Calling...");
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
+				mp.display.setCursor(11, 28);
+				if(contact == "")
+					mp.display.printCenter(number);
+				else
+					mp.display.printCenter(contact);
+				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+				mp.display.setCursor(5, 109);
+				mp.display.print("Mic gain: ");
+				mp.display.print(mp.micGain);
+				mp.display.setCursor(100, 109);
+				mp.display.print("Hang up");
+				break;
+			case 2:
+				if (firstPass == 1)
+				{
+					timeOffset = millis();
+					firstPass = 0;
+				}
 
+				String temp = "";
+				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
+					temp += (int((millis() - timeOffset) / 1000) / 60) ;
+				else
+				{
+					temp += "0";
+					temp += (int((millis() - timeOffset) / 1000) / 60);
+				}
+				temp += ":";
+				if (int((millis() - timeOffset) / 1000) % 60 > 9)
+					temp += (int((millis() - timeOffset) / 1000) % 60);
+				else
+				{
+					temp += "0";
+					temp += (int((millis() - timeOffset) / 1000) % 60);
+				}
+				mp.display.setCursor(9, 9);
+				mp.display.printCenter(temp);
+				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
+				mp.display.setCursor(11, 28);
+				if(contact == "")
+					mp.display.printCenter(number);
+				else
+					mp.display.printCenter(contact);
+				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
+				mp.display.setCursor(5, 109);
+				mp.display.print("Mic gain: ");
+				mp.display.print(mp.micGain);
+				mp.display.setCursor(100, 109);
+				mp.display.print("Hang up");
+				break;
+		}
 		for(int i = 0; i < 12;i++)
 		{
 			

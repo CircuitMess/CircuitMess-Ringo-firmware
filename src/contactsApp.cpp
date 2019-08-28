@@ -300,7 +300,6 @@ uint8_t newContactSD(String *name, String *number)
 			mp.exitedLockscreen = true;
 			mp.lockscreen(); // Robert
 		}
-
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
