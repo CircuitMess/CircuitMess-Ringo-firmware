@@ -1,8 +1,8 @@
 
 
-# Circuitmess Ringo firmware 
+# CircuitMess Ringo firmware 
 
-A repository for the core firmware that comes preloaded on every Circuitmess Ringo.
+A repository for the core firmware that comes pre-loaded on every CircuitMess Ringo.
 
 Functionalities that are currently available:
 - home screen
@@ -12,11 +12,37 @@ Functionalities that are currently available:
 - sleep mode
 - calculator app
 - clock app
-- media app
+- media app (photos and videos)
 - settings app
 - loading other apps (.bin format) from SD card
-- WAV file playback
+- music player (.mp3 and wav)
 - basic notification sounds and ringtones
+
+Here are some examples of how the current version of the firmware looks:
+
+ ### **Home**
+ 
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_46-export.png)
+
+<br/>
+
+ ### **Main menu**
+
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_28-export.png)
+
+<br/>
+
+### **Apps**
+
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_30-export.png)
+
+### **Wi-Fi**
+
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_44-export.png)
+
+## **Settings**
+
+![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_45-export.png)
 
 #
 

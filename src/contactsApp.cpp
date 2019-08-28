@@ -1,5 +1,7 @@
 #include "contactsApp.h"
 //Contacts app
+uint8_t contactsMenuCursor = 0;
+bool helpPop;
 
 void contactsMenuDrawCursor(uint8_t i, int32_t y) {
     uint8_t offset = 19;
@@ -63,7 +65,9 @@ uint8_t deleteContactSD(String name, String number)
 		mp.display.print(name);
 		mp.display.setCursor(4, 49);
 		mp.display.print(number);
-		mp.display.setCursor(110, 110);
+		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setCursor(110, 113);
 		mp.display.print("Confirm");
 		// if (blinkState){
 		// 	mp.display.drawRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
@@ -86,6 +90,7 @@ uint8_t deleteContactSD(String name, String number)
 		}
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) // DELETE
 		{
+			while(!mp.update());
 			// Serial.println("Delete");
 			// mp.display.fillScreen(TFT_BLACK);
 			// mp.display.setTextFont(2);
@@ -108,7 +113,6 @@ void contactsAppSD(){
 		Serial.println("Override");
 		file.close();
 		jb.clear();
-		// JsonArray& jarr = jb.parseArray("[{\"name\":\"foo\", \"number\":\"099\"}]");
 		JsonArray& jarr = jb.createArray();
 		delay(10);
 		File file1 = SD.open("/.core/contacts.json", "w");
@@ -151,11 +155,12 @@ void contactsAppSD(){
 			menuChoice = contactsMenuSD(&jarr);
 
 			mp.update();
-			if (menuChoice != -2) //creating new contact
+			if (menuChoice != -2) 
 			{
-				if (menuChoice == 0)
+				if (menuChoice == 0) //creating new contact
 				{
-					String name, number;
+					String name;
+					String number = "+";
 					if(newContactSD(&name, &number))
 					{
 						JsonObject& newContact = jb.createObject();
@@ -168,31 +173,72 @@ void contactsAppSD(){
 						file.close();
 					}
 				}
-				else if(menuChoice < -2000) // editing contact
+				else if(menuChoice < -2000) // view contact
 				{
 					int id = menuChoice + 3000 - 1;
-					String name, number;
-					name = jarr[id]["name"].as<String>();
-					number = jarr[id]["number"].as<String>();
+					int8_t info = viewContact(jarr[id]);
+					if(info == -1)
+					{
+						String name, number;
+						name = jarr[id]["name"].as<String>();
+						number = jarr[id]["number"].as<String>();
 
-					if(newContactSD(&name, &number)){
-						JsonObject& newContact = jb.createObject();
-						newContact["name"] = name;
-						newContact["number"] = number;
-						jarr[id] = newContact;
-						File file = SD.open("/.core/contacts.json", "w");
-						jarr.prettyPrintTo(file);
-						jarr.prettyPrintTo(Serial);
-						file.close();
+						if(newContactSD(&name, &number)){
+							JsonObject& newContact = jb.createObject();
+							newContact["name"] = name;
+							newContact["number"] = number;
+							jarr[id] = newContact;
+							File file = SD.open("/.core/contacts.json", "w");
+							jarr.prettyPrintTo(file);
+							jarr.prettyPrintTo(Serial);
+							file.close();
+						}
 					}
-					// if(deleteContactSD(jarr[id]["name"], jarr[id]["number"])){
-					// 	jarr.remove(id);
-					// 	File file = SD.open("/.core/contacts.json", "w");
-					// 	jarr.prettyPrintTo(file);
-					// 	file.close();
-					// }
+					else if(info == 1) //call number
+					{
+						if(mp.sim_module_version == 255)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("No network board!"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Insert board and reset"));
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+								mp.update();
+							while(!mp.update());
+						}
+						else if(!mp.simInserted)
+						{
+							mp.display.setTextColor(TFT_BLACK);
+							mp.display.setTextSize(1);
+							mp.display.setTextFont(2);
+							mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+							mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+							mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+							mp.display.setCursor(47, 55);
+							mp.display.printCenter(F("SIM card missing!"));
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000)
+							{
+								mp.update();
+								if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+								{
+									while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+										mp.update();
+									break;
+								}
+							}
+							while(!mp.update());
+						}
+						else
+							callNumber(jarr[id]["number"].as<char*>());
+					}
 				}
-				else if (menuChoice < -10)
+				else if (menuChoice < -10) //deleting contact
 				{
 					int id = menuChoice + 1000 - 1;
 					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"]))
@@ -201,70 +247,37 @@ void contactsAppSD(){
 						File file = SD.open("/.core/contacts.json", "w");
 						jarr.prettyPrintTo(file);
 						file.close();
+						contactsMenuCursor = 0;
 					}
 				}
 				else
 				{
-					if(mp.sim_module_version == 255)
-					{
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setTextColor(TFT_WHITE);
-						mp.display.setTextSize(1);
-						mp.display.setCursor(0, mp.display.height()/2 - 20);
-						mp.display.setTextFont(2);
-						mp.display.printCenter(F("No network board!"));
-						mp.display.setCursor(0, mp.display.height()/2);
-						mp.display.printCenter(F("Insert board and reset"));
-						uint32_t tempMillis = millis();
-						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
-						while(!mp.update());
-					}
-					else if(!mp.simInserted)
-					{
-						mp.display.setTextColor(TFT_BLACK);
-						mp.display.setTextSize(1);
-						mp.display.setTextFont(2);
-						mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-						mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-						mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-						mp.display.setCursor(47, 55);
-						mp.display.printCenter(F("SIM card missing!"));
-						uint32_t tempMillis = millis();
-						while(millis() < tempMillis + 2000)
-						{
-							mp.update();
-							if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-							{
-								while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-									mp.update();
-								break;
-							}
-						}
-						while(!mp.update());
-					}
-					else
-						callNumber(jarr[menuChoice - 1]["number"].as<char*>());
+					
 					while(!mp.update());
 				}
 			}
 			else
+			{
+				contactsMenuCursor = 0;
 				break;
+			}
 		}
 	}
 }
 
+
 uint8_t newContactSD(String *name, String *number)
 {
 	mp.textInput("");
-	mp.textPointer = 0;
 	String content = *name;
 	String contact = *number;
 	String prevContent = "";
+	mp.textPointer = name->length();
 	char key = NO_KEY;
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
+	// bool plusSign = 0;
 	while (1) {
 
 		mp.display.fillScreen(TFT_BLACK);
@@ -274,6 +287,20 @@ uint8_t newContactSD(String *name, String *number)
 		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
+		mp.display.fillRect(0,60,160,50, TFT_DARKGREY);
+		mp.display.setCursor(4, 60);
+		mp.display.print("Enter your country code");
+		mp.display.setCursor(4, 76);
+		mp.display.printCenter("(example: +001 for USA)");
+		mp.display.setCursor(4, 92);
+		mp.display.printCenter("Press A to save");
+
+
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
+
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
@@ -282,7 +309,16 @@ uint8_t newContactSD(String *name, String *number)
 		if (cursor == 0) //inputting the contact number
 		{
 			key = mp.buttons.getKey();
-			if (mp.buttons.released(BTN_FUN_LEFT))
+			// if(mp.buttons.held(BTN_0, 20))
+			// {
+			// 	contact+="+";
+			// 	plusSign = 1;
+			// }
+			// if(key == '0' && plusSign)
+				// key = NO_KEY;
+			// if(plusSign && mp.buttons.released(BTN_0))
+				// plusSign = 0;
+			if (mp.buttons.released(BTN_FUN_LEFT) && contact.length() > 1)
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 14)
 				contact += key;
@@ -309,10 +345,10 @@ uint8_t newContactSD(String *name, String *number)
 			mp.display.setTextColor(TFT_WHITE);
 			mp.display.setCursor(2*2, 38);
 			mp.display.print("Num: ");
-			if (contact == "")
+			if (contact == "+")
 			{
 				mp.display.setTextColor(TFT_LIGHTGREY);
-				mp.display.print(F("xxxxxxxx"));
+				mp.display.print(F("+XXXXXXXXXXXX"));
 				mp.display.setTextColor(TFT_WHITE);
 			}
 			else
@@ -333,8 +369,11 @@ uint8_t newContactSD(String *name, String *number)
 				mp.display.drawFastVLine(mp.display.getCursorX() + 1, mp.display.getCursorY() + 3, 11, TFT_WHITE);
 		}
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(125, 110);
-		mp.display.print("Save");
+		mp.display.setCursor(130, 110);
+		mp.display.print("Help");
+/* 		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(90, 110);
+		mp.display.print("Help"); */
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setCursor(4, 110);
 		mp.display.print("Erase");
@@ -352,15 +391,25 @@ uint8_t newContactSD(String *name, String *number)
 			while(!mp.update());
 			cursor = 1;
 		}
-
+		if(mp.buttons.released(BTN_FUN_RIGHT)){
+			helpPop = !helpPop;
+			mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);	
+			while(!mp.update());
+		}
+		while (helpPop) {
+			if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B)){
+				helpPop = !helpPop;
+			}
+			mp.update();
+		}
 		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
 			while(!mp.update());
 			break;
 		}
-		if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) // SAVE CONTACT
+		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
 			while(!mp.update());
-			if(contact != "" && content != "")
+			if(contact != "+" && content != "")
 			{
 				*name = content;
 				*number = contact;
@@ -373,7 +422,6 @@ uint8_t newContactSD(String *name, String *number)
 }
 
 int contactsMenuSD(JsonArray *contacts){
-	uint8_t cursor = 0;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t length = contacts->size();
@@ -381,6 +429,9 @@ int contactsMenuSD(JsonArray *contacts){
 	uint8_t boxHeight = 28;
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
+	if (length > 2 && contactsMenuCursor > 2) {
+		cameraY = -(contactsMenuCursor - 1) * (boxHeight + 1) + offset + 11 ;
+	}
 	while (1) {
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
@@ -402,10 +453,10 @@ int contactsMenuSD(JsonArray *contacts){
 		}
 		if(blinkState)
 		{
-			if(cursor == 0)
-				contactsMenuNewBoxCursor(cursor, cameraY_actual);
+			if(contactsMenuCursor == 0)
+				contactsMenuNewBoxCursor(contactsMenuCursor, cameraY_actual);
 			else
-				contactsMenuDrawCursor(cursor, cameraY_actual);
+				contactsMenuDrawCursor(contactsMenuCursor, cameraY_actual);
 		}
 
 		// last draw the top entry thing
@@ -416,36 +467,42 @@ int contactsMenuSD(JsonArray *contacts){
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
-		mp.display.fillRect(0, 103, 160, 28, TFT_BLACK);
-		mp.display.setCursor(110, 110);
-		mp.display.printCenter("Delete               Edit");
+		mp.display.fillRect(0, 104, 160, 28, TFT_BLACK);
+		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setCursor(110, 113);
+		mp.display.printCenter("Delete               View");
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
+		if (mp.buttons.released(BTN_A) && contactsMenuCursor == 0) {   //BUTTON CONFIRM
 			while(!mp.update());// Exit when pressed
 			break;
 		}
-		if (mp.buttons.released(BTN_FUN_LEFT) && cursor != 0) {
+		if (mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor != 0) {
 			while(!mp.update()); // Delete
-			return -1000 + cursor;
+			return -1000 + contactsMenuCursor;
 		}
-		if (mp.buttons.released(BTN_FUN_RIGHT) && cursor != 0) {
-			while(!mp.update()); // Edit contact
-			return -3000 + cursor;
+		if ((mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) && contactsMenuCursor != 0) {
+			while(!mp.update()); // View contact
+			return -3000 + contactsMenuCursor;
 		}
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
-			if (cursor == 0) {
-				cursor = length;
+			if (contactsMenuCursor == 0) {
+				contactsMenuCursor = length;
 				if (length > 2) {
-				cameraY = -(cursor - 2) * (boxHeight+1);
+				cameraY = -(contactsMenuCursor - 2) * (boxHeight+1);
 				}
 			}
 			else {
-				cursor--;
-				if (cursor > 0 && (cursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
+				contactsMenuCursor--;
+				if (contactsMenuCursor > 0 && (contactsMenuCursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
 				cameraY += (boxHeight+1);
 				}
 			}
@@ -456,12 +513,12 @@ int contactsMenuSD(JsonArray *contacts){
 			blinkMillis = millis();
 			while(!mp.update());
 
-			cursor++;
-			if ((cursor * (boxHeight+1) + cameraY + offset) > 48) {
+			contactsMenuCursor++;
+			if ((contactsMenuCursor * (boxHeight+1) + cameraY + offset) > 80) {
 				cameraY -= (boxHeight+1);
 			}
-			if (cursor >= length + 1) {
-				cursor = 0;
+			if (contactsMenuCursor >= length + 1) {
+				contactsMenuCursor = 0;
 				cameraY = 0;
 			}
 		}
@@ -472,7 +529,7 @@ int contactsMenuSD(JsonArray *contacts){
 
 		mp.update();
 	}
-	return cursor;
+	return contactsMenuCursor;
 }
 
 void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y) {
@@ -502,4 +559,70 @@ String readAllContacts() {
 	}
 	else return "";
 }
+int8_t viewContact(JsonObject &contact)
+{
+	while (1)
+	{
+		mp.display.fillScreen(TFT_BLACK);
+        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+        mp.display.setTextFont(2);
+        mp.display.setCursor(0,-2);
+        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Contacts");
 
+		// if (millis() - elapsedMillis >= multi_tap_threshold) {
+		// elapsedMillis = millis();
+		// blinkState = !blinkState;
+		// }
+		mp.display.setCursor(2, 18);
+		mp.display.print("Name:");
+		mp.display.setCursor(4, 34);
+		mp.display.print(contact["name"].as<char*>());
+		mp.display.setCursor(4, 54);
+		mp.display.print("Number:");
+		mp.display.setCursor(2, 70);
+		mp.display.print(contact["number"].as<char*>());
+		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
+		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setCursor(110, 113);
+		mp.display.printCenter("Edit                 Call");
+		// if (blinkState){
+		// 	mp.display.drawRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
+		// 	mp.display.setTextColor(TFT_RED);
+		// 	mp.display.setCursor(28*2, 103);
+		// 	mp.display.printCenter("DELETE");
+		// }
+		// else {
+		// 	mp.display.fillRect(mp.display.width() / 2 - 29, 102, 30*2, 9*2, TFT_RED);
+		// 	mp.display.setTextColor(TFT_WHITE);
+		// 	mp.display.setCursor(28*2, 103);
+		// 	mp.display.print("DELETE");
+		// }
+
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		{
+			Serial.println("Go back");
+			while(!mp.update());
+			break;
+		}
+		if (mp.buttons.released(BTN_FUN_RIGHT)) // call
+		{
+			while(!mp.update());
+			// Serial.println("Delete");
+			// mp.display.fillScreen(TFT_BLACK);
+			// mp.display.setTextFont(2);
+			// mp.display.setCursor(34, mp.display.height()/2 -16);
+			// mp.display.printCenter("Deleting contact...");
+			// mp.update();
+			return 1;
+		}
+		if(mp.buttons.released(BTN_FUN_LEFT)) //edit
+		{
+			while(!mp.update());
+			return -1;
+		}
+		mp.update();
+	}
+	return 0;
+}

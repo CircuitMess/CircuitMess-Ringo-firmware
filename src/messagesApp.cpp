@@ -41,6 +41,7 @@ void messagesApp() {
 
 	jb.clear();
 	JsonArray& jarr = jb.parseArray(file);
+	file.close();
 	jarr.prettyPrintTo(Serial);
 	if(!jarr.success())
 	{
@@ -108,7 +109,26 @@ void messagesApp() {
 					while(!mp.update());
 				}
 				else
+				{
 					composeSMS(&jarr);
+					File file = SD.open("/.core/messages.json", "r");
+					jb.clear();
+					JsonArray& jarr = jb.parseArray(file);
+					file.close();
+					if(!jarr.success())
+					{
+						Serial.println("Error");
+						mp.display.fillScreen(TFT_BLACK);
+						mp.display.setCursor(0, mp.display.height()/2 - 16);
+						mp.display.setTextFont(2);
+						mp.display.printCenter("Error loading data");
+
+						while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
+							mp.update();
+						while(!mp.update());
+					}
+					mp.newMessage = 0;
+				}
 				menuChoice = -1;
 			}
 
@@ -117,6 +137,7 @@ void messagesApp() {
 				File file = SD.open("/.core/messages.json", "r");
 				jb.clear();
 				JsonArray& jarr = jb.parseArray(file);
+				file.close();
 				if(!jarr.success())
 				{
 					Serial.println("Error");
@@ -135,8 +156,19 @@ void messagesApp() {
 
 			else if(menuChoice > -1)
 			{
-				if(viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
-				jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>()))
+				bool helper = 0;
+				String temp = jarr[menuChoice]["contact"].as<char*>();
+				if(temp == "")
+				{
+					helper = viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["number"].as<char*>(),
+					jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>());
+				}
+				else
+				{
+					helper = viewSms(jarr[menuChoice]["text"].as<char*>(), jarr[menuChoice]["contact"].as<char*>(),
+					jarr[menuChoice]["dateTime"].as<uint32_t>(), jarr[menuChoice]["direction"].as<bool>());
+				}
+				if(helper)
 				{
 					jarr.remove(menuChoice);
 					File file = SD.open("/.core/messages.json", "w");
@@ -186,7 +218,6 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
-
 		mp.display.setCursor(1, y);
 		mp.display.print(content);
 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
@@ -284,8 +315,24 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 		mp.display.drawBitmap(3, y + 6, outgoingMessageIcon, TFT_GREEN, 2);
 	
 	mp.display.setTextColor(TFT_WHITE);
-	mp.display.setCursor(4, y + 2);
-	mp.display.drawString(contact, 22, y-1);
+	mp.display.setCursor(22, y - 1);
+	
+	if(contact.length() > 13)
+	{
+		for(int i = 0; i < contact.length(); i++)
+		{
+			mp.display.print(contact[i]);
+			if(mp.display.getCursorX() > 105)
+			{
+				mp.display.print("...");
+				break;
+			}
+		}
+	}
+	else
+		mp.display.print(contact);
+
+	// mp.display.drawString(contact, 22, y-1);
 	mp.display.drawString(content, 22, y + 13);
 
 	mp.display.setTextFont(1);
@@ -319,20 +366,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	for(int i = 0; i < length; i++)
 		sortingArray[i] = i;
 	uint16_t min;
-	for(int i = 0; i < length - 1; i++)
-	{
-		min = i;
-		for(int j = i + 1; j < length ; j++)
-			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>())
-				min = j;
-		uint16_t temp = sortingArray[min];
-		sortingArray[min] = sortingArray[i];
-		sortingArray[i] = temp;
-	}
-	Serial.print("Prevcursor: ");
-	Serial.println(prevCursor);
-	Serial.println(length);
-	for(int i = 0; i < length; i++)
+	for(int i = 0; i < length; i++) // sorting by unread
 	{
 		if(!messages[sortingArray[i]]["read"].as<bool>())
 		{
@@ -350,17 +384,33 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if(sortingArray[i] == prevCursor)
 			cursor = i + 1;
 	}
-	for(int i = 0; i < length; i++)
+	for(int i = 0; i < length - 1; i++) //sorting all by latest
 	{
 		min = i;
 		for(int j = i + 1; j < length ; j++)
 			if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
-			&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+			&& ((!messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+			|| (messages[sortingArray[i]]["read"].as<bool>() && messages[sortingArray[j]]["read"].as<bool>())))
 				min = j;
 		uint16_t temp = sortingArray[min];
 		sortingArray[min] = sortingArray[i];
 		sortingArray[i] = temp;
 	}
+	Serial.print("Prevcursor: ");
+	Serial.println(prevCursor);
+	Serial.println(length);
+	
+	// for(int i = 0; i < length; i++) // sorting unread by latest
+	// {
+	// 	min = i;
+	// 	for(int j = i + 1; j < length ; j++)
+	// 		if(messages[sortingArray[j]]["dateTime"].as<uint32_t>() > messages[sortingArray[min]]["dateTime"].as<uint32_t>()
+	// 		&& !messages[sortingArray[i]]["read"].as<bool>() && !messages[sortingArray[j]]["read"].as<bool>())
+	// 			min = j;
+	// 	uint16_t temp = sortingArray[min];
+	// 	sortingArray[min] = sortingArray[i];
+	// 	sortingArray[i] = temp;
+	// }
 	Serial.print("Cursor: ");
 	Serial.println(cursor);
 	// messages.prettyPrintTo(Serial);
@@ -392,9 +442,13 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		{
 			JsonObject& elem = messages[sortingArray[i]];
 			DateTime date = DateTime(elem["dateTime"].as<uint32_t>());
-			
-			smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
-			elem["read"].as<bool>(), i+1, cameraY_actual);
+			String temp = elem["contact"].as<char*>();
+			if(temp == "")
+				smsMenuDrawBox(elem["number"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
+				elem["read"].as<bool>(), i+1, cameraY_actual);
+			else
+				smsMenuDrawBox(elem["contact"].as<char*>(), date, elem["text"].as<char*>(), elem["direction"].as<bool>(),
+				elem["read"].as<bool>(), i+1, cameraY_actual);
 		}
 		if(millis() - blinkMillis >= 300)
 		{
@@ -425,8 +479,12 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			while(!mp.update());// Exit when pressed
@@ -541,13 +599,15 @@ void composeSMS(JsonArray *messages)
 	mp.textPointer = 0;
     y = 16; //beginning point
 	String content = "";
-	String contact = "";
+	String contact = "+";
 	String prevContent = "";
 	char key = NO_KEY;
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	uint8_t scale = 2;
+	bool plusSign = 0;
+	boolean helpPop;
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
@@ -593,6 +653,15 @@ void composeSMS(JsonArray *messages)
 		if (cursor == 0) //inputting the contact number
 		{
 			key = mp.buttons.getKey();
+			if(mp.buttons.held(BTN_0, 20))
+			{
+				contact+="+";
+				plusSign = 1;
+			}
+			if(key == '0' && plusSign)
+				key = NO_KEY;
+			if(plusSign && mp.buttons.released(BTN_0))
+				plusSign = 0;
 			if (mp.buttons.released(BTN_FUN_LEFT))
 				contact.remove(contact.length() - 1);
 			if (key != NO_KEY && isdigit(key) && contact.length() < 16)
@@ -604,6 +673,8 @@ void composeSMS(JsonArray *messages)
 			{
 				mp.display.setTextColor(TFT_LIGHTGREY);
 				mp.display.print(F("Compose..."));
+				mp.display.setCursor(1*scale+1, y+14);
+				mp.display.print(F("Press A to send"));
 				mp.display.setTextColor(TFT_WHITE);
 			}
 			else
@@ -622,11 +693,13 @@ void composeSMS(JsonArray *messages)
 			if (blinkState == 1)
                 mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
 		}
-		if (mp.buttons.released(BTN_UP) && cursor == 1) { //BUTTON UP
+		if ((mp.buttons.released(BTN_UP)) && cursor) { //BUTTON UP
+			mp.buttons.update();
 			cursor = 0;
 		}
 
-		if (mp.buttons.released(BTN_DOWN) && cursor == 0) { //BUTTON DOWN
+		if ((mp.buttons.released(BTN_DOWN)) && !cursor) { //BUTTON DOWN
+			mp.buttons.update();
 			cursor = 1;
 		}
 
@@ -635,7 +708,18 @@ void composeSMS(JsonArray *messages)
 			while(!mp.update());
 			break;
 		}
-		if (mp.buttons.released(BTN_A) && contact != "" && content != "") // SEND SMS
+		if(mp.buttons.released(BTN_FUN_RIGHT)){
+			helpPop = !helpPop;
+			mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);	
+			while(!mp.update());
+		}
+		while (helpPop) {
+			if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B)){
+				helpPop = !helpPop;
+			}
+			mp.update();
+		}
+		if (mp.buttons.released(BTN_A) && contact.length() > 1 && content != "") // SEND SMS
 		{
 			mp.display.fillScreen(TFT_BLACK);
             mp.display.setCursor(0, mp.display.height()/2 - 16);
@@ -678,7 +762,8 @@ void composeSMS(JsonArray *messages)
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.printCenter("Text sent!");
 				while(!mp.update());
-				mp.saveMessage(content, contact, 1, 0, messages);
+				// String temp = mp.checkContact(contact);
+				mp.saveMessage(content, mp.checkContact(contact), contact, 1, 0);
 				delay(1000);
 			}
 			else
@@ -697,12 +782,19 @@ void composeSMS(JsonArray *messages)
         mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.print("To: ");
 		mp.display.print(contact);
+		mp.display.fillRect(0,110, 160, 18, TFT_DARKGREY);
+		mp.display.drawFastHLine(0,111, 160, TFT_WHITE);
+		mp.display.setCursor(4, 112);
+		mp.display.print("Erase");
+		mp.display.setCursor(130,112);
+		mp.display.print("Help");
 		mp.update();
 		if(mp.newMessage)
 		{
 			File file = SD.open("/.core/messages.json", "r");
 			jb.clear();
 			JsonArray& jarr = jb.parseArray(file);
+			file.close();
 			if(!jarr.success())
 			{
 				Serial.println("Error");
@@ -717,7 +809,6 @@ void composeSMS(JsonArray *messages)
 			}
 			mp.newMessage = 0;
 		}
-
 	}
 }
 

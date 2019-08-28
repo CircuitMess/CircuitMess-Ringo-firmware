@@ -13,5 +13,6 @@ int contactsMenuSD(JsonArray *contacts);
 void contactsAppSD();
 String readAllContacts();
 void callNumber(String number);
+int8_t viewContact(JsonObject &object);
 extern int textPointer;
 #endif

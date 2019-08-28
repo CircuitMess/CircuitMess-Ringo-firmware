@@ -1,6 +1,7 @@
 #include "settingsApp.h"
 uint16_t pinNumber = 1234;
 uint8_t timesRemaining = 0;
+boolean colorSetup = 0;
 String settingsItems[6] PROGMEM = {
     "Network",
     "Display",
@@ -106,6 +107,11 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 			while(!mp.update());// Exit when pressed
 			break;
 		}
+		if(mp.buttons.released(BTN_HOME)) {
+		mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert 
+		}
+
 
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 			blinkState = 1;
@@ -167,8 +173,10 @@ bool settingsApp() {
 			networkMenu();
 		if (input == 1)
 			displayMenu();
-		if (input == 2)
+		if (input == 2){
+			colorSetup = 1;
 			timeMenu();
+		}
 		if (input == 3)
 			soundMenu();
 		if (input == 4)
@@ -788,7 +796,25 @@ void soundMenu() {
 					while(!mp.update());
 					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
+				if (mp.buttons.repeat(BTN_LEFT,5) && mp.ringVolume > 0)
+				{
+					mp.ringVolume--;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
 				if (mp.buttons.released(BTN_RIGHT) && mp.ringVolume < 14)
+				{
+					mp.ringVolume++;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				if (mp.buttons.repeat(BTN_RIGHT,5) && mp.ringVolume < 14)
 				{
 					mp.ringVolume++;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
@@ -812,7 +838,25 @@ void soundMenu() {
 					while(!mp.update());
 					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
+				if (mp.buttons.repeat(BTN_LEFT,5) && mp.mediaVolume > 0)
+				{
+					mp.mediaVolume--;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
 				if (mp.buttons.released(BTN_RIGHT) && mp.mediaVolume < 14)
+				{
+					mp.mediaVolume++;
+					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					while(!mp.update());
+					// Serial.print("Volume: "); Serial.println(mp.volume);
+				}
+				if (mp.buttons.repeat(BTN_RIGHT,5) && mp.mediaVolume < 14)
 				{
 					mp.mediaVolume++;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
@@ -1477,13 +1521,13 @@ void timeMenu()
 	bool blinkState = 0;
 	uint32_t previousMillis = millis();
 	uint8_t cursor = 0;
-	uint8_t editCursor = 0;
 	String foo="";
 	char key;
 	mp.display.setTextWrap(0);
 	while(1)
 	{
-		mp.display.fillScreen(0xFFED);
+		if(colorSetup == 1)mp.display.fillScreen(0xFFED);
+		else mp.display.fillScreen(TFT_WHITE);
 		mp.display.setTextFont(2);
 		mp.display.setTextColor(TFT_BLACK);
 
@@ -1521,16 +1565,26 @@ void timeMenu()
 		mp.display.setCursor( 0, 65);
 		mp.display.printCenter("Edit time");
 		mp.display.drawRect(46,63, 68, 20, TFT_BLACK);
-		mp.display.setCursor( 40, 95);
-		mp.display.printCenter("Force time sync");
-		mp.display.drawRect(23, 93, 110, 20, TFT_BLACK);
-
+		if(colorSetup == 1) {
+			mp.display.drawRect(23, 93, 110, 20, TFT_BLACK);
+			mp.display.setCursor( 40, 95);
+			mp.display.printCenter("Force time sync");
+		}
+		else{
+			mp.display.drawRect(23, 88, 110, 20, TFT_BLACK);
+			mp.display.setCursor( 40, 90);
+			mp.display.printCenter("Force time sync");
+			mp.display.setCursor(4, 110);
+			mp.display.print("Press B to confirm");
+		}
 		if(cursor == 0)
 		{
 			if(!blinkState)
-				mp.display.drawRect(46,63, 68, 20, 0xFFED);
+				if(colorSetup == 1)mp.display.drawRect(46,63, 68, 20, 0xFFED);
+				else mp.display.drawRect(46,63, 68, 20, TFT_WHITE);
 			if(mp.buttons.released(BTN_A))
 			{
+				uint8_t editCursor = 0;
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				while(!mp.update());
@@ -1542,11 +1596,12 @@ void timeMenu()
 
 				while(1)
 				{
-					mp.display.fillScreen(0xFFED);
-					mp.display.setCursor(2, 98);
-					mp.display.print("Press A to save");
+					if(colorSetup == 1)mp.display.fillScreen(0xFFED);
+					else mp.display.fillScreen(TFT_WHITE);
 					mp.display.setCursor(2, 110);
-					mp.display.print("Press B to cancel");
+					mp.display.print("Erase");
+					mp.display.setCursor(120, 110);
+					mp.display.print("Save");
 					switch (editCursor)
 					{
 						case 0:
@@ -1788,7 +1843,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1812,7 +1867,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -1844,7 +1899,7 @@ void timeMenu()
 								break;
 							case 4:
 								if(mp.clockYear != 0)
-									inputBuffer = String(mp.clockYear);
+									inputBuffer = String(mp.clockYear % 100);
 								else
 									inputBuffer = "";
 								break;
@@ -1877,7 +1932,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1901,7 +1956,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000+inputBuffer.toInt();
 									break;
 							}
 						}
@@ -1967,7 +2022,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -1991,7 +2046,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -2043,7 +2098,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -2067,7 +2122,7 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
@@ -2087,7 +2142,7 @@ void timeMenu()
 								break;
 							case 2:
 								if(mp.clockYear != 0)
-									inputBuffer = String(mp.clockYear);
+									inputBuffer = String(mp.clockYear % 100);
 								else
 									inputBuffer = "";
 								break;
@@ -2095,7 +2150,7 @@ void timeMenu()
 						editCursor+=3;
 					}
 
-					if(mp.buttons.released(BTN_A))
+					if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 					{
 						if(inputBuffer == "")
 						{
@@ -2117,7 +2172,7 @@ void timeMenu()
 									mp.clockMonth = 0;
 									break;
 								case 5:
-									mp.clockYear = 0;
+									mp.clockYear = 2000;
 									break;
 							}
 						}
@@ -2141,12 +2196,12 @@ void timeMenu()
 									mp.clockMonth = inputBuffer.toInt();
 									break;
 								case 5:
-									mp.clockYear = inputBuffer.toInt();
+									mp.clockYear = 2000 + inputBuffer.toInt();
 									break;
 							}
 						}
 						DateTime now = DateTime(mp.clockYear, mp.clockMonth, mp.clockDay,
-							mp.clockHour, mp.clockMinute, mp.clockSecond);
+						mp.clockHour, mp.clockMinute, mp.clockSecond);
 						mp.RTC.adjust(now);
 						break;
 					}
@@ -2162,7 +2217,8 @@ void timeMenu()
 		else if(cursor == 1)
 		{
 			if(!blinkState)
-				mp.display.drawRect(23, 93, 110, 20, 0xFFED);
+				if(colorSetup == 1)mp.display.drawRect(23,93, 110, 20, 0xFFED);
+				else mp.display.drawRect(23,88, 110, 20, TFT_WHITE);
 			if(mp.buttons.released(BTN_A))
 			{
 				if(mp.sim_module_version == 255)
@@ -2199,16 +2255,18 @@ void timeMenu()
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
-					mp.clockYear = 0;
+					mp.clockYear = 2000;
 					previousMillis = millis();
 					while(1)
 					{
-						mp.display.fillScreen(0xFFED);
+						if(colorSetup == 1)mp.display.fillScreen(0xFFED);
+						else mp.display.fillScreen(TFT_WHITE);
 						mp.display.setCursor(0, mp.display.height()/2 - 16);
 						mp.display.printCenter("Fetching time...");
 						if(millis() - previousMillis >= 4000)
 						{
-							mp.display.fillScreen(0xFFED);
+							if(colorSetup == 1)mp.display.fillScreen(0xFFED);
+							else mp.display.fillScreen(TFT_WHITE);
 							mp.display.setCursor(0, mp.display.height()/2 - 20);
 							mp.display.printCenter("Couldn't fetch time");
 							mp.display.setCursor(0, mp.display.height()/2);
@@ -2221,7 +2279,8 @@ void timeMenu()
 						if(mp.clockYear % 100 < 80 && mp.clockYear % 100 >= 19)
 						{
 							delay(200);
-							mp.display.fillScreen(0xFFED);
+							if(colorSetup == 1)mp.display.fillScreen(0xFFED);
+							else mp.display.fillScreen(TFT_WHITE);
 							mp.display.setCursor(0, mp.display.height()/2 - 16);
 							mp.display.printCenter("Time fetched over GSM!");
 							while(!mp.update());
@@ -2258,10 +2317,31 @@ void timeMenu()
 			while(!mp.update());
 			cursor++;
 		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		if(colorSetup == 1)
+		{  
+			if (mp.buttons.released(BTN_B)) //BUTTON BACK
 			break;
+ 		}
+		else {
+			if (mp.buttons.released(BTN_B)){
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
+				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
+				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
+				mp.display.setCursor(47, 55);
+				mp.display.printCenter("Date & time set!");
+				mp.update();
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 1000)
+				mp.update();
+				break;
+			}
+		} 
 		mp.update();
 	}
+	colorSetup = 0;
 
 }
 bool updateMenu()
@@ -2270,11 +2350,12 @@ bool updateMenu()
 	uint32_t previousMillis = millis();
 	uint8_t cursor = 0;
 	String foo="";
-	mp.display.setTextWrap(0);
-	mp.display.setTextFont(2);
+	
 
 	while(1)
 	{
+		mp.display.setTextWrap(0);
+		mp.display.setTextFont(2);
 		mp.display.fillScreen(0xFD29);
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setCursor(10, 10);
@@ -2471,7 +2552,10 @@ bool updateMenu()
 				else
 					mp.display.drawRect(20,83,117, 20, 0xFD29);
 				if(mp.buttons.released(BTN_A))
+				{
+					while(!mp.update());
 					controlTry();
+				}
 			break;
 		}
 		
@@ -2654,6 +2738,7 @@ void wifiConnect()
 	// }
 	bool blinkState = 1;
 	unsigned long elapsedMillis = millis();
+	bool helpPop;
 	String content = ""; //password string
 	String prevContent = "";
 	delay(500);
@@ -2740,8 +2825,8 @@ void wifiConnect()
 					mp.display.printCenter("Enter password:");
 					mp.display.setCursor(1, 112);
 					mp.display.print("Erase");
-					mp.display.setCursor(110, 112);
-					mp.display.print("Confirm");
+					mp.display.setCursor(133, 112);
+					mp.display.print("Help");
 					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 					{
 						elapsedMillis = millis();
@@ -2767,7 +2852,18 @@ void wifiConnect()
 					if (blinkState == 1)
 						mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
 
-					if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && content.length() > 0)
+					if(mp.buttons.released(BTN_FUN_RIGHT)){
+							helpPop = !helpPop;
+							mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);	
+							while(!mp.update());
+						}
+						while (helpPop) {
+							if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B)){
+								helpPop = !helpPop;
+							}
+						mp.update();
+						}
+					if((mp.buttons.released(BTN_A)) && content.length() > 0)
 					{
 						Serial.println("PRESSED");
 						mp.display.setCursor(20, 50);
@@ -2849,7 +2945,8 @@ void wifiConnect()
 							int8_t selection = checkForUpdate();
 							Serial.println("OUT");
 							delay(5);
-							
+							EEPROM.writeBool(33, 0);
+							EEPROM.commit();
 							if(selection == 1)
 							{
 								EEPROM.writeBool(34, 1);
@@ -3121,7 +3218,6 @@ int8_t checkForUpdate()
 		if (httpCode == HTTP_CODE_OK) {
 			String payload = http.getString();
 			http.end();
-			mp.firmware_version = 1;
 			uint16_t version = payload.substring(payload.indexOf("version=") + 8, payload.indexOf("\r")).toInt();
 			if (version > mp.firmware_version)
 			{
@@ -3242,8 +3338,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		}
 		for (uint8_t i = 0; i < length; i++)
 			wifiDrawBox(items[i], signals[i], i, cameraY_actual);
-
-		wifiDrawCursor(cursor, cameraY_actual);
+		if(blinkState)
+			wifiDrawCursor(cursor, cameraY_actual);
 
 		mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
 		mp.display.setTextFont(2);
@@ -3251,14 +3347,19 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 		mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print("Networks");
+		mp.display.print("Choose a network");
+		mp.display.fillRect(0, 111, mp.display.width(), 30, TFT_DARKGREY);
+		mp.display.setTextFont(2);
+		mp.display.setCursor(2,112);
+		mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
+		mp.display.printCenter("Cancel            Select");
 		if(mp.released(BTN_FUN_RIGHT))
 		{
 			while(!mp.update());
 			mp.playNotificationSound(cursor);
 		}
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
 			while(!mp.update());
 			break;
 		}
@@ -3296,7 +3397,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 			}
 
 		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
+		if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
 		{
 			while(!mp.update());
 			return -1;

@@ -100,14 +100,18 @@ void mediaApp() {
 					else
 						mp.drawJpeg(photoFiles[index], 0, 0);
 					while(!mp.update());
+					bool firstRefresh = 1;
 					while(1)
 					{
-						if(!mp.SDinsertedFlag)
-							break;
-						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B))
+						if(mp.buttons.released(BTN_HOME)) {
+						mp.exitedLockscreen = true;
+						mp.lockscreen(); // Robert
+						}
+						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B) || !mp.SDinsertedFlag)
 							break;
 						if(mp.buttons.released(BTN_LEFT))
 						{
+							firstRefresh = 1;
 							if(index > 0)
 								index--;
 							else
@@ -120,10 +124,20 @@ void mediaApp() {
 						}
 						if(mp.buttons.released(BTN_RIGHT))
 						{
+							firstRefresh = 1;
 							if(index < photoCount - 1)
 								index++;
 							else
 								index = 0;
+							if(photoFiles[index].endsWith(".bmp") || photoFiles[index].endsWith(".BMP"))
+								mp.display.drawBmp(photoFiles[index], 0,0);
+							else
+								mp.drawJpeg(photoFiles[index], 0, 0);
+							while(!mp.update());
+						}
+						if(mp.buttons.holdForUnlock && firstRefresh)
+						{
+							firstRefresh = 0;
 							if(photoFiles[index].endsWith(".bmp") || photoFiles[index].endsWith(".BMP"))
 								mp.display.drawBmp(photoFiles[index], 0,0);
 							else
@@ -193,6 +207,10 @@ int8_t mediaMenu(String* title, uint8_t length) {
 		if(blinkState)
 			mediaMenuDrawCursor(cursor, cameraY_actual, pressed);
 
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
 		if (!mp.buttons.pressed(BTN_DOWN) && !mp.buttons.pressed(BTN_UP))
 			pressed = 0;
 
@@ -307,6 +325,7 @@ int16_t audioPlayer(uint16_t index) {
 		mp3 = new MPTrack((char*)audioFiles[index].c_str());
 		addTrack(mp3);
 	}
+	uint8_t isPlaying[100];
 	while(1)
 	{
 		bool trackAdded = 0;
@@ -328,35 +347,7 @@ int16_t audioPlayer(uint16_t index) {
 		uint8_t x = 1;
 		uint8_t y = 53;
 		int8_t i = 0;
-
 		
-		mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
-		//draw bitmaps
-		mp.display.drawBitmap(2*scale, 20*scale, previous, TFT_BLACK, scale);
-		mp.display.drawBitmap(65*scale, 20*scale, next, TFT_BLACK, scale);
-		mp.display.drawBitmap(2*scale, 75, repeatSprite, TFT_BLACK, scale);
-		mp.display.drawBitmap(66*scale, 37*scale, shuffleIcon, TFT_BLACK, scale);
-		if(playState)
-			mp.display.drawBitmap(37*scale, 19*scale, play, TFT_BLACK, scale);
-		else
-			mp.display.drawBitmap(72, 40, pause2, TFT_BLACK, scale);
-		mp.display.drawBitmap(17*scale, 2*scale, cover2, TFT_BLACK, scale);
-		//prepare for text printing
-		mp.display.setTextColor(TFT_BLACK);
-
-
-		mp.display.setTextSize(1);
-		mp.display.setTextWrap(0);
-		//drawtext
-		mp.display.setCursor(4, 2);
-		mp.display.print(mp.mediaVolume);
-		mp.display.setCursor(1, 111);
-		if(audioFiles[index].length() > 20)
-			mp.display.print(audioFiles[index]);
-		else
-			mp.display.printCenter(audioFiles[index]);
-		mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
-		mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 		if(firstPass)
 		{
 			if(mp3->reloadFile((char*)audioFiles[index].c_str()))
@@ -367,15 +358,42 @@ int16_t audioPlayer(uint16_t index) {
 		else
 			firstPass = 1;
 		
-		
-		if(playState)
-			mp3->play();
+		if(playState);
+			mp3->play(); // Robert v2 dodao if
+			mp.osc->setVolume(0); // Robert v1 -- turn off menu sounds while music is playing
 		if(mp.mediaVolume == 0)
 			mp3->setVolume(0);
 		else
-			mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+			mp3->setVolume(mp.mediaVolume*21);
+
 		while (1) 
 		{
+			mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
+			mp.display.drawBitmap(2*scale, 20*scale, previous, TFT_BLACK, scale);
+			mp.display.drawBitmap(65*scale, 20*scale, next, TFT_BLACK, scale);
+			mp.display.drawBitmap(2*scale, 75, repeatSprite, TFT_BLACK, scale);
+			mp.display.drawBitmap(66*scale, 37*scale, shuffleIcon, TFT_BLACK, scale);
+			if(playState)
+				mp.display.drawBitmap(37*scale, 19*scale, play, TFT_BLACK, scale);
+			else
+				mp.display.drawBitmap(72, 40, pause2, TFT_BLACK, scale);
+			mp.display.drawBitmap(17*scale, 2*scale, cover2, TFT_BLACK, scale);
+			mp.display.setTextColor(TFT_BLACK);
+
+
+			mp.display.setTextSize(1);
+			mp.display.setTextWrap(0);
+			mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+			mp.display.setCursor(24, 2);
+			mp.display.print(mp.mediaVolume);
+			mp.display.setCursor(1, 111);
+			if(audioFiles[index].length() > 20)
+				mp.display.print(audioFiles[index]);
+			else
+				mp.display.printCenter(audioFiles[index]);
+			mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
+			mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
+			
 			bool trackAdded = 0;
 			for(uint8_t i = 0; i < 4;i++)
 			{
@@ -394,19 +412,24 @@ int16_t audioPlayer(uint16_t index) {
 				return 0;
 			if (mp.buttons.released(BTN_B))
 			{
-				while(!mp.update());
-				mp3->stop();
+				mp.buttons.update();
+			//	mp3->stop();
 				Serial.println(F("Stopped"));
 				delay(5);
 				return index;
 			}
+			if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+			}
 
 			if (mp.buttons.released(BTN_A)) //PLAY/PAUSE BUTTON
 			{
-				while(!mp.update());
+				mp.buttons.update();
 				if(playState)
 				{
 					mp3->pause();
+					//mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]); // Robert v1 -- turns on menu sounds when song stops playing
 					mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
 
 					//draw bitmaps
@@ -428,7 +451,8 @@ int16_t audioPlayer(uint16_t index) {
 						mp.display.print(audioFiles[index]);
 					else
 						mp.display.printCenter(audioFiles[index]);
-					mp.display.setCursor(4, 2);
+					mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+					mp.display.setCursor(24, 2);
 					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
@@ -460,23 +484,26 @@ int16_t audioPlayer(uint16_t index) {
 						mp.display.print(audioFiles[index]);
 					else
 						mp.display.printCenter(audioFiles[index]);
-					mp.display.setCursor(4, 2);
+					mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+					mp.display.setCursor(24, 2);
 					mp.display.print(mp.mediaVolume);
 					mp.display.fillRect(141,74, 4,4, shuffle ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 					mp3->resume();
 				}
 				playState = !playState;
+				isPlaying[index] = 1; // Robert v2 zadnje
 			}
 
 			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0) //DOWN
 			{
-				while(!mp.update());
+				mp.buttons.update();
 				mp.mediaVolume--;
 				if(mp.mediaVolume == 0)
 					mp3->setVolume(0);
 				else
-					mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+				mp3->setVolume(mp.mediaVolume*21);
+				
 				// mp3->setVolume(256/14*mp.mediaVolume);
 				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
@@ -486,9 +513,21 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setTextWrap(0);
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
-				mp.display.setCursor(4, 2);
+				mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
-
+			}
+			if (mp.buttons.repeat(BTN_DOWN,2) && mp.mediaVolume > 0) //DOWN
+			{
+				mp.buttons.update();
+				mp.mediaVolume--;
+				if(mp.mediaVolume == 0)
+					mp3->setVolume(0);
+				else
+				mp3->setVolume(mp.mediaVolume*21);
+				
+				// mp3->setVolume(256/14*mp.mediaVolume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -496,18 +535,19 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setTextWrap(0);
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
-				mp.display.setCursor(4, 2);
+				mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
 			}
 
 			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
 			{
-				while(!mp.update());
+				mp.buttons.update();
 				mp.mediaVolume++;
 				if(mp.mediaVolume == 0)
 					mp3->setVolume(0);
 				else
-					mp3->setVolume(map(mp.mediaVolume, 0, 14, 100, 300));
+					mp3->setVolume(mp.mediaVolume*21);
 				// mp3->setVolume(256/14*mp.mediaVolume);
 				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
@@ -517,8 +557,20 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setTextWrap(0);
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
-				mp.display.setCursor(4, 2);
+				mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
+			}
+			if (mp.buttons.repeat(BTN_UP,2) && mp.mediaVolume < 14) //UP
+			{
+				mp.buttons.update();
+				mp.mediaVolume++;
+				if(mp.mediaVolume == 0)
+					mp3->setVolume(0);
+				else
+					mp3->setVolume(mp.mediaVolume*21);
+				// mp3->setVolume(256/14*mp.mediaVolume);
+				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
 				mp.display.setTextColor(TFT_BLACK);
 				mp.display.setTextFont(2);
@@ -526,14 +578,15 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setTextWrap(0);
 				mp.display.fillRect(4,2, 15, 15, backgroundColors[mp.backgroundIndex]);
 				//drawtext
-				mp.display.setCursor(4, 2);
+				mp.display.drawBitmap(4,2, fullSound, TFT_BLACK, 2);
+				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
 			}
 			if(mp.buttons.released(BTN_LEFT)) //previous
 			{
 				Serial.println("previous");
-				while(!mp.update());
-
+				mp.buttons.update();
+				isPlaying[index] = 0; // Robert v2
 				playState = 1;
 				if(shuffle && !shuffleReset)
 				{
@@ -546,8 +599,8 @@ int16_t audioPlayer(uint16_t index) {
 						memset(shuffleList, 0, sizeof(shuffleList));
 						if(!loop)
 						{
-							playState = 0;
-							shuffleReset = 1;
+							playState = 0; // Robert -- added 1
+							shuffleReset = 1; // Robert -- added 0
 						}
 					}
 					uint16_t randNumber = random(0,audioCount);
@@ -565,21 +618,22 @@ int16_t audioPlayer(uint16_t index) {
 							index--;
 						else
 						{
-							playState = 0;
+							playState = 1; // Robert dodao 1
 							index = audioCount-1;
 						}
 					}
 				}
 				if(shuffleReset)
-					playState = 0;
+					playState = 1;
 				mp3->stop();
 				break;
 			}
 			if(mp.buttons.released(BTN_RIGHT)) //next
 			{
 				Serial.println("next");
-				while(!mp.update());
+				mp.buttons.update();
 				playState = 1;
+				isPlaying[index] = 0; // Robert v2
 				if(shuffle && !shuffleReset)
 				{
 					bool allTrue=1;
@@ -591,8 +645,8 @@ int16_t audioPlayer(uint16_t index) {
 						memset(shuffleList, 0, sizeof(shuffleList));
 						if(!loop)
 						{
-							playState = 0;
-							shuffleReset = 1;
+							playState = 1;
+							shuffleReset = 0; // Robert - added 0
 						}
 					}
 					uint16_t randNumber = random(0,audioCount);
@@ -610,21 +664,21 @@ int16_t audioPlayer(uint16_t index) {
 							index++;
 						else
 						{
-							shuffleReset = 1;
+							shuffleReset = 0; // Robert - was 1, now 0
 							index = 0;
-							playState = 0;
+							playState = 1; // Robert - added 1
 						}
 					}
 					// index = (index < audioCount - 1) ? index++ : 0;
 				}
 				if(shuffleReset)
-					playState = 0;
+					playState = 1;
 				mp3->stop();
 				break;
 			}
 			if(mp.buttons.released(BTN_FUN_RIGHT)) //shuffle button
 			{
-				while(!mp.update());
+				mp.buttons.update();
 				if(!shuffle)
 					memset(shuffleList, 0, sizeof(shuffleList));
 				shuffle = !shuffle;
@@ -635,12 +689,21 @@ int16_t audioPlayer(uint16_t index) {
 			}
 			if(mp.buttons.released(BTN_FUN_LEFT)) //loop button
 			{
-				while(!mp.update());
+				mp.buttons.update();
 				loop = !loop;
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 				mp.display.fillRect(14,73, 4,4, loop ? TFT_BLACK : backgroundColors[mp.backgroundIndex]);
 			}
-			mp.update();
+			// if(mp.buttons.getJoystickX() == 1104)
+			// 	Serial.print("joystick X break ");
+			// if(mp.buttons.getJoystickY() == 1104)
+			// 	Serial.print("joystick Y break ");
+			Serial.print("joystick X: ");
+			Serial.println(mp.buttons.getJoystickX());
+			Serial.print("joystick Y: ");
+			Serial.println(mp.buttons.getJoystickY());
+			Serial.println("------------------");
+			mp.update(1);
 			if(mp3->isPlaying() < 1 && playState) //if the current song is finished, play the next one
 			{
 				Serial.println("song end");
@@ -655,8 +718,8 @@ int16_t audioPlayer(uint16_t index) {
 						memset(shuffleList, 0, sizeof(shuffleList));
 						if(!loop)
 						{
-							playState = 0;
-							shuffleReset = 1;
+							playState = 1; // Robert added 1
+							shuffleReset = 0; // Robert addded 0
 						}
 					}
 					uint16_t randNumber = random(0,audioCount);
@@ -675,7 +738,7 @@ int16_t audioPlayer(uint16_t index) {
 						else
 						{
 							index = 0;
-							playState = 0;
+							playState = 1; // Robert -- was 0 -- trying to countinue at the end of the playlist
 						}
 					}
 				}
