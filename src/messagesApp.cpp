@@ -116,24 +116,49 @@ void messagesApp() {
 						Serial1.read();
 					while(!readyForCall && millis() - timeoutMillis < 10000)
 					{
-						Serial1.println("AT+CCALR?");
-						String input = mp.waitForOK();
-
-						uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
-						readyForCall = input.substring(helper + 1, helper + 2).toInt();
-						Serial.println(input);
-						if(!readyForCall)
+						if(mp.sim_module_version == 1)
 						{
-							mp.display.fillScreen(TFT_BLACK);
-							mp.display.setTextColor(TFT_WHITE);
-							mp.display.setTextSize(1);
-							mp.display.setCursor(0, mp.display.height()/2 - 20);
-							mp.display.setTextFont(2);
-							mp.display.printCenter(F("Registering to network"));
-							mp.display.setCursor(0, mp.display.height()/2);
-							mp.display.printCenter(F("Please wait..."));
-							while(!mp.update());
-							delay(1000);
+							Serial1.println("AT+CCALR?");
+							String input = mp.waitForOK();
+
+							uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
+							readyForCall = input.substring(helper + 1, helper + 2).toInt();
+							Serial.println(input);
+							if(!readyForCall)
+							{
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setTextColor(TFT_WHITE);
+								mp.display.setTextSize(1);
+								mp.display.setCursor(0, mp.display.height()/2 - 20);
+								mp.display.setTextFont(2);
+								mp.display.printCenter(F("Registering to network"));
+								mp.display.setCursor(0, mp.display.height()/2);
+								mp.display.printCenter(F("Please wait..."));
+								while(!mp.update());
+								delay(1000);
+							}
+						}
+						else
+						{
+							Serial1.println("AT+CREG?");
+							String input = mp.waitForOK();
+
+							uint16_t helper = input.indexOf(",", input.indexOf("+CREG:"));
+							readyForCall = input.substring(helper + 1, helper + 2).toInt();
+							Serial.println(input);
+							if(!readyForCall)
+							{
+								mp.display.fillScreen(TFT_BLACK);
+								mp.display.setTextColor(TFT_WHITE);
+								mp.display.setTextSize(1);
+								mp.display.setCursor(0, mp.display.height()/2 - 20);
+								mp.display.setTextFont(2);
+								mp.display.printCenter(F("Registering to network"));
+								mp.display.setCursor(0, mp.display.height()/2);
+								mp.display.printCenter(F("Please wait..."));
+								while(!mp.update());
+								delay(1000);
+							}
 						}
 					}
 					mp.networkRegistered = readyForCall;
@@ -312,6 +337,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
+
 		mp.display.setCursor(1, y);
 		mp.display.print(content);
 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
@@ -791,7 +817,6 @@ void composeSMS(JsonArray *messages)
 			mp.buttons.update();
 			cursor = 0;
 		}
-
 		if ((mp.buttons.released(BTN_DOWN)) && !cursor) { //BUTTON DOWN
 			mp.buttons.update();
 			cursor = 1;
