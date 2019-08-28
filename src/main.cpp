@@ -1892,6 +1892,7 @@ bool startupWizard()
 		}
 	}
 	while(!mp.update());
+  timeMenu();
 
 	// Wifi testing
 	// if(!mp.wifi)
@@ -1914,7 +1915,6 @@ bool startupWizard()
 	mp.shutdownPopupEnable(1);
 	EEPROM.writeBool(33, 0);
 	EEPROM.commit();
-  timeMenu();
   mp.display.setTextColor(TFT_BLACK);
 	mp.display.setTextSize(1);
 	mp.display.setTextFont(2);
