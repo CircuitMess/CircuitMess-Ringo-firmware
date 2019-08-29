@@ -2142,20 +2142,25 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
-	// mp.pduDecode("069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202");
-	PDU pdu = PDU("069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202");
-	if(pdu.parse())
-	{
-		Serial.printf("PDU: %s\n", pdu.getPDU());
-		Serial.printf("SMSC: %s\n", pdu.getSMSC());
-		Serial.printf("Sender: %s\n", pdu.getNumber());
-		Serial.printf("Sender Number Type: %s\n", pdu.getNumberType());
-		Serial.printf("Date: %s\n", pdu.getDate());
-		Serial.printf("Time: %s\n", pdu.getTime());
-		Serial.printf("UDH Type: %s\n", pdu.getUDHType());
-		Serial.printf("UDH Data: %s\n", pdu.getUDHData());
-		Serial.printf("Message: %s\n", pdu.getMessage());
-	}
+	mp.pduDecode("069183950124F2040C918395121548670000918082812383801900546A83DAA436BC8DAFB7A16C7A1BE0E6E5E3B95827");
+	// const char *temp = "B2F35DACBEC3E2B0B0BA1D7FC74602532BB202";
+	// char output[21];
+	// mp.DecodePDUMessage(temp, strlen(temp), output, 21);
+	// Serial.println("new output: ");
+	// Serial.println(output);
+	// PDU pdu = PDU("069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202");
+	// if(pdu.parse())
+	// {
+	// 	Serial.printf("PDU: %s\n", pdu.getPDU());
+	// 	Serial.printf("SMSC: %s\n", pdu.getSMSC());
+	// 	Serial.printf("Sender: %s\n", pdu.getNumber());
+	// 	Serial.printf("Sender Number Type: %s\n", pdu.getNumberType());
+	// 	Serial.printf("Date: %s\n", pdu.getDate());
+	// 	Serial.printf("Time: %s\n", pdu.getTime());
+	// 	Serial.printf("UDH Type: %s\n", pdu.getUDHType());
+	// 	Serial.printf("UDH Data: %s\n", pdu.getUDHData());
+	// 	Serial.printf("Message: %s\n", pdu.getMessage());
+	// }
 	mp.shutdownPopupEnable(1);
 	//069183950124F2040C9183951215486700009180822134818015B2F35DACBEC3E2B0B0BA1D7FC74602532BB202
 	// startupWizard();
