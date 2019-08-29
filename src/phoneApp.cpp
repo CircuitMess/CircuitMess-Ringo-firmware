@@ -215,24 +215,49 @@ void phoneApp() {
 					Serial1.read();
 				while(!readyForCall && millis() - timeoutMillis < 10000)
 				{
-					Serial1.println("AT+CCALR?");
-					String input = mp.waitForOK();
-
-					uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
-					readyForCall = input.substring(helper + 1, helper + 2).toInt();
-					Serial.println(input);
-					if(!readyForCall)
+					if(mp.sim_module_version == 1)
 					{
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setTextColor(TFT_WHITE);
-						mp.display.setTextSize(1);
-						mp.display.setCursor(0, mp.display.height()/2 - 20);
-						mp.display.setTextFont(2);
-						mp.display.printCenter(F("Registering to network"));
-						mp.display.setCursor(0, mp.display.height()/2);
-						mp.display.printCenter(F("Please wait..."));
-						while(!mp.update());
-						delay(1000);
+						Serial1.println("AT+CCALR?");
+						String input = mp.waitForOK();
+
+						uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
+						readyForCall = input.substring(helper + 1, helper + 2).toInt();
+						Serial.println(input);
+						if(!readyForCall)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Registering to network"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Please wait..."));
+							while(!mp.update());
+							delay(1000);
+						}
+					}
+					else
+					{
+						Serial1.println("AT+CREG?");
+						String input = mp.waitForOK();
+
+						uint16_t helper = input.indexOf(",", input.indexOf("+CREG:"));
+						readyForCall = input.substring(helper + 1, helper + 2).toInt();
+						Serial.println(input);
+						if(!readyForCall)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Registering to network"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Please wait..."));
+							while(!mp.update());
+							delay(1000);
+						}
 					}
 				}
 				mp.networkRegistered = readyForCall;
@@ -703,24 +728,49 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String contact, Strin
 					Serial1.read();
 				while(!readyForCall && millis() - timeoutMillis < 10000)
 				{
-					Serial1.println("AT+CCALR?");
-					String input = mp.waitForOK();
-
-					uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
-					readyForCall = input.substring(helper + 1, helper + 2).toInt();
-					Serial.println(input);
-					if(!readyForCall)
+					if(mp.sim_module_version == 1)
 					{
-						mp.display.fillScreen(TFT_BLACK);
-						mp.display.setTextColor(TFT_WHITE);
-						mp.display.setTextSize(1);
-						mp.display.setCursor(0, mp.display.height()/2 - 20);
-						mp.display.setTextFont(2);
-						mp.display.printCenter(F("Registering to network"));
-						mp.display.setCursor(0, mp.display.height()/2);
-						mp.display.printCenter(F("Please wait..."));
-						while(!mp.update());
-						delay(1000);
+						Serial1.println("AT+CCALR?");
+						String input = mp.waitForOK();
+
+						uint16_t helper = input.indexOf(" ", input.indexOf("+CCALR:"));
+						readyForCall = input.substring(helper + 1, helper + 2).toInt();
+						Serial.println(input);
+						if(!readyForCall)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Registering to network"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Please wait..."));
+							while(!mp.update());
+							delay(1000);
+						}
+					}
+					else
+					{
+						Serial1.println("AT+CREG?");
+						String input = mp.waitForOK();
+
+						uint16_t helper = input.indexOf(",", input.indexOf("+CREG:"));
+						readyForCall = input.substring(helper + 1, helper + 2).toInt();
+						Serial.println(input);
+						if(!readyForCall)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setTextColor(TFT_WHITE);
+							mp.display.setTextSize(1);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Registering to network"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Please wait..."));
+							while(!mp.update());
+							delay(1000);
+						}
 					}
 				}
 			
