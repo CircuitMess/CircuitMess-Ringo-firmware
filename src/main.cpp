@@ -1892,7 +1892,7 @@ bool startupWizard()
 		}
 	}
 	while(!mp.update());
-
+	timeMenu();
 	// Wifi testing
 	// if(!mp.wifi)
 	// {
@@ -1914,11 +1914,10 @@ bool startupWizard()
 	mp.shutdownPopupEnable(1);
 	EEPROM.writeBool(33, 0);
 	EEPROM.commit();
-  timeMenu();
-  mp.display.setTextColor(TFT_BLACK);
+  	mp.display.setTextColor(TFT_BLACK);
 	mp.display.setTextSize(1);
 	mp.display.setTextFont(2);
-  mp.display.fillScreen(TFT_WHITE);
+ 	mp.display.fillScreen(TFT_WHITE);
 	mp.display.drawRect(10, 45, 138, 38, TFT_BLACK);
 	mp.display.drawRect(9, 44, 140, 40, TFT_BLACK);
 	mp.display.fillRect(11, 46, 136, 36, TFT_WHITE);

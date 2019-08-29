@@ -723,6 +723,7 @@ uint8_t showCall(int id, String number, uint32_t dateTime, String contact, Strin
 						delay(1000);
 					}
 				}
+			
 				mp.networkRegistered = readyForCall;
 				if(readyForCall)
 				{
