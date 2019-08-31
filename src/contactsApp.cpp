@@ -298,7 +298,7 @@ uint8_t newContactSD(String *name, String *number)
 
 		if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen();
 		}
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
@@ -474,7 +474,7 @@ int contactsMenuSD(JsonArray *contacts){
 
 		if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen();
 		}
 		if (mp.buttons.released(BTN_A) && contactsMenuCursor == 0) {   //BUTTON CONFIRM
 			while(!mp.update());// Exit when pressed

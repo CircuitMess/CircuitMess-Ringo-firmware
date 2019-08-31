@@ -601,7 +601,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 
 		if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen();
 		}
 
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
@@ -730,6 +730,10 @@ void composeSMS(JsonArray *messages)
 	boolean helpPop;
 	while (1)
 	{
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen();
+		}
 		mp.display.fillScreen(TFT_DARKGREY);
 
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine

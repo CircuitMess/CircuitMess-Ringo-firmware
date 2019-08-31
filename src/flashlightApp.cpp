@@ -87,7 +87,7 @@ void flashlightApp()
 
 		if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen(); 
 		}
 
 		if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
