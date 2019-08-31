@@ -109,11 +109,11 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 		}
 		if(mp.buttons.released(BTN_HOME)) {
 		mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert 
+			mp.lockscreen();
 		}
 
 
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+		if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
 			blinkState = 1;
 			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
@@ -133,7 +133,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 			pressed = 1;
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
 			blinkState = 1;
 			blinkMillis = millis();
 			mp.osc->note(75, 0.05);
@@ -458,8 +458,8 @@ void networkMenu() {
 		// 		cursor++;
 
 		// }
-		if((mp.buttons.released(BTN_LEFT) && !mp.airplaneMode)
-		|| (mp.buttons.released(BTN_RIGHT) && mp.airplaneMode))
+		if((mp.buttons.pressed(BTN_LEFT) && !mp.airplaneMode)
+		|| (mp.buttons.pressed(BTN_RIGHT) && mp.airplaneMode))
 			mp.airplaneMode = !mp.airplaneMode;
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
@@ -549,14 +549,14 @@ void displayMenu() {
 				mp.display.drawBitmap(12, 20, noBrightness, 0x8FEA, 2);
 				mp.display.drawBitmap(132, 14, fullBrightness, 0x8FEA, 2);
 			}
-			if (mp.buttons.released(BTN_LEFT) && mp.brightness > 0)
+			if (mp.buttons.pressed(BTN_LEFT) && mp.brightness > 0)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				mp.brightness--;
 				while(!mp.update());
 			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.brightness < 5)
+			if (mp.buttons.pressed(BTN_RIGHT) && mp.brightness < 5)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
@@ -568,14 +568,14 @@ void displayMenu() {
 		{
 			for(int i = 0;i<8;i++)
 				mp.leds[i] = CRGB::White;
-			if (mp.buttons.released(BTN_LEFT) && mp.pixelsBrightness > 0)
+			if (mp.buttons.pressed(BTN_LEFT) && mp.pixelsBrightness > 0)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				mp.pixelsBrightness--;
 				while(!mp.update());
 			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.pixelsBrightness < 5)
+			if (mp.buttons.pressed(BTN_RIGHT) && mp.pixelsBrightness < 5)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
@@ -601,14 +601,14 @@ void displayMenu() {
 				mp.display.print("30m");
 				mp.display.setTextColor(TFT_BLACK);
 			}
-			if (mp.buttons.released(BTN_LEFT) && sleepTimeBuffer!= 0)
+			if (mp.buttons.pressed(BTN_LEFT) && sleepTimeBuffer!= 0)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				sleepTimeBuffer--;
 				while(!mp.update());
 			}
-			if (mp.buttons.released(BTN_RIGHT) && sleepTimeBuffer!= 5)
+			if (mp.buttons.pressed(BTN_RIGHT) && sleepTimeBuffer!= 5)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
@@ -645,14 +645,14 @@ void displayMenu() {
 				mp.display.drawBitmap(11*2, 107, arrowLeft, TFT_BLACK, 2);
 				mp.display.drawBitmap(65*2, 107, arrowRight, TFT_BLACK, 2);
 			}
-			if (mp.buttons.released(BTN_LEFT) && mp.backgroundIndex != 0)
+			if (mp.buttons.pressed(BTN_LEFT) && mp.backgroundIndex != 0)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
 				mp.backgroundIndex--;
 				while(!mp.update());
 			}
-			if (mp.buttons.released(BTN_RIGHT) && mp.backgroundIndex != 6)
+			if (mp.buttons.pressed(BTN_RIGHT) && mp.backgroundIndex != 6)
 			{
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
@@ -661,7 +661,7 @@ void displayMenu() {
 			}
 		}
 
-		if (mp.buttons.released(BTN_UP))
+		if (mp.buttons.pressed(BTN_UP))
 		{
 			blinkState = 1;
 			blinkMillis = millis();
@@ -673,7 +673,7 @@ void displayMenu() {
 			else
 				cursor--;
 		}
-		if (mp.buttons.released(BTN_DOWN))
+		if (mp.buttons.pressed(BTN_DOWN))
 		{
 			blinkState = 1;
 			blinkMillis = millis();
@@ -787,7 +787,7 @@ void soundMenu() {
 			case 0:
 				mp.display.drawBitmap(8, 14, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				mp.display.drawBitmap(134, 14, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				if (mp.buttons.released(BTN_LEFT) && mp.ringVolume > 0)
+				if (mp.buttons.pressed(BTN_LEFT) && mp.ringVolume > 0)
 				{
 					mp.ringVolume--;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
@@ -805,7 +805,7 @@ void soundMenu() {
 					while(!mp.update());
 					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
-				if (mp.buttons.released(BTN_RIGHT) && mp.ringVolume < 14)
+				if (mp.buttons.pressed(BTN_RIGHT) && mp.ringVolume < 14)
 				{
 					mp.ringVolume++;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
@@ -829,7 +829,7 @@ void soundMenu() {
 			case 1:
 				mp.display.drawBitmap(8, 40, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				mp.display.drawBitmap(134, 40, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				if (mp.buttons.released(BTN_LEFT) && mp.mediaVolume > 0)
+				if (mp.buttons.pressed(BTN_LEFT) && mp.mediaVolume > 0)
 				{
 					mp.mediaVolume--;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
@@ -847,7 +847,7 @@ void soundMenu() {
 					while(!mp.update());
 					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
-				if (mp.buttons.released(BTN_RIGHT) && mp.mediaVolume < 14)
+				if (mp.buttons.pressed(BTN_RIGHT) && mp.mediaVolume < 14)
 				{
 					mp.mediaVolume++;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
@@ -925,7 +925,7 @@ void soundMenu() {
 				break;
 		}
 
-		if (mp.buttons.released(BTN_UP))
+		if (mp.buttons.pressed(BTN_UP))
 		{
 			mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 			mp.osc->note(75, 0.05);
@@ -938,7 +938,7 @@ void soundMenu() {
 			blinkState = 0;
 			blinkMillis = millis();
 		}
-		if (mp.buttons.released(BTN_DOWN))
+		if (mp.buttons.pressed(BTN_DOWN))
 		{
 			mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 			mp.osc->note(75, 0.05);
@@ -1122,13 +1122,13 @@ void securityMenu() {
 					mp.display.drawRect(69, 12, 17*2, 11*2, TFT_BLACK);
 				else if (blinkState && pinLockBuffer == 0)
 					mp.display.drawRect(113, 12, 38, 11*2, TFT_BLACK);
-				if (mp.buttons.released(BTN_LEFT) && pinLockBuffer == 0)
+				if (mp.buttons.pressed(BTN_LEFT) && pinLockBuffer == 0)
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
 					pinLockBuffer = !pinLockBuffer;
 				}
-				if (mp.buttons.released(BTN_RIGHT) && pinLockBuffer == 1)
+				if (mp.buttons.pressed(BTN_RIGHT) && pinLockBuffer == 1)
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
@@ -1485,7 +1485,7 @@ void securityMenu() {
 				}
 			}
 
-			if (mp.buttons.released(BTN_UP))
+			if (mp.buttons.pressed(BTN_UP))
 			{
 				blinkState = 1;
 				blinkMillis = millis();
@@ -1497,7 +1497,7 @@ void securityMenu() {
 				else if (pinLockBuffer == 1 && cursor == 1)
 					cursor--;
 			}
-			if (mp.buttons.released(BTN_DOWN))
+			if (mp.buttons.pressed(BTN_DOWN))
 			{
 				blinkState = 1;
 				blinkMillis = millis();
@@ -1818,7 +1818,7 @@ void timeMenu()
 						blinkState = !blinkState;
 					}
 					mp.update();
-					if(mp.buttons.released(BTN_RIGHT) && editCursor < 5) //RIGHT
+					if(mp.buttons.pressed(BTN_RIGHT) && editCursor < 5) //RIGHT
 					{
 						blinkState = 1;
 						previousMillis = millis();
@@ -1907,7 +1907,7 @@ void timeMenu()
 						editCursor++;
 
 					}
-					if(mp.buttons.released(BTN_LEFT) && editCursor > 0) //LEFT
+					if(mp.buttons.pressed(BTN_LEFT) && editCursor > 0) //LEFT
 					{
 						while(!mp.update());
 						blinkState = 1;
@@ -1997,7 +1997,7 @@ void timeMenu()
 
 					}
 
-					if(mp.buttons.released(BTN_UP) && editCursor > 2) //UP
+					if(mp.buttons.pressed(BTN_UP) && editCursor > 2) //UP
 					{
 						while(!mp.update());
 						blinkState = 1;
@@ -2073,7 +2073,7 @@ void timeMenu()
 						}
 						editCursor-=3;
 					}
-					if(mp.buttons.released(BTN_DOWN) && editCursor < 3) //DOWN
+					if(mp.buttons.pressed(BTN_DOWN) && editCursor < 3) //DOWN
 					{
 						while(!mp.update());
 						blinkState = 1;
@@ -2299,7 +2299,7 @@ void timeMenu()
 			blinkState = !blinkState;
 			mp.updateTimeRTC();
 		}
-		if (mp.buttons.released(BTN_UP) && cursor > 0)
+		if (mp.buttons.pressed(BTN_UP) && cursor > 0)
 		{
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
@@ -2308,7 +2308,7 @@ void timeMenu()
 			while(!mp.update());
 			cursor--;
 		}
-		if (mp.buttons.released(BTN_DOWN) && cursor < 1)
+		if (mp.buttons.pressed(BTN_DOWN) && cursor < 1)
 		{
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
@@ -2564,7 +2564,7 @@ bool updateMenu()
 			previousMillis = millis();
 			blinkState = !blinkState;
 		}
-		if (mp.buttons.released(BTN_UP))
+		if (mp.buttons.pressed(BTN_UP))
 		{
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
@@ -2576,7 +2576,7 @@ bool updateMenu()
 			else
 				cursor--;
 		}
-		if (mp.buttons.released(BTN_DOWN))
+		if (mp.buttons.pressed(BTN_DOWN))
 		{
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
@@ -2663,7 +2663,7 @@ int8_t notificationsAudioMenu(String* items, uint8_t length) {
 
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
@@ -3382,7 +3382,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
 
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
@@ -3531,7 +3531,7 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());

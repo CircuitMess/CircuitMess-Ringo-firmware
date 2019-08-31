@@ -8,6 +8,7 @@ void calculatorApp()
 	uint8_t tempCursor;
 	uint8_t cursor = 0;
 	uint32_t blinkMillis = millis();
+	uint32_t helpMillisOne;
 	int8_t operation = -1;
 	bool blinkState = 0;
 	bool clear = 0;
@@ -124,7 +125,7 @@ void calculatorApp()
 
 		if(mp.buttons.held(BTN_FUN_LEFT, 40))
 		{
-			while(!mp.update());
+			while(!mp.update(0));
 			result = 0;
 			operation = -1;
 			input = "0";
@@ -142,7 +143,7 @@ void calculatorApp()
 			mp.exitedLockscreen = true;
 			mp.lockscreen();
 		}
-		if(mp.buttons.released(BTN_LEFT))
+		if(mp.buttons.pressed(BTN_LEFT))
 		{
 			mp.display.drawRect(7 + 37 * (cursor % 4), 48 + 27 * (int)(cursor / 4), 35, 25, 0xA794);
 			mp.display.drawRect(6 + 37 * (cursor % 4), 47 + 27 * (int)(cursor / 4), 37, 27, 0xA794);
@@ -152,9 +153,11 @@ void calculatorApp()
 				cursor += 3;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update());
+			helpMillisOne = millis();
+		while(!mp.update(0));
+		//while (helpMillisOne + 50 > millis());
 		}
-		if(mp.buttons.released(BTN_RIGHT))
+		if(mp.buttons.pressed(BTN_RIGHT))
 		{
 			mp.display.drawRect(7 + 37 * (cursor % 4), 48 + 27 * (int)(cursor / 4), 35, 25, 0xA794);
 			mp.display.drawRect(6 + 37 * (cursor % 4), 47 + 27 * (int)(cursor / 4), 37, 27, 0xA794);
@@ -164,9 +167,9 @@ void calculatorApp()
 				cursor -= 3;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update());
+			while(!mp.update(1));
 		}
-		if(mp.buttons.released(BTN_DOWN))
+		if(mp.buttons.pressed(BTN_DOWN))
 		{
 			mp.display.drawRect(7 + 37 * (cursor % 4), 48 + 27 * (int)(cursor / 4), 35, 25, 0xA794);
 			mp.display.drawRect(6 + 37 * (cursor % 4), 47 + 27 * (int)(cursor / 4), 37, 27, 0xA794);
@@ -176,9 +179,9 @@ void calculatorApp()
 				cursor -= 4;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update());
+			while(!mp.update(1));
 		}
-		if(mp.buttons.released(BTN_UP))
+		if(mp.buttons.pressed(BTN_UP))
 		{
 			mp.display.drawRect(7 + 37 * (cursor % 4), 48 + 27 * (int)(cursor / 4), 35, 25, 0xA794);
 			mp.display.drawRect(6 + 37 * (cursor % 4), 47 + 27 * (int)(cursor / 4), 37, 27, 0xA794);
@@ -188,7 +191,7 @@ void calculatorApp()
 				cursor += 4;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update());
+			while(!mp.update(1));
 		}
 		if(mp.buttons.released(BTN_A))
 		{
@@ -267,12 +270,13 @@ void calculatorApp()
 					operation = cursor;
 
 			}
-			while(!mp.update());
+
+			while(!mp.update(0));
 			Serial.println(operation);
 		}
 		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{
-			while(!mp.update());
+			while(!mp.update(0));
 			if(operation != -1 && !clear)
 			{
 				if(!set)
@@ -313,7 +317,9 @@ void calculatorApp()
 		}
 		if(mp.buttons.released(BTN_B))
 			break;
-		mp.update();
+		helpMillisOne = millis();
+		mp.update(0);
+		while (helpMillisOne + 50 > millis());
 	}
-	while(!mp.update());
+	while(!mp.update(0));
 }

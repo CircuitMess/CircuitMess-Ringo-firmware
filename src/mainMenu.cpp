@@ -231,7 +231,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			while(!mp.update());
 			return cursorY * x_elements + cursorX;  //returns index of selected icon
 		}
-		if (mp.buttons.released(BTN_UP)) //UP
+		if (mp.buttons.pressed(BTN_UP)) //UP
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
@@ -270,7 +270,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			elapsedMillis = millis();
 			cursorState = 1;
 		}
-		if (mp.buttons.released(BTN_DOWN))//DOWN
+		if (mp.buttons.pressed(BTN_DOWN))//DOWN
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
@@ -306,7 +306,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			elapsedMillis = millis();
 			cursorState = 1;
 		}
-		if (mp.buttons.released(BTN_LEFT)) //LEFT
+		if (mp.buttons.pressed(BTN_LEFT)) //LEFT
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);
@@ -327,7 +327,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			elapsedMillis = millis();
 			cursorState = 1;
 		}
-		if (mp.buttons.released(BTN_RIGHT))//RIGHT
+		if (mp.buttons.pressed(BTN_RIGHT))//RIGHT
 		{
 			mp.display.drawRect(3 + cursorX * 52, 17 + (cameraY) * 56, 50, 54, TFT_BLACK);
 			mp.display.drawRect(2 + cursorX * 52, 16 + (cameraY) * 56, 52, 56, TFT_BLACK);

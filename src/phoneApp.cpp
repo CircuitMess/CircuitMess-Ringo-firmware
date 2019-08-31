@@ -49,7 +49,7 @@ void phoneApp() {
 		}
 		if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen(); 
 		}
 		if(mp.buttons.held(BTN_0, 20))
 		{
@@ -486,7 +486,7 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 				callLogMenuDrawCursor(cursor, cameraY_actual);
 					if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen(); 
 			}	
 
 			if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {
