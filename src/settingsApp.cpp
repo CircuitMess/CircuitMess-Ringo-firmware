@@ -2825,6 +2825,8 @@ void wifiConnect()
 					mp.display.printCenter("Enter password:");
 					mp.display.setCursor(1, 112);
 					mp.display.print("Erase");
+					mp.display.setCursor(22, 83);
+					mp.display.print("Press A to confirm");
 					mp.display.setCursor(133, 112);
 					mp.display.print("Help");
 					if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
