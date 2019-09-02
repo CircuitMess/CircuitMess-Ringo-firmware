@@ -805,7 +805,8 @@ void composeSMS(JsonArray *messages)
 			if(contact.startsWith("00"))
 				contact = String("+" + contact.substring(2));
 			while(!mp.update());
-
+			Serial1.println("AT+CMGF=1");
+			mp.waitForOK();
 
 			Serial1.print("AT+CMGS=\"");
 			Serial1.print(contact);
