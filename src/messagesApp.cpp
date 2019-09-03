@@ -457,6 +457,14 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	uint32_t blinkMillis = millis();
 	bool blinkState = 0;
 	int length = messages.size();
+	uint8_t actualMessagesSize = messages.size();
+	for(int i = 0; i < messages.size(); i++)
+	{
+		Serial.println(messages[i]["text"].as<char*>());
+		Serial.println(strlen(messages[i]["text"].as<char*>()));
+		if(strlen(messages[i]["text"].as<char*>()) > 160)
+			actualMessagesSize+=strlen(messages[i]["text"].as<char*>())/160;
+	}
 	uint16_t sortingArray[length];
 	for(int i = 0; i < length; i++)
 		sortingArray[i] = i;
@@ -566,7 +574,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Messages");
 		mp.display.print("          ");
-		mp.display.printf("%d/35", length);
+		mp.display.printf("%d/35", actualMessagesSize);
 		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
 		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
 		mp.display.setCursor(5, 113);
@@ -841,7 +849,7 @@ void composeSMS(JsonArray *messages)
 				mp.display.printCenter("Text sent!");
 				while(!mp.update());
 				// String temp = mp.checkContact(contact);
-				mp.saveMessage(content, mp.checkContact(contact), contact, 1, 0);
+				mp.saveMessage((char*)content.c_str(), mp.checkContact(contact), contact, 1, 0);
 				delay(1000);
 			}
 			else
