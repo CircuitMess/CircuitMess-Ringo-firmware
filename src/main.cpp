@@ -2155,6 +2155,7 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
+
 	mp.shutdownPopupEnable(1);
 	// startupWizard();
 	// controlTry();

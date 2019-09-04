@@ -263,6 +263,8 @@ void phoneApp() {
 				mp.networkRegistered = readyForCall;
 				if(readyForCall)
 				{
+					Serial1.println("AT+CMGF=1");
+					mp.waitForOK();
 					if(mp.signalStrength == 99)
 					{
 						Serial1.println("AT+CSQ");
