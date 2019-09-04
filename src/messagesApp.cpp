@@ -313,10 +313,18 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
 
-		mp.display.setCursor(1, y);
-		mp.display.print(content);
+		mp.display.setCursor(2, y);
+		for(uint16_t i = 0; i < content.length(); i++)
+		{
+			mp.display.print(content[i]);
+			if(mp.display.getCursorX() > 150)
+				mp.display.print("\n");
+			if(mp.display.getCursorX() < 2)
+				mp.display.setCursor(2, mp.display.getCursorY());
+			if(mp.display.getCursorY() > 110)
+				break;
+		}
 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
-			Serial.println(mp.display.cursor_y);
 			if (mp.display.cursor_y >= 94)
 			{
 
@@ -381,7 +389,8 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 		mp.display.print("Erase");
 		mp.update();
 	}
-	while(!mp.update());
+	// while(!mp.update());
+	mp.buttons.update();
 	return 0;
 }
 void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) {
@@ -460,8 +469,6 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	uint8_t actualMessagesSize = messages.size();
 	for(int i = 0; i < messages.size(); i++)
 	{
-		Serial.println(messages[i]["text"].as<char*>());
-		Serial.println(strlen(messages[i]["text"].as<char*>()));
 		if(strlen(messages[i]["text"].as<char*>()) > 160)
 			actualMessagesSize+=strlen(messages[i]["text"].as<char*>())/160;
 	}
@@ -897,4 +904,3 @@ void composeSMS(JsonArray *messages)
 		}
 	}
 }
-
