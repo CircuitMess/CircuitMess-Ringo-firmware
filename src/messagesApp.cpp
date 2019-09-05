@@ -52,8 +52,8 @@ void messagesApp() {
 		mp.display.printCenter("Error loading data");
 		jb.clear();
 		while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
-			mp.update();
-		while(!mp.update());
+			mp.update(0);
+		while(!mp.update(0));
 	}
 	else
 	{
@@ -80,7 +80,7 @@ void messagesApp() {
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					while(!mp.update(0));
 				}
 				else if(!mp.simInserted)
 				{
@@ -93,7 +93,7 @@ void messagesApp() {
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					while(!mp.update(0));
 				}
 				else if(mp.airplaneMode)
 				{
@@ -106,7 +106,7 @@ void messagesApp() {
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 						mp.update();
-					while(!mp.update());
+					while(!mp.update(0));
 				}
 				else
 				{
@@ -134,7 +134,7 @@ void messagesApp() {
 								mp.display.printCenter(F("Registering to network"));
 								mp.display.setCursor(0, mp.display.height()/2);
 								mp.display.printCenter(F("Please wait..."));
-								while(!mp.update());
+								while(!mp.update(0));
 								delay(1000);
 							}
 						}
@@ -156,7 +156,7 @@ void messagesApp() {
 								mp.display.printCenter(F("Registering to network"));
 								mp.display.setCursor(0, mp.display.height()/2);
 								mp.display.printCenter(F("Please wait..."));
-								while(!mp.update());
+								while(!mp.update(0));
 								delay(1000);
 							}
 						}
@@ -186,7 +186,7 @@ void messagesApp() {
 								uint32_t tempMillis = millis();
 								while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 									mp.update();
-								while(!mp.update());
+								while(!mp.update(0));
 							}
 							else
 							{
@@ -205,7 +205,7 @@ void messagesApp() {
 
 									while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 										mp.update();
-									while(!mp.update());
+									while(!mp.update(0));
 								}
 								mp.newMessage = 0;
 							}
@@ -227,7 +227,7 @@ void messagesApp() {
 
 								while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 									mp.update();
-								while(!mp.update());
+								while(!mp.update(0));
 							}
 							mp.newMessage = 0;
 						}
@@ -245,7 +245,7 @@ void messagesApp() {
 						uint32_t tempMillis = millis();
 						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 							mp.update();
-						while(!mp.update());
+						while(!mp.update(0));
 					}
 				}
 				menuChoice = -1;
@@ -404,7 +404,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 		mp.display.drawFastHLine(0,111, 160, TFT_WHITE);
 		mp.display.setCursor(4, 112);
 		mp.display.print("Erase");
-		mp.update();
+		while(!mp.update());
 	}
 	while(!mp.update());
 	return 0;
@@ -607,7 +607,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
-			while(!mp.update());// Exit when pressed
+			while(!mp.update(0));// Exit when pressed
 			break;
 		}
 
@@ -828,19 +828,19 @@ void composeSMS(JsonArray *messages)
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			while(!mp.update());
+			mp.update(0);
 			break;
 		}
 		if(mp.buttons.released(BTN_FUN_RIGHT)){
 			helpPop = !helpPop;
 			mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);	
-			while(!mp.update());
+			while(!mp.update(0));
 		}
 		while (helpPop) {
 			if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B)){
 				helpPop = !helpPop;
 			}
-			mp.update();
+			mp.update(0);
 		}
 		if (mp.buttons.released(BTN_A) && contact.length() > 1 && content != "") // SEND SMS
 		{
@@ -850,7 +850,7 @@ void composeSMS(JsonArray *messages)
 			mp.display.printCenter("Sending text...");
 			if(contact.startsWith("00"))
 				contact = String("+" + contact.substring(2));
-			while(!mp.update());
+			while(!mp.update(0));
 
 
 			Serial1.print("AT+CMGS=\"");
@@ -884,7 +884,7 @@ void composeSMS(JsonArray *messages)
 				while (Serial1.readString().indexOf("OK") != -1);
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.printCenter("Text sent!");
-				while(!mp.update());
+				while(!mp.update(0));
 				// String temp = mp.checkContact(contact);
 				mp.saveMessage(content, mp.checkContact(contact), contact, 1, 0);
 				delay(1000);
@@ -893,7 +893,7 @@ void composeSMS(JsonArray *messages)
 			{
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.printCenter("Error sending text!");
-				while(!mp.update());
+				while(!mp.update(0));
 				delay(1000);
 			}
 			
@@ -911,7 +911,7 @@ void composeSMS(JsonArray *messages)
 		mp.display.print("Erase");
 		mp.display.setCursor(130,112);
 		mp.display.print("Help");
-		mp.update();
+		mp.update(0);
 		if(mp.newMessage)
 		{
 			File file = SD.open("/.core/messages.json", "r");
@@ -928,7 +928,7 @@ void composeSMS(JsonArray *messages)
 
 				while (mp.buttons.released(BTN_B) == 0)//BUTTON BACK
 					mp.update();
-				while(!mp.update());
+				while(!mp.update(0));
 			}
 			mp.newMessage = 0;
 		}

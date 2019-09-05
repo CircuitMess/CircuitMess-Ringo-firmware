@@ -87,6 +87,7 @@ void flashlightApp()
 
 		if(mp.buttons.released(BTN_HOME)) {
 			mp.exitedLockscreen = true;
+			if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
 			mp.lockscreen(); 
 		}
 
@@ -95,20 +96,31 @@ void flashlightApp()
 			state = !state;
 			Serial.println(state);
 			delay(5);
-			while(!mp.update());
+			if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
+			while(!mp.update(0));
 		}
  		if(mp.buttons.released(BTN_B))
 		{
 			for(int i = 0; i < 8; i++)
 				mp.leds[i] = CRGB::Black;
-				
+			if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
 			mp.pixelsBrightness = localBrightness;  // rad lampe u pozadini
 			break;
 		} 
+		if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
 		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 			{
+				if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextFont(2);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(2, 110);
+				mp.display.print("Color");
+				mp.display.setCursor(112, 110);
+				mp.display.print("On/Off");
 				if(!state)
 					{
 					mp.pixelsBrightness = 0;
@@ -152,28 +164,30 @@ void flashlightApp()
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
 					color--;
-					while(!mp.update());
+					if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
+					while(!mp.update(0));
 				}
 				if (mp.buttons.released(BTN_RIGHT) && color < 6)
 				{
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
 					color++;
-					while(!mp.update());
+					mp.update(0);
 				}
 				if(state) colorChange(color);
-				mp.update();
+				while(!mp.update(0));
 				if(mp.buttons.released(BTN_FUN_LEFT)) break;
 				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 					{
 						state = !state;
 						Serial.println(state);
 						delay(5);
-						while(!mp.update());
+						if(mp.buttons.update()) mp.buttonsRefreshMillis = millis();
+						while(!mp.update(0));
 					}
 			}
-			while(!mp.update());
+			mp.update(0);
 		}
-		mp.update();
+		mp.update(1);
 	}
 }

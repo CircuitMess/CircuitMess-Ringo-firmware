@@ -119,7 +119,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	bool newScreen = 1;
 	mp.display.fillScreen(TFT_BLACK);
 	Serial.println(mp.buttons.timeHeld(BTN_A));
-	// while(!mp.update());
+	mp.update(0);
 	while (1)
 	{
 		mp.display.fillRect(0,0,mp.display.width(), 14, TFT_BLACK);
@@ -228,7 +228,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			// mp.osc->note(75, 0.05);
 			// mp.osc->play();
-			while(!mp.update());
 			return cursorY * x_elements + cursorX;  //returns index of selected icon
 		}
 		if (mp.buttons.pressed(BTN_UP)) //UP
@@ -242,7 +241,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[0] = CRGB::Blue;
 			mp.leds[7] = CRGB::Blue;
 			FastLED.clear();
-			while(!mp.update());
 
 			if (cursorY == 0)
 			{
@@ -281,7 +279,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[3] = CRGB::Blue;
 			mp.leds[4] = CRGB::Blue;
 			FastLED.clear();
-			while(!mp.update());
 
 			if (cursorY == y_elements - 1)
 			{
@@ -317,7 +314,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[6] = CRGB::Blue;
 			mp.leds[5] = CRGB::Blue;
 			FastLED.clear();
-			while(!mp.update());
 
 			if (cursorX == 0) {
 				cursorX = x_elements - 1;
@@ -338,7 +334,6 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 			mp.leds[1] = CRGB::Blue;
 			mp.leds[2] = CRGB::Blue;
 			FastLED.clear();
-			while(!mp.update());
 
 			if (cursorX == x_elements - 1) {
 				cursorX = 0;
@@ -428,7 +423,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 				}
 			}
 		}
-		mp.update();
+		//while(!mp.update());
+		mp.update(0);
 	}
 }
 void mainMenu()
@@ -464,8 +460,9 @@ void mainMenu()
 					mp.display.printCenter(F("PLACEHOLDER"));
 					uint32_t tempMillis = millis();
 					while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
+						while(!mp.update());
 					while(!mp.update());
+					
 				}
 
 				if (titles[index] == "Messages")
@@ -486,7 +483,7 @@ void mainMenu()
 						mp.display.printCenter(F("SD card missing"));
 						uint32_t tempMillis = millis();
 						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
+							while(!mp.update());
 						while(!mp.update());
 					}
 				}
@@ -506,7 +503,7 @@ void mainMenu()
 						mp.display.printCenter(F("Insert SD card and reset"));
 						uint32_t tempMillis = millis();
 						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
+							while(!mp.update());
 						while(!mp.update());
 					}
 				}
@@ -538,7 +535,7 @@ void mainMenu()
 						mp.display.printCenter(F("Insert SD and reset"));
 						uint32_t tempMillis = millis();
 						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
+							while(!mp.update());
 						while(!mp.update());
 					}
 					else if(mp.airplaneMode)
@@ -550,7 +547,7 @@ void mainMenu()
 						mp.display.printCenter(F("Turn off airplane mode"));
 						uint32_t tempMillis = millis();
 						while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-							mp.update();
+							while(!mp.update());
 						while(!mp.update());
 					}
 				}
@@ -582,8 +579,10 @@ void mainMenu()
 				initWavLib();
 				mp.updateFromFS(String("/" + foo + "/" + foo + ".bin"));
 			}
-			mp.update();
+			mp.update(0);
 
 		}
+	while(!mp.update());
+	//while(!mp.update());
 	}
 }
