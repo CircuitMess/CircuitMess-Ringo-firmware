@@ -391,27 +391,33 @@ void callNumber(String number) {
 		delay(5);
 		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
 			buffer = "";
-		if (localBuffer.indexOf("+CLCC: 1") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
+		if (((localBuffer.indexOf("CLCC: 1") != -1 && mp.sim_module_version == 1) || 
+		(localBuffer.indexOf("CLCC: 2") != -1 && mp.sim_module_version == 0)) || localBuffer.indexOf("AT+CMIC") != -1)
 		{
-			if (localBuffer.indexOf("1,0,0,0,0") != -1 || localBuffer.indexOf("AT+CMIC") != -1)
+			if(((localBuffer.indexOf("1,0,0,0,0") != -1 && mp.sim_module_version == 1) 
+			|| (localBuffer.indexOf("2,0,0,0,0") != -1 && mp.sim_module_version == 0))
+			|| localBuffer.indexOf("AT+CMIC") != -1  )
 			{
 				callState = 2;
 				
 			}
 
-			else if (localBuffer.indexOf("1,0,3,0,0") != -1)
+			if((localBuffer.indexOf("1,0,3,0,0") != -1 && mp.sim_module_version == 1) 
+			|| (localBuffer.indexOf("2,0,3,0,0") != -1 && mp.sim_module_version == 0))
 			{
 				callState = 0;
 				
 			}
 
-			else if (localBuffer.indexOf("1,0,2,0,0") != -1)
+			if((localBuffer.indexOf("1,0,2,0,0") != -1 && mp.sim_module_version == 1) 
+			|| (localBuffer.indexOf("2,0,2,0,0") != -1 && mp.sim_module_version == 0))
 			{
 				callState = 1;
 
 			}
 
-			else if (localBuffer.indexOf("1,0,6,0,0") != -1)
+			if((localBuffer.indexOf("1,0,6,0,0") != -1 && mp.sim_module_version == 1) 
+			|| (localBuffer.indexOf("2,0,6,0,0") != -1 && mp.sim_module_version == 0))
 			{
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
@@ -463,9 +469,6 @@ void callNumber(String number) {
 				delay(1000);
 				break;
 			}
-			
-			
-
 		}
 
 
@@ -551,8 +554,9 @@ void callNumber(String number) {
 			mp.updateTimeRTC();
 			Serial.println("B PRESSED");
 			Serial1.println("ATH");
+			mp.waitForOK();
 			uint32_t curr_millis = millis();
-			while (readSerial().indexOf("1,0,6,0,0") == -1 && millis() - curr_millis < 2000)	{
+			while (readSerial().indexOf("1,0,6,0,0") == -1 && millis() - curr_millis < 2000){
 				Serial1.println("ATH");
 			}
 			if(mp.SDinsertedFlag)
