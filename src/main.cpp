@@ -395,9 +395,9 @@ void callNumber(String number) {
 		}
 		if(buffer.indexOf("\r") != -1)
 			buffer = "";
-		Serial.println("---------------");
-		Serial.println(buffer);
-		delay(5);
+		// Serial.println("---------------");
+		// Serial.println(buffer);
+		// delay(5);
 		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
 			buffer = "";
 		if (localBuffer.indexOf(String("CLCC: " + String(callIdNumber))) != -1 || localBuffer.indexOf("AT+CMIC") != -1)
