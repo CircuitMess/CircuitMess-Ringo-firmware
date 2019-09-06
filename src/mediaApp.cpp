@@ -702,7 +702,7 @@ int16_t audioPlayer(uint16_t index) {
 			Serial.print("joystick Y: ");
 			Serial.println(mp.buttons.getJoystickY());
 			Serial.println("------------------");
-			mp.update(1);
+			mp.update();
 			if(mp3->isPlaying() < 1 && playState) //if the current song is finished, play the next one
 			{
 				Serial.println("song end");

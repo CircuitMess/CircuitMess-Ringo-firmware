@@ -125,7 +125,7 @@ void calculatorApp()
 
 		if(mp.buttons.held(BTN_FUN_LEFT, 40))
 		{
-			while(!mp.update(0));
+			while(!mp.update());
 			result = 0;
 			operation = -1;
 			input = "0";
@@ -154,7 +154,7 @@ void calculatorApp()
 			blinkState = 1;
 			blinkMillis = millis();
 			helpMillisOne = millis();
-		while(!mp.update(0));
+		while(!mp.update());
 		//while (helpMillisOne + 50 > millis());
 		}
 		if(mp.buttons.pressed(BTN_RIGHT))
@@ -167,7 +167,7 @@ void calculatorApp()
 				cursor -= 3;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update(1));
+			while(!mp.update());
 		}
 		if(mp.buttons.pressed(BTN_DOWN))
 		{
@@ -179,7 +179,7 @@ void calculatorApp()
 				cursor -= 4;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update(1));
+			while(!mp.update());
 		}
 		if(mp.buttons.pressed(BTN_UP))
 		{
@@ -191,7 +191,7 @@ void calculatorApp()
 				cursor += 4;
 			blinkState = 1;
 			blinkMillis = millis();
-			while(!mp.update(1));
+			while(!mp.update());
 		}
 		if(mp.buttons.released(BTN_A))
 		{
@@ -271,12 +271,12 @@ void calculatorApp()
 
 			}
 
-			while(!mp.update(0));
+			while(!mp.update());
 			Serial.println(operation);
 		}
 		if(mp.buttons.released(BTN_FUN_RIGHT))
 		{
-			while(!mp.update(0));
+			while(!mp.update());
 			if(operation != -1 && !clear)
 			{
 				if(!set)
@@ -318,8 +318,8 @@ void calculatorApp()
 		if(mp.buttons.released(BTN_B))
 			break;
 		helpMillisOne = millis();
-		mp.update(0);
+		mp.update();
 		while (helpMillisOne + 50 > millis());
 	}
-	while(!mp.update(0));
+	while(!mp.update());
 }
