@@ -371,6 +371,8 @@ void callNumber(String number) {
 	else
 		mp.display.printCenter(contact);
 	uint8_t callState = 1;
+	uint8_t callIdNumber = 0;
+	
 	while (1)
 	{
 		mp.display.fillScreen(TFT_WHITE);
@@ -381,6 +383,13 @@ void callNumber(String number) {
 		}
 		if(buffer.indexOf("CLCC:") != -1 && buffer.indexOf("\r", buffer.indexOf("CLCC:")) != -1)
 		{
+			if(callIdNumber < 1)
+			{
+				uint16_t helper = buffer.indexOf("+CLCC: ") + 7;
+				callIdNumber = buffer.substring(helper, helper + 1).toInt();
+				Serial.print("call id: ");
+				Serial.println(callIdNumber);
+			}
 			localBuffer = buffer;
 			buffer = "";
 		}
@@ -391,33 +400,28 @@ void callNumber(String number) {
 		delay(5);
 		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
 			buffer = "";
-		if (((localBuffer.indexOf("CLCC: 1") != -1 && mp.sim_module_version == 1) || 
-		(localBuffer.indexOf("CLCC: 2") != -1 && mp.sim_module_version == 0)) || localBuffer.indexOf("AT+CMIC") != -1)
+		if (localBuffer.indexOf(String("CLCC: " + String(callIdNumber))) != -1 || localBuffer.indexOf("AT+CMIC") != -1)
 		{
-			if(((localBuffer.indexOf("1,0,0,0,0") != -1 && mp.sim_module_version == 1) 
-			|| (localBuffer.indexOf("2,0,0,0,0") != -1 && mp.sim_module_version == 0))
+			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,0,0,0")) != -1 
 			|| localBuffer.indexOf("AT+CMIC") != -1  )
 			{
 				callState = 2;
 				
 			}
 
-			if((localBuffer.indexOf("1,0,3,0,0") != -1 && mp.sim_module_version == 1) 
-			|| (localBuffer.indexOf("2,0,3,0,0") != -1 && mp.sim_module_version == 0))
+			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,3,0,0")) != -1 )
 			{
 				callState = 0;
 				
 			}
 
-			if((localBuffer.indexOf("1,0,2,0,0") != -1 && mp.sim_module_version == 1) 
-			|| (localBuffer.indexOf("2,0,2,0,0") != -1 && mp.sim_module_version == 0))
+			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,2,0,0")) != -1)
 			{
 				callState = 1;
 
 			}
 
-			if((localBuffer.indexOf("1,0,6,0,0") != -1 && mp.sim_module_version == 1) 
-			|| (localBuffer.indexOf("2,0,6,0,0") != -1 && mp.sim_module_version == 0))
+			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,6,0,0")) != -1)
 			{
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
@@ -553,12 +557,11 @@ void callNumber(String number) {
 			while(!mp.update());
 			mp.updateTimeRTC();
 			Serial.println("B PRESSED");
+			// Serial1.println("ATH");
+			// mp.waitForOK();
 			Serial1.println("ATH");
-			mp.waitForOK();
-			uint32_t curr_millis = millis();
-			while (readSerial().indexOf("1,0,6,0,0") == -1 && millis() - curr_millis < 2000){
-				Serial1.println("ATH");
-			}
+			buffer = mp.waitForOK();
+			Serial.println(buffer);
 			if(mp.SDinsertedFlag)
 				mp.addCall(number, mp.checkContact(number), mp.RTC.now().unixtime(), tmp_time, 1);
 			delay(1000);
