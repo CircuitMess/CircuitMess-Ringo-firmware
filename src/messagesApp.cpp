@@ -676,11 +676,36 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		
 		if(mp.buttons.released(BTN_FUN_LEFT) && cursor > 0)
 		{
+			String temp = messages[sortingArray[cursor - 1]]["contact"].as<String>();
+			for(int i = 0; i < 10; i ++)
+			{
+				if(temp == "")
+				{
+					if(mp.notificationTypeList[i] == 2 &&
+					mp.notificationDescriptionList[i] == messages[sortingArray[cursor - 1]]["number"].as<String>() &&
+					mp.notificationTimeList[i] == DateTime(messages[sortingArray[cursor - 1]]["dateTime"].as<uint32_t>()))
+					{
+						mp.removeNotification(i);
+						break;
+					}
+				}
+				else
+				{
+					if(mp.notificationTypeList[i] == 2 &&
+					mp.notificationDescriptionList[i] == messages[sortingArray[cursor - 1]]["contact"].as<String>() &&
+					mp.notificationTimeList[i] == DateTime(messages[sortingArray[cursor - 1]]["dateTime"].as<uint32_t>()))
+					{
+						mp.removeNotification(i);
+						break;
+					}
+				}
+			}
 			messages.remove(sortingArray[cursor - 1]);
 			File file = SD.open("/.core/messages.json", "w");
 			messages.prettyPrintTo(file);
 			file.close();
 			return -3 - sortingArray[cursor-1];
+
 		}
 		if(mp.newMessage)
 		{
