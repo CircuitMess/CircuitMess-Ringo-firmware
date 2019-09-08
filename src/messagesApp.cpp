@@ -60,6 +60,7 @@ void messagesApp() {
 		while (1)
 		{
 			menuChoice = smsMenu(jarr, menuChoice);
+			Serial.print("chosen: ");
 			Serial.println(menuChoice);
 
 			if (menuChoice == -1)
@@ -310,10 +311,8 @@ void messagesApp() {
 			}
 			else
 			{
-				// Serial.print("before: "); Serial.println(menuChoice);
 				menuChoice = -(menuChoice + 3);
 				menuChoice--;
-				// Serial.print("after: "); Serial.println(menuChoice);
 			}
 		}
 	}
@@ -485,7 +484,6 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	int32_t cameraY = 0;
 	int16_t cursor = 0;
 	int32_t cameraY_actual = 0;
-	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
 	uint32_t blinkMillis = millis();
@@ -516,8 +514,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 				}
 			}
 		}
-		if(sortingArray[i] == prevCursor)
-			cursor = i + 1;
+		
 	}
 	for(int i = 0; i < length - 1; i++) //sorting all by latest
 	{
@@ -531,9 +528,11 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		sortingArray[min] = sortingArray[i];
 		sortingArray[i] = temp;
 	}
+	for(int i = 0; i < length; i++)
+		if(sortingArray[i] == prevCursor)
+			cursor = i + 1;
 	Serial.print("Prevcursor: ");
 	Serial.println(prevCursor);
-	Serial.println(length);
 	
 	// for(int i = 0; i < length; i++) // sorting unread by latest
 	// {
@@ -555,7 +554,6 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	// }
 	if(prevCursor == -1)
 		cursor = 0;
-	scale = 2;
 	offset = 19;
 	boxHeight = 30;
 	if (length > 2 && cursor > 2) {
@@ -697,8 +695,6 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	}
 	else
 		return -2;
-	
-
 }
 void smsMenuComposeBoxCursor(uint8_t i, int32_t y) {
 	uint8_t offset;
