@@ -535,132 +535,129 @@ void displayMenu() {
 		mp.display.printCenter(backgroundColorsNames[mp.backgroundIndex]);
 		mp.display.drawBitmap(11*2, 107, arrowLeft, TFT_BLACK, 2);
 		mp.display.drawBitmap(65*2, 107, arrowRight, TFT_BLACK, 2);
-
-		if (cursor == 0)
+		switch(cursor)
 		{
-			if (blinkState)
-			{
-				mp.display.drawBitmap(12, 20, noBrightness, TFT_BLACK, 2);
-				mp.display.drawBitmap(132, 14, fullBrightness, TFT_BLACK, 2);
-
-			}
-			else
-			{
-				mp.display.drawBitmap(12, 20, noBrightness, 0x8FEA, 2);
-				mp.display.drawBitmap(132, 14, fullBrightness, 0x8FEA, 2);
-			}
-			if (mp.buttons.pressed(BTN_LEFT) && mp.brightness > 0)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.brightness--;
-				while(!mp.update());
-			}
-			if (mp.buttons.pressed(BTN_RIGHT) && mp.brightness < 5)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.brightness++;
-				while(!mp.update());
-			}
-		}
-		if (cursor == 1)
-		{
-			for(int i = 0;i<8;i++)
-				mp.leds[i] = CRGB::White;
-			if (mp.buttons.pressed(BTN_LEFT) && mp.pixelsBrightness > 0)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.pixelsBrightness--;
-				while(!mp.update());
-			}
-			if (mp.buttons.pressed(BTN_RIGHT) && mp.pixelsBrightness < 5)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.pixelsBrightness++;
-				while(!mp.update());
-			}
-		}
-		if (cursor == 2)
-		{
-			if(blinkState)
-			{
-				mp.display.setCursor(12, 72);
-				mp.display.print("0s");
-				mp.display.setCursor(132, 72);
-				mp.display.print("30m");
-			}
-			else
-			{
-				mp.display.setTextColor(0x8FEA);
-				mp.display.setCursor(12, 72);
-				mp.display.print("0s");
-				mp.display.setCursor(132, 72);
-				mp.display.print("30m");
-				mp.display.setTextColor(TFT_BLACK);
-			}
-			if (mp.buttons.pressed(BTN_LEFT) && sleepTimeBuffer!= 0)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				sleepTimeBuffer--;
-				while(!mp.update());
-			}
-			if (mp.buttons.pressed(BTN_RIGHT) && sleepTimeBuffer!= 5)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				sleepTimeBuffer++;
-				while(!mp.update());
-			}
-		}
-		if (cursor == 3)
-		{
-			if(blinkState)
-			{
-				if (mp.backgroundIndex == 0)
+			case 0:
+				if (blinkState)
 				{
-					mp.display.fillRect(65*2 , 105, 20, 20, 0x8FEA);
-					mp.display.drawBitmap(11*2, 107, arrowLeft, TFT_BLACK, 2);
-					mp.display.drawBitmap(66*2, 107, arrowRight, TFT_BLACK, 2);
-				}
-				else if (mp.backgroundIndex == 6)
-				{
-					mp.display.fillRect(5*2 , 105, 20, 20, 0x8FEA);
-					mp.display.drawBitmap(10*2, 107, arrowLeft, TFT_BLACK, 2);
-					mp.display.drawBitmap(65*2, 107, arrowRight, TFT_BLACK, 2);
+					mp.display.drawBitmap(12, 20, noBrightness, TFT_BLACK, 2);
+					mp.display.drawBitmap(132, 14, fullBrightness, TFT_BLACK, 2);
+
 				}
 				else
 				{
-					mp.display.fillRect(65*2 , 105, 20, 20, 0x8FEA);
-					mp.display.fillRect(5*2, 105, 20, 20, 0x8FEA);
-					mp.display.drawBitmap(10*2, 107, arrowLeft, TFT_BLACK, 2);
-					mp.display.drawBitmap(66*2, 107, arrowRight, TFT_BLACK, 2);
+					mp.display.drawBitmap(12, 20, noBrightness, 0x8FEA, 2);
+					mp.display.drawBitmap(132, 14, fullBrightness, 0x8FEA, 2);
 				}
-			}
-			else
-			{
-				mp.display.drawBitmap(11*2, 107, arrowLeft, TFT_BLACK, 2);
-				mp.display.drawBitmap(65*2, 107, arrowRight, TFT_BLACK, 2);
-			}
-			if (mp.buttons.pressed(BTN_LEFT) && mp.backgroundIndex != 0)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.backgroundIndex--;
-				while(!mp.update());
-			}
-			if (mp.buttons.pressed(BTN_RIGHT) && mp.backgroundIndex != 6)
-			{
-				mp.osc->note(75, 0.05);
-				mp.osc->play();
-				mp.backgroundIndex++;
-				while(!mp.update());
-			}
+				if (mp.buttons.pressed(BTN_LEFT) && mp.brightness > 0)
+				{
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.brightness--;
+					while(!mp.update());
+				}
+				if (mp.buttons.pressed(BTN_RIGHT) && mp.brightness < 5)
+				{
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.brightness++;
+					while(!mp.update());
+				}
+			break;
+			case 1:
+				for(int i = 0;i<8;i++)
+					mp.leds[i] = CRGB::White;
+				if (mp.buttons.pressed(BTN_LEFT) && mp.pixelsBrightness > 0)
+				{
+					mp.buttons.update();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.pixelsBrightness--;
+				}
+				if (mp.buttons.pressed(BTN_RIGHT) && mp.pixelsBrightness < 5)
+				{
+					mp.buttons.update();
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.pixelsBrightness++;
+				}
+			break;
+			case 2:
+				if(blinkState)
+				{
+					mp.display.setCursor(12, 72);
+					mp.display.print("0s");
+					mp.display.setCursor(132, 72);
+					mp.display.print("30m");
+				}
+				else
+				{
+					mp.display.setTextColor(0x8FEA);
+					mp.display.setCursor(12, 72);
+					mp.display.print("0s");
+					mp.display.setCursor(132, 72);
+					mp.display.print("30m");
+					mp.display.setTextColor(TFT_BLACK);
+				}
+				if (mp.buttons.pressed(BTN_LEFT) && sleepTimeBuffer!= 0)
+				{
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					sleepTimeBuffer--;
+					while(!mp.update());
+				}
+				if (mp.buttons.pressed(BTN_RIGHT) && sleepTimeBuffer!= 5)
+				{
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					sleepTimeBuffer++;
+					while(!mp.update());
+				}
+			break;
+			case 3:
+				if(blinkState)
+				{
+					if (mp.backgroundIndex == 0)
+					{
+						mp.display.fillRect(65*2 , 105, 20, 20, 0x8FEA);
+						mp.display.drawBitmap(11*2, 107, arrowLeft, TFT_BLACK, 2);
+						mp.display.drawBitmap(66*2, 107, arrowRight, TFT_BLACK, 2);
+					}
+					else if (mp.backgroundIndex == 6)
+					{
+						mp.display.fillRect(5*2 , 105, 20, 20, 0x8FEA);
+						mp.display.drawBitmap(10*2, 107, arrowLeft, TFT_BLACK, 2);
+						mp.display.drawBitmap(65*2, 107, arrowRight, TFT_BLACK, 2);
+					}
+					else
+					{
+						mp.display.fillRect(65*2 , 105, 20, 20, 0x8FEA);
+						mp.display.fillRect(5*2, 105, 20, 20, 0x8FEA);
+						mp.display.drawBitmap(10*2, 107, arrowLeft, TFT_BLACK, 2);
+						mp.display.drawBitmap(66*2, 107, arrowRight, TFT_BLACK, 2);
+					}
+				}
+				else
+				{
+					mp.display.drawBitmap(11*2, 107, arrowLeft, TFT_BLACK, 2);
+					mp.display.drawBitmap(65*2, 107, arrowRight, TFT_BLACK, 2);
+				}
+				if (mp.buttons.pressed(BTN_LEFT) && mp.backgroundIndex != 0)
+				{
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.backgroundIndex--;
+					while(!mp.update());
+				}
+				if (mp.buttons.pressed(BTN_RIGHT) && mp.backgroundIndex != 6)
+				{
+					mp.osc->note(75, 0.05);
+					mp.osc->play();
+					mp.backgroundIndex++;
+					while(!mp.update());
+				}
+			break;
 		}
-
 		if (mp.buttons.pressed(BTN_UP))
 		{
 			blinkState = 1;
@@ -1580,14 +1577,18 @@ void timeMenu()
 		if(cursor == 0)
 		{
 			if(!blinkState)
-				if(colorSetup == 1)mp.display.drawRect(46,63, 68, 20, 0xFFED);
-				else mp.display.drawRect(46,63, 68, 20, TFT_WHITE);
+			{
+				if(colorSetup == 1)
+					mp.display.drawRect(46,63, 68, 20, 0xFFED);
+				else
+					mp.display.drawRect(46,63, 68, 20, TFT_WHITE);
+			}
 			if(mp.buttons.released(BTN_A))
 			{
+				mp.buttons.update();
 				uint8_t editCursor = 0;
 				mp.osc->note(75, 0.05);
 				mp.osc->play();
-				while(!mp.update());
 				String inputBuffer;
 				if(mp.clockHour == 0)
 					inputBuffer = "";
@@ -2217,10 +2218,15 @@ void timeMenu()
 		else if(cursor == 1)
 		{
 			if(!blinkState)
-				if(colorSetup == 1)mp.display.drawRect(23,93, 110, 20, 0xFFED);
-				else mp.display.drawRect(23,88, 110, 20, TFT_WHITE);
+			{
+				if(colorSetup == 1)
+					mp.display.drawRect(23,93, 110, 20, 0xFFED);
+				else
+					mp.display.drawRect(23,88, 110, 20, TFT_WHITE);
+			}
 			if(mp.buttons.released(BTN_A))
 			{
+				mp.buttons.update();
 				if(mp.sim_module_version == 255)
 				{
 					mp.display.fillScreen(TFT_BLACK);

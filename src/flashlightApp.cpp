@@ -1,34 +1,34 @@
 #include "flashlightApp.h"
 
 void colorChange(uint8_t col){
-			for(int i = 0; i < 8; i++)
+	for(int i = 0; i < 8; i++)
+	{
+		switch(col)
 		{
-			switch(col)
-			{
-				case 0:
-					mp.leds[i] = CRGB::Cyan;
-					break;
-				case 1:
-					mp.leds[i] = CRGB::Green;
-					break;
-				case 2:
-					mp.leds[i] = CRGB::Red;
-					break;
-				case 3:
-					mp.leds[i] = CRGB::Yellow;
-					break;
-				case 4:
-					mp.leds[i] = CRGB::White;
-					break;
-				case 5:
-					mp.leds[i] = CRGB::Orange;
-					break;
-				case 6:
-					mp.leds[i] = CRGB::Fuchsia;
-					break;
-			}
+			case 0:
+				mp.leds[i] = CRGB::Cyan;
+				break;
+			case 1:
+				mp.leds[i] = CRGB::Green;
+				break;
+			case 2:
+				mp.leds[i] = CRGB::Red;
+				break;
+			case 3:
+				mp.leds[i] = CRGB::Yellow;
+				break;
+			case 4:
+				mp.leds[i] = CRGB::White;
+				break;
+			case 5:
+				mp.leds[i] = CRGB::Orange;
+				break;
+			case 6:
+				mp.leds[i] = CRGB::Fuchsia;
+				break;
 		}
-		mp.pixelsBrightness = 5;
+	}
+	mp.pixelsBrightness = 5;
 	//	mp.update();
 }
 
@@ -92,25 +92,27 @@ void flashlightApp()
 
 		if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 		{
+			mp.buttons.update();
 			state = !state;
 			Serial.println(state);
 			delay(5);
-			while(!mp.update());
 		}
  		if(mp.buttons.released(BTN_B))
 		{
+			mp.buttons.update();
 			for(int i = 0; i < 8; i++)
 				mp.leds[i] = CRGB::Black;
 				
-			mp.pixelsBrightness = localBrightness;  // rad lampe u pozadini
+			mp.pixelsBrightness = localBrightness;
 			break;
 		} 
 		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
-			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+			mp.buttons.update();
+			while(1)
 			{
 				if(!state)
-					{
+				{
 					mp.pixelsBrightness = 0;
 					mp.display.drawIcon(flashlightOff, 46, 10, 34, 50, 2, TFT_GREEN);
 				}
@@ -149,30 +151,35 @@ void flashlightApp()
 				
 				if (mp.buttons.released(BTN_LEFT) && color > 0)
 				{
+					mp.buttons.update();
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
 					color--;
-					while(!mp.update());
 				}
 				if (mp.buttons.released(BTN_RIGHT) && color < 6)
 				{
+					mp.buttons.update();
 					mp.osc->note(75, 0.05);
 					mp.osc->play();
 					color++;
-					while(!mp.update());
 				}
-				if(state) colorChange(color);
+				if(state)
+					colorChange(color);
+				if(mp.buttons.released(BTN_FUN_LEFT))
+				{
+					mp.buttons.update();
+					break;
+				}
+				if(mp.buttons.released(BTN_FUN_RIGHT))
+				{
+					mp.buttons.update();
+					state = !state;
+				}
+				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B))
+					break;
 				mp.update();
-				if(mp.buttons.released(BTN_FUN_LEFT)) break;
-				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
-					{
-						state = !state;
-						Serial.println(state);
-						delay(5);
-						while(!mp.update());
-					}
 			}
-			while(!mp.update());
+			mp.buttons.update();
 		}
 		mp.update();
 	}
