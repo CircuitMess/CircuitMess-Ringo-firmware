@@ -186,9 +186,16 @@ bool settingsApp() {
 				return true;
 	}
 
-	mp.applySettings();
 	mp.display.fillScreen(TFT_BLACK);
 	mp.display.setTextColor(TFT_WHITE);
+	mp.display.setTextFont(2);
+	mp.display.setCursor(0, mp.display.height()/2 - 22);
+	mp.display.printCenter("Applying settings...");
+	mp.display.setCursor(0, mp.display.height()/2 - 2);
+	mp.display.printCenter("Please wait");
+	while(!mp.update());
+	mp.applySettings();
+	mp.display.fillScreen(TFT_BLACK);
 	if(mp.SDinsertedFlag)
 	{
 		mp.saveSettings(0);
@@ -196,7 +203,7 @@ bool settingsApp() {
 		mp.display.setTextFont(2);
 		mp.display.printCenter("Settings saved!");
 		uint32_t tempMillis = millis();
-		while(millis() < tempMillis + 2000)
+		while(millis() < tempMillis + 1500)
 		{
 			mp.update();
 			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
@@ -216,7 +223,7 @@ bool settingsApp() {
 		mp.display.setCursor(0, mp.display.height()/2);
 		mp.display.printCenter("Insert SD card and reset");
 		uint32_t tempMillis = millis();
-		while(millis() < tempMillis + 2000)
+		while(millis() < tempMillis + 1500)
 		{
 			mp.update();
 			if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
