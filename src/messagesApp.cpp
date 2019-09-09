@@ -4,6 +4,15 @@ uint32_t start = 0;
 uint32_t end = 0;
 String input;
 String buffer;
+uint16_t awayX;
+String helpString;
+int16_t leftX;
+int16_t oldX;
+uint32_t helpM;
+int16_t oldY;
+bool lineFlag;
+char moveChar;
+String tempContent = "";
 
 /*
 [
@@ -337,18 +346,47 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
-
 		mp.display.setCursor(2, y);
 		for(uint16_t i = 0; i < content.length(); i++)
 		{
-			mp.display.print(content[i]);
-			if(mp.display.getCursorX() > 150)
-				mp.display.print("\n");
-			if(mp.display.getCursorX() < 2)
+			leftX = 155 - mp.display.getCursorX();
+
+
+			if( content[i] == ' ' || i==0) {
+				helpString = "";
+				for(uint8_t j = 1; j < 24; j++){
+				if (j == 21) {
+					lineFlag = true;
+					mp.display.print(content[i]);
+				}
+				else if(content[i+j] != ' ' && i+j != content.length()-1) helpString += content[i+j];
+				else {
+					oldX = mp.display.getCursorX();
+		        	oldY = mp.display.getCursorY();
+					mp.display.setCursor(0, -20);
+					mp.display.print(helpString);
+					awayX = mp.display.getCursorX();
+					mp.display.setCursor(oldX, oldY);
+					//mp.display.print(content[i]);
+					if(awayX > leftX) mp.display.println("");
+					else mp.display.print(content[i]);
+					if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
+					break;
+					}
+				}
+			}
+			else mp.display.print(content[i]);
+			if (lineFlag && mp.display.getCursorX() > 144 ) {
+				mp.display.print("-");
+				mp.display.println();
 				mp.display.setCursor(2, mp.display.getCursorY());
-			if(mp.display.getCursorY() > 110)
-				break;
+				lineFlag = false;
+			}
+
+			if(mp.display.getCursorY() > 120)
+				break; 
 		}
+
 		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
 			if (mp.display.cursor_y >= 94)
 			{
@@ -736,6 +774,7 @@ void composeSMS(JsonArray *messages)
 	String content = "";
 	String contact = "+";
 	String prevContent = "";
+	String moveContent = "";
 	char key = NO_KEY;
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
