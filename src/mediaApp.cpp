@@ -104,8 +104,8 @@ void mediaApp() {
 					while(1)
 					{
 						if(mp.buttons.released(BTN_HOME)) {
-						mp.exitedLockscreen = true;
-						mp.lockscreen(); 
+							mp.exitedLockscreen = true;
+							mp.lockscreen(); 
 						}
 						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B) || !mp.SDinsertedFlag)
 							break;
@@ -419,8 +419,8 @@ int16_t audioPlayer(uint16_t index) {
 				return index;
 			}
 			if(mp.buttons.released(BTN_HOME)) {
-			mp.exitedLockscreen = true;
-			mp.lockscreen();
+				mp.exitedLockscreen = true;
+				mp.lockscreen();
 			}
 
 			if (mp.buttons.released(BTN_A)) //PLAY/PAUSE BUTTON
@@ -429,6 +429,7 @@ int16_t audioPlayer(uint16_t index) {
 				if(playState)
 				{
 					mp3->pause();
+					//mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]); // Robert v1 -- turns on menu sounds when song stops playing
 					mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
 
 					//draw bitmaps
@@ -598,8 +599,8 @@ int16_t audioPlayer(uint16_t index) {
 						memset(shuffleList, 0, sizeof(shuffleList));
 						if(!loop)
 						{
-							playState = 0;
-							shuffleReset = 1;
+							playState = 0; // Robert -- added 1
+							shuffleReset = 1; // Robert -- added 0
 						}
 					}
 					uint16_t randNumber = random(0,audioCount);

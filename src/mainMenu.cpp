@@ -5,7 +5,8 @@ uint16_t directoryCount = 0;
 String directories[100];
 String BinaryFiles[100];
 uint16_t binaryCount = 0;
-void listDirectories(const char * dirname) {
+void listDirectories(const char * dirname) 
+{
 
 	directoryCount = 0;
 	Serial.printf("Listing directory: %s\n", dirname);
@@ -40,7 +41,8 @@ void listDirectories(const char * dirname) {
 		file = root.openNextFile();
 	}
 }
-void listBinaries(const char * dirname, uint8_t levels) {
+void listBinaries(const char * dirname, uint8_t levels) 
+{
 
 	binaryCount = 0;
 	Serial.printf("Listing directory: %s\n", dirname);
@@ -143,19 +145,19 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 						// Serial.println(tempY);
 						// Serial.println(F("-------------"));
 						// delay(5);
-						mp.display.drawIcon(bigMessages, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigMessages, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
 					case 1:
-						mp.display.drawIcon(bigMedia, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigPhone, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
 					case 2:
-						mp.display.drawIcon(bigContacts, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigContacts, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
 					case 3:
-						mp.display.drawIcon(bigSettings, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigSettings, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
 					case 4:
-						mp.display.drawIcon(bigPhone, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigMedia, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
 					// case 5:
 					// 	mp.display.drawIcon(bigApps, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
@@ -388,7 +390,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 						mp.display.drawIcon(bigMessages, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
 					case 1:
-						mp.display.drawIcon(bigMedia, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigPhone, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
 					case 2:
 						mp.display.drawIcon(bigContacts, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
@@ -397,7 +399,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 						mp.display.drawIcon(bigSettings, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
 					case 4:
-						mp.display.drawIcon(bigPhone, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						mp.display.drawIcon(bigMedia, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
 					// case 5:
 					// 	mp.display.drawIcon(bigApps, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
@@ -527,7 +529,7 @@ void mainMenu()
 						mp.display.fillScreen(TFT_BLACK);
 						mp.display.setCursor(0,mp.display.height()/2 -16);
 						mp.display.printCenter(F("Loading contacts..."));
-						contactsAppSD();
+						contactsAppSD(false);
 					}
 					else if(!mp.SDinsertedFlag)
 					{

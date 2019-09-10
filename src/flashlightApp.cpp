@@ -103,7 +103,7 @@ void flashlightApp()
 			for(int i = 0; i < 8; i++)
 				mp.leds[i] = CRGB::Black;
 				
-			mp.pixelsBrightness = localBrightness;
+			mp.pixelsBrightness = localBrightness;  // rad lampe u pozadini
 			break;
 		} 
 		if(mp.buttons.released(BTN_FUN_LEFT))
@@ -178,6 +178,14 @@ void flashlightApp()
 				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B))
 					break;
 				mp.update();
+				if(mp.buttons.released(BTN_FUN_LEFT)) break;
+				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
+					{
+						state = !state;
+						Serial.println(state);
+						delay(5);
+						while(!mp.update());
+					}
 			}
 			mp.buttons.update();
 		}

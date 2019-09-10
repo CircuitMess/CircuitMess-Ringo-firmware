@@ -9,10 +9,11 @@ void parse_contacts();
 void contactsMenuNewBox(uint8_t i, int32_t y);
 void contactsMenuDrawCursor(uint8_t i, int32_t y);
 void contactsMenuNewBoxCursor(uint8_t i, int32_t y);
-int contactsMenuSD(JsonArray *contacts);
-void contactsAppSD();
+int contactsMenuSD(JsonArray *contacts, bool smsFlag);
+void contactsAppSD(bool smsFlag);
 String readAllContacts();
 void callNumber(String number);
 int8_t viewContact(JsonObject &object);
 extern int textPointer;
+String searchContacts(String input);
 #endif
