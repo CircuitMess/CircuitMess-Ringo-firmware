@@ -160,6 +160,10 @@ void calendarApp()
 			mp.display.drawFastHLine(2, 18 + 90, 155, TFT_BLACK);
 
 		} 
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
 		 if(mp.buttons.released(BTN_LEFT))
 		{
 			while(!mp.update());

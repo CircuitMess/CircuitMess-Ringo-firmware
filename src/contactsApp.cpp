@@ -1,24 +1,29 @@
 #include "contactsApp.h"
 //Contacts app
 uint8_t contactsMenuCursor = 0;
+bool helpPop;
 
-void contactsMenuDrawCursor(uint8_t i, int32_t y) {
+void contactsMenuDrawCursor(uint8_t i, int32_t y) 
+{
     uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
 }
-void contactsMenuNewBoxCursor(uint8_t i, int32_t y) {
+void contactsMenuNewBoxCursor(uint8_t i, int32_t y)
+{
 	uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	y += offset + 1;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
-void contactsMenuNewBox(uint8_t i, int32_t y) {
+void contactsMenuNewBox(uint8_t i, int32_t y) 
+{
 	uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	y += offset + 1;
-	if (y < 0 || y > mp.display.height()) {
+	if (y < 0 || y > mp.display.height()) 
+	{
 		return;
 	}
     mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
@@ -103,12 +108,14 @@ uint8_t deleteContactSD(String name, String number)
 	return 0;
 }
 
-void contactsAppSD(){
+void contactsAppSD(bool smsFlag)
+{
 	Serial.println("");
 	Serial.println("Begin contacts");
 	File file = SD.open("/.core/contacts.json", "r");
 
-	if(file.size() < 2){ // empty -> FILL
+	if(file.size() < 2)
+	{ // empty -> FILL
 		Serial.println("Override");
 		file.close();
 		jb.clear();
@@ -118,7 +125,7 @@ void contactsAppSD(){
 		jarr.prettyPrintTo(file1);
 		file1.close();
 		file = SD.open("/.core/contacts.json", "r");
-		while(!file)
+		if(!file)
 			Serial.println("CONTACTS ERROR");
 	}
 
@@ -144,21 +151,23 @@ void contactsAppSD(){
 		// Serial.println(contactNumber);
 
 		Serial.println("Read from .json");
-		for (JsonObject& elem : jarr) {
+		for (JsonObject& elem : jarr) 
+		{
+
 			Serial.println(elem["name"].as<char*>());
 			Serial.println(elem["number"].as<char*>());
 		}
 
-		while(1){
+		while(1)
+		{
 			int menuChoice = -1;
-			menuChoice = contactsMenuSD(&jarr);
-
+			menuChoice = contactsMenuSD(&jarr, false);
 			mp.update();
 			if (menuChoice != -2) 
 			{
 				if (menuChoice == 0) //creating new contact
 				{
-					String name;
+					String name;  
 					String number = "+";
 					if(newContactSD(&name, &number))
 					{
@@ -234,10 +243,13 @@ void contactsAppSD(){
 							while(!mp.update());
 						}
 						else
+						{
 							callNumber(jarr[id]["number"].as<char*>());
+						}
+							
 					}
 				}
-				else if (menuChoice < -10) //deleting contact
+				else if (menuChoice < -10 && !smsFlag) //deleting contact
 				{
 					int id = menuChoice + 1000 - 1;
 					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"]))
@@ -264,6 +276,7 @@ void contactsAppSD(){
 	}
 }
 
+
 uint8_t newContactSD(String *name, String *number)
 {
 	mp.textInput("");
@@ -276,7 +289,8 @@ uint8_t newContactSD(String *name, String *number)
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	// bool plusSign = 0;
-	while (1) {
+	while (1) 
+	{
 
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
@@ -285,12 +299,20 @@ uint8_t newContactSD(String *name, String *number)
 		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
-		mp.display.fillRect(0,60,160,45, TFT_DARKGREY);
-		mp.display.setCursor(4, 65);
+		mp.display.fillRect(0,60,160,50, TFT_DARKGREY);
+		mp.display.setCursor(4, 60);
 		mp.display.print("Enter your country code");
-		mp.display.setCursor(4, 83);
+		mp.display.setCursor(4, 76);
 		mp.display.printCenter("(example: +001 for USA)");
+		mp.display.setCursor(4, 92);
+		mp.display.printCenter("Press A to save");
 
+
+		if(mp.buttons.released(BTN_HOME)) 
+		{
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
 		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
@@ -359,8 +381,11 @@ uint8_t newContactSD(String *name, String *number)
 				mp.display.drawFastVLine(mp.display.getCursorX() + 1, mp.display.getCursorY() + 3, 11, TFT_WHITE);
 		}
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(125, 110);
-		mp.display.print("Save");
+		mp.display.setCursor(130, 110);
+		mp.display.print("Help");
+/* 		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(90, 110);
+		mp.display.print("Help"); */
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.setCursor(4, 110);
 		mp.display.print("Erase");
@@ -378,12 +403,24 @@ uint8_t newContactSD(String *name, String *number)
 			while(!mp.update());
 			cursor = 1;
 		}
-
+		if(mp.buttons.released(BTN_FUN_RIGHT)){
+			helpPop = !helpPop;
+			mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);	
+			while(!mp.update());
+		}
+		while (helpPop) 
+		{
+			if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B))
+			{
+				helpPop = !helpPop;
+			}
+			mp.update();
+		}
 		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
 			while(!mp.update());
 			break;
 		}
-		if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) // SAVE CONTACT
+		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
 			while(!mp.update());
 			if(contact != "+" && content != "")
@@ -398,22 +435,27 @@ uint8_t newContactSD(String *name, String *number)
 	return 0;
 }
 
-int contactsMenuSD(JsonArray *contacts){
+int contactsMenuSD(JsonArray *contacts, bool smsFlag)
+{
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	uint8_t length = contacts->size();
 	uint8_t offset = 19;
 	uint8_t boxHeight = 28;
 	bool blinkState = 0;
+	String number = "";
 	uint32_t blinkMillis = millis();
-	if (length > 2 && contactsMenuCursor > 2) {
+	if (length > 2 && contactsMenuCursor > 2) 
+	{
 		cameraY = -(contactsMenuCursor - 1) * (boxHeight + 1) + offset + 11 ;
 	}
-	while (1) {
+	while (1) 
+	{
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
-		if (cameraY_actual - cameraY == 1) {
+		if (cameraY_actual - cameraY == 1) 
+		{
 			cameraY_actual = cameraY;
 		}
 		if(millis() - blinkMillis > 350)
@@ -421,16 +463,23 @@ int contactsMenuSD(JsonArray *contacts){
 			blinkMillis = millis();
 			blinkState = !blinkState;
 		}
-		contactsMenuNewBox(0, cameraY_actual);
-
 		int i = 0;
-		for (JsonObject& elem : *contacts) {
+		if(!smsFlag)
+		{
+			contactsMenuNewBox(0, cameraY_actual);
+		}
+		else
+		{
+			i = -1;
+		}
+		for (JsonObject& elem : *contacts) 
+		{
 			contactsMenuDrawBoxSD(elem["name"].as<char*>(), elem["number"].as<char*>(), i+1, cameraY_actual);
 			i++;
 		}
 		if(blinkState)
 		{
-			if(contactsMenuCursor == 0)
+			if(contactsMenuCursor == 0 && smsFlag == 0)
 				contactsMenuNewBoxCursor(contactsMenuCursor, cameraY_actual);
 			else
 				contactsMenuDrawCursor(contactsMenuCursor, cameraY_actual);
@@ -448,54 +497,103 @@ int contactsMenuSD(JsonArray *contacts){
 		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
 		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
 		mp.display.setCursor(110, 113);
-		mp.display.printCenter("Delete               View");
-
-		if (mp.buttons.released(BTN_A) && contactsMenuCursor == 0) {   //BUTTON CONFIRM
+		if(smsFlag)
+		{
+			mp.display.printCenter("Select               View");
+		}
+		else
+		{
+			mp.display.printCenter("Delete               View");
+		}
+		
+		if(mp.buttons.released(BTN_HOME)) 
+		{
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
+		if (mp.buttons.released(BTN_A) && contactsMenuCursor == 0 && smsFlag == false) 
+		{   //BUTTON CONFIRM
 			while(!mp.update());// Exit when pressed
 			break;
 		}
-		if (mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor != 0) {
+		if (mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor != 0 && smsFlag == false) 
+		{
 			while(!mp.update()); // Delete
 			return -1000 + contactsMenuCursor;
 		}
-		if ((mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) && contactsMenuCursor != 0) {
+		//Check if we're picking a number for sending a message (smsFlag == true)
+		//if so, return the number of the picked contact
+		else if((mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_A))&& smsFlag == true)
+		{
+			while(!mp.update());
+			return contactsMenuCursor - 1;
+		}
+		if ((mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) && contactsMenuCursor != 0 && smsFlag == false) 
+		{
 			while(!mp.update()); // View contact
 			return -3000 + contactsMenuCursor;
 		}
 
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+		if (mp.buttons.released(BTN_UP)) 
+		{  //BUTTON UP
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
-			if (contactsMenuCursor == 0) {
-				contactsMenuCursor = length;
-				if (length > 2) {
-				cameraY = -(contactsMenuCursor - 2) * (boxHeight+1);
+			if (contactsMenuCursor == 0) 
+			{
+				if(smsFlag)
+				{
+					contactsMenuCursor = length - 1;
+				}
+				else
+				{
+					contactsMenuCursor = length;
+				}
+				if (length > 2) 
+				{
+					cameraY = -(contactsMenuCursor - 2) * (boxHeight+1);
 				}
 			}
-			else {
+			else 
+			{
 				contactsMenuCursor--;
-				if (contactsMenuCursor > 0 && (contactsMenuCursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) {
-				cameraY += (boxHeight+1);
+				if (contactsMenuCursor > 0 && (contactsMenuCursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) 
+				{
+					cameraY += (boxHeight+1);
 				}
 			}
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.released(BTN_DOWN)) 
+		{ //BUTTON DOWN
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
 
 			contactsMenuCursor++;
-			if ((contactsMenuCursor * (boxHeight+1) + cameraY + offset) > 80) {
+			if ((contactsMenuCursor * (boxHeight+1) + cameraY + offset) > 80) 
+			{
 				cameraY -= (boxHeight+1);
 			}
-			if (contactsMenuCursor >= length + 1) {
-				contactsMenuCursor = 0;
-				cameraY = 0;
+			if(smsFlag)
+			{
+				if (contactsMenuCursor >= length) 
+				{
+					contactsMenuCursor = 0;
+					cameraY = 0;
+				}
+			}
+			else
+			{
+				if (contactsMenuCursor >= length + 1) 
+				{
+					contactsMenuCursor = 0;
+					cameraY = 0;
+				}
 			}
 		}
-		if (mp.buttons.released(BTN_B) == 1) {
+		if (mp.buttons.released(BTN_B) == 1) 
+		{
 			while(!mp.update());
 			return -2;
 		}
@@ -505,11 +603,13 @@ int contactsMenuSD(JsonArray *contacts){
 	return contactsMenuCursor;
 }
 
-void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y) {
+void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y) 
+{
     uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
-	if (y < 0 || y > mp.display.height()) {
+	if (y < 0 || y > mp.display.height()) 
+	{
 		return;
 	}
     mp.display.setTextSize(1);
@@ -522,12 +622,14 @@ void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y) {
 
 }
 
-String readAllContacts() {
+String readAllContacts() 
+{
 	String buffer;
 	Serial1.print(F("AT+CPBR=1,250\r"));
 	buffer = readSerial();
 	delay(5);
-	if (buffer.indexOf("CPBR:") != -1 || buffer.indexOf("OK") != -1) {
+	if (buffer.indexOf("CPBR:") != -1 || buffer.indexOf("OK") != -1) 
+	{
 		return buffer;
 	}
 	else return "";
@@ -598,4 +700,57 @@ int8_t viewContact(JsonObject &contact)
 		mp.update();
 	}
 	return 0;
+}
+
+
+String searchContacts(String input)
+{
+	String ret = "";
+
+	//OPEN FILE START
+	File file1 = SD.open("/.core/contacts.json", "r");
+	if (file1.size() < 2)
+	{
+		Serial.println("Override");
+		file1.close();
+		jb.clear();
+		JsonArray &contactsjarr = jb.createArray();
+		delay(10);
+		File file2 = SD.open("/.core/contacts.json", "w");
+		contactsjarr.prettyPrintTo(file2);
+		file2.close();
+		file1 = SD.open("/.core/contacts.json", "r");
+		if (!file1)
+			Serial.println("CONTACTS ERROR");
+	}
+	jb.clear();
+	JsonArray &contactsjarr = jb.parseArray(file1);
+	file1.close();
+	//OPEN FILE END
+	if (!contactsjarr.success())
+	{
+		Serial.println("Error");
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(0, mp.display.height() / 2 - 16);
+		mp.display.setTextFont(2);
+		mp.display.printCenter("Error: Contacts");
+		while (!mp.buttons.released(BTN_B))
+			mp.update();
+		while (!mp.update());
+	}
+	else
+	{
+		String nameBuf = "";
+		for (JsonObject &elem : contactsjarr)
+		{
+			nameBuf = elem["name"].as<char*>();
+			if(nameBuf.startsWith(input))
+			{
+				ret = nameBuf;
+				break;
+			}
+		}
+	}
+
+	return ret;
 }

@@ -131,6 +131,10 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 			mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
 		}
 
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
 		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();

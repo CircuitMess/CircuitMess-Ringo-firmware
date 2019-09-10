@@ -1,5 +1,6 @@
 #include "phoneApp.h"
-void phoneApp() {
+void phoneApp() 
+{
 	mp.dataRefreshFlag = 0;
 	String callBuffer = "";
 	char key = NO_KEY;
@@ -8,32 +9,143 @@ void phoneApp() {
 	bool plusSign = 0;
 	uint32_t blinkMillis = millis();
 	bool blinkState = 1;
+
+
+	int32_t cameraY = 0;
+	int32_t cameraY_actual = 0;
+	
+	uint8_t offset = 19;
+	uint8_t boxHeight = 28;
+	String favs[50] = {};
+	String favsNames[50] = {};
+
+	int32_t cursorPos = 0;
+	int8_t length = 1; //5 favs + inputbox
+	//int8_t lenActual = 0;
+	String favsBuff = sortAndGetFav();
+	int entries = getContact(favsBuff, 0).toInt();
+	String tempBuff[50] = "";
+	int i = 1;
+	Serial.println(favsBuff);
+	favsBuff = favsBuff.substring(favsBuff.indexOf("|")+1, favsBuff.length());
+	Serial.println(favsBuff);
+
+    char* ptr = strtok(&favsBuff[0], "|");
+
+    while(ptr != NULL) 
+	{
+        favs[i] = ptr;
+		favsNames[i] = mp.checkContact(favs[i]);
+        ptr = strtok(NULL, "|");
+		i++;
+    }
+
+	//Serial.println("endbuff");
+
+	for(int d = 1; d <= entries; d++)
+	{
+		length++;
+		Serial.println(favs[d]);
+	}
 	while (1)
 	{
+		length = 2;
+		favs[0] = callBuffer;
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(0, 0);
+		cameraY_actual = (cameraY_actual + cameraY) / 2;
+		if (cameraY_actual - cameraY == 1) 
+		{
+			cameraY_actual = cameraY;
+		}
 		if(millis() - blinkMillis >= 350)
 		{
 			blinkMillis = millis();
 			blinkState = !blinkState;
+		}	
+		//-------------------------------DRAW 0 START-----------------------------------------
+		int i = -1;
+		for(int k = 0; k < 5; k++)
+		{
+			if(k == 0)
+				phoneMenuDrawBox("", favs[k], i+1, cameraY_actual, blinkState, cursorPos, k);
+			else if(favs[k].compareTo("") != 0)
+			{
+				phoneMenuDrawBox(favsNames[k], favs[k], i+1, cameraY_actual, blinkState, cursorPos, k);
+				//phoneMenuDrawBox(mp.checkContact(favs[k]), favs[k], i+1, cameraY_actual, blinkState, cursorPos, k);
+				length++;
+				/*
+				if(blinkState)
+				{
+					Serial.println("PHONEAPP-------------");
+					Serial.println(favs[k]);
+					Serial.println("PHONEAPP-------------");
+				}
+				*/
+			}
+				i++;
 		}
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setTextSize(1);
-		mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
-		mp.display.drawRect(108, 110, 52, 17, TFT_WHITE);
-		mp.display.setCursor(110, 110);
-		mp.display.setTextFont(2);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print("Call log");
-		mp.display.setCursor(2, 110);
-		mp.display.print("Press A to call");
-		mp.display.setCursor(2, -1);
-		mp.display.setTextColor(TFT_LIGHTGREY);
-		mp.display.print("Dialer");
-		mp.display.setTextColor(TFT_WHITE);
+		if(blinkState)
+		{
+			phoneMenuDrawCursor(cursorPos, cameraY_actual);
+		}	
+		drawStuff();
+		//-------------------------------DRAW 0 END-------------------------------------------
+		
+		if(mp.buttons.released(BTN_UP))
+		{
+			blinkState = 1;
+			blinkMillis = millis();
+			while(!mp.update());
 
+				if (cursorPos == 0)
+				{
+					cursorPos = length - 2;
+					if (length > 2)
+					{
+						cameraY = -(cursorPos - 2) * (boxHeight + 1);
+					}
+				}
+				else
+				{
+					cursorPos--;
+					if (cursorPos > 0 && (cursorPos * (boxHeight + 1) + cameraY + offset) < (boxHeight + 1))
+					{
+						cameraY += (boxHeight + 1);
+					}
+				}
+				//Serial.println("-----------------------UP");
+				//Serial.println(cursorPos);
+				//Serial.println(length);
+				//Serial.println(lenActual);
+				//Serial.println("-----------------------");
+		}
+		if (mp.buttons.released(BTN_DOWN)) 
+		{
+			blinkState = 1;
+			blinkMillis = millis();
+			while (!mp.update());
+				cursorPos++;
+				if ((cursorPos * (boxHeight + 1) + cameraY + offset) > 80)
+				{
+					cameraY -= (boxHeight + 1);
+				}
+				if (cursorPos >= length - 1)
+				{
+					cursorPos = 0;
+					cameraY = 0;
+				}
+				//Serial.println("---------------------DOWN");
+				//Serial.println(cursorPos);
+				//Serial.println(length);
+				//Serial.println(lenActual);
+				//Serial.println("-----------------------");
+		}
 		key = NO_KEY;
-		for(int i = 0; i < 12; i++) {
-			if(mp.buttons.released(i)) {
+		for(int i = 0; i < 12; i++) 
+		{
+			if(mp.buttons.released(i)) 
+			{
 				if(i == 10)
 					key = '0';
 				else if(i == 9)
@@ -45,7 +157,12 @@ void phoneApp() {
 				break;
 			}
 		}
-		if(mp.buttons.held(BTN_0, 20))
+		if(mp.buttons.released(BTN_HOME)) 
+		{
+			mp.exitedLockscreen = true;
+			mp.lockscreen();
+		}
+		if(mp.buttons.held(BTN_0, 10))
 		{
 			callBuffer+="+";
 			plusSign = 1;
@@ -57,7 +174,6 @@ void phoneApp() {
 		if (mp.buttons.released(BTN_FUN_LEFT))
 		{
 			callBuffer.remove(callBuffer.length()-1);
-			// while(!mp.update());
 			mp.buttons.update();
 		}
 		if (mp.buttons.released(BTN_FUN_RIGHT))
@@ -137,23 +253,8 @@ void phoneApp() {
 			}
 			callBuffer += key;
 		}
-		mp.display.setCursor(0, 76);
-		mp.display.setTextSize(2);
-		mp.display.print(callBuffer);
 
-		if (mp.display.cursor_x + 4  >= mp.display.width())
-		{
-			mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
-			mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, 76);
-			mp.display.print(callBuffer);
-		}
-		if (blinkState)
-		{
-			mp.display.drawFastVLine(mp.display.getCursorX() + 1, mp.display.getCursorY() + 6, 20, TFT_WHITE);
-			mp.display.drawFastVLine(mp.display.getCursorX() + 2, mp.display.getCursorY() + 6, 20, TFT_WHITE);
-		}
-
-		if (mp.buttons.released(BTN_A) && callBuffer != "")//initate call
+		if (mp.buttons.released(BTN_A) && (callBuffer != "" || cursorPos != 0))//initate call
 		{
 			while(!mp.update());
 			if(mp.sim_module_version == 255)
@@ -264,7 +365,16 @@ void phoneApp() {
 							}
 							else
 							{
-								callNumber(callBuffer);
+								if(cursorPos == 0)
+								{
+									
+									callNumber(callBuffer);
+								}
+								else
+								{
+									callBuffer = favs[cursorPos];
+									callNumber(callBuffer);
+								}
 								while(!mp.update());
 							}
 							callBuffer = "";
@@ -273,13 +383,22 @@ void phoneApp() {
 					else
 					{
 						
-						if(callBuffer.startsWith("*"))
+						if(callBuffer.startsWith("*") && cursorPos == 0)
 						{
 							sendMMI(callBuffer);
 						}
 						else
 						{
-							callNumber(callBuffer);
+							if (cursorPos == 0)
+							{
+								callNumber(callBuffer);
+							}
+							else
+							{
+								callBuffer = favs[cursorPos];
+								callNumber(callBuffer);
+							}
+
 							while(!mp.update());
 						}
 						callBuffer = "";
@@ -302,6 +421,11 @@ void phoneApp() {
 				}
 			}
 		}
+		//-------------------------------DRAW 1 START-----------------------------------------
+		if(blinkState)
+			phoneMenuDrawCursor(cursorPos, cameraY_actual);
+		drawStuff();
+		//-------------------------------DRAW 1 END-------------------------------------------
 		if (mp.buttons.released(BTN_B)) //BACK BUTTON
 			break;
 
@@ -310,7 +434,137 @@ void phoneApp() {
 	while(!mp.update());
 }
 
-void callLog() {
+String getContact(String data, int no)
+{
+	String ret = "";
+	int index = data.indexOf("|") + 1;
+	int prevIndex = 0;
+	if(no == 0)
+	{
+		ret = data.substring(0, data.indexOf("|"));
+	}
+	else
+	{
+		for (int i = 0; i < no; i++)
+		{
+			prevIndex = index;
+			index += data.indexOf("|", index) + 1;
+		}
+		ret = data.substring(prevIndex, index - 1);
+	}
+	return ret;
+}
+
+void drawStuff()
+{
+	mp.display.setTextColor(TFT_WHITE);
+	mp.display.setTextSize(1);
+	//mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
+	mp.display.fillRect(0, 0, mp.display.width(), 18, TFT_BLACK);
+	mp.display.fillRect(0, 110, mp.display.width(), 20, TFT_BLACK);
+	mp.display.drawRect(108, 110, 52, 17, TFT_WHITE);
+	mp.display.setCursor(110, 110);
+	mp.display.setTextFont(2);
+	mp.display.setTextColor(TFT_WHITE);
+	mp.display.print("Call log");
+	mp.display.setCursor(60, -1);
+	mp.display.print("Press A to call");
+	mp.display.setCursor(4, 110);
+	mp.display.print("Erase");
+	mp.display.setCursor(2, -1);
+	mp.display.setTextColor(TFT_LIGHTGREY);
+	mp.display.print("Dialer");
+	mp.display.setTextColor(TFT_WHITE);
+}
+
+void phoneMenuDrawBox(String name, String number, uint8_t i, int32_t y, bool blState, int32_t cPos, bool inputFlag) 
+{
+    uint8_t offset = 19;
+    uint8_t boxHeight = 28;
+	y += i * boxHeight + offset;
+	int tempCursor = 0;
+	int k;
+	if (y < 0 || y > mp.display.height()) 
+	{
+		return;
+	}
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(2);
+    mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.setCursor(2, y + 2);
+    mp.display.drawString(name, 4, y);
+	if(blState && cPos == 0 && !inputFlag)
+	{
+		mp.display.setTextSize(2);
+		mp.display.drawString(number + "|", 4, y - 2);
+		Serial.println(mp.display.cursor_x);
+		if (number.length() > 9)
+		{
+			mp.display.fillRect(0, 19, mp.display.width() - 1, 26, TFT_DARKGREY);
+			mp.display.setCursor((mp.display.cursor_x - (14 * (number.length() - 8))), 17);
+			mp.display.print(number + "|");
+		}
+	}
+	else if(cPos == 0 && !inputFlag)
+	{
+		mp.display.setTextSize(2);
+		mp.display.drawString(number, 4, y - 2);
+		Serial.println(mp.display.cursor_x);
+		if (number.length() > 9)
+		{
+			mp.display.fillRect(0, 19, mp.display.width() - 1, 26, TFT_DARKGREY);
+			mp.display.setCursor((mp.display.cursor_x - (14 * (number.length() - 8))), 17);
+			mp.display.print(number);
+		}
+	}
+	else
+	{
+		mp.display.setTextSize(1);
+		mp.display.drawString(number, 4, y + 12);
+	}
+		
+}
+
+void phoneMenuDrawCursor(uint8_t i, int32_t y) 
+{
+    uint8_t offset = 19;
+    uint8_t boxHeight = 28;
+	y += i * boxHeight + offset;
+	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
+}
+
+
+void phoneMenuInputBox(uint8_t i, int32_t y, String callBuffer) 
+{
+	uint8_t offset = 19;
+    uint8_t boxHeight = 28;
+	y += offset + 1;
+	if (y < 0 || y > mp.display.height()) 
+	{
+		return;
+	}
+    mp.display.setFreeFont(TT1);
+    mp.display.setTextSize(1);
+    mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
+    //mp.display.drawBitmap(2, y + 4, newContactIcon, TFT_WHITE, 2);
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.setCursor(32, y + 6);
+    mp.display.setTextFont(2);
+    mp.display.print(callBuffer);
+
+
+	if (mp.display.cursor_x + 4 >= mp.display.width())
+	{
+		mp.display.fillRect(0, 79, mp.display.width(), 26, TFT_DARKGREY);
+		mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, 76);
+		mp.display.print(callBuffer);
+	}
+	
+}
+
+void callLog() 
+{
 	mp.dataRefreshFlag = 0;
 	mp.display.setTextWrap(0);
     mp.display.setTextFont(2);
@@ -334,7 +588,7 @@ void callLog() {
 		jarr.prettyPrintTo(file1);
 		file1.close();
 		file = SD.open("/.core/call_log.json", "r");
-		while(!file)
+		if(!file)
 			Serial.println("CONTACTS ERROR");
 	}
 
@@ -391,7 +645,10 @@ void callLog() {
 	}
 }
 
-int callLogMenu(JsonArray& call_log, int prevCursor){
+
+
+int callLogMenu(JsonArray& call_log, int prevCursor)
+{
 	uint8_t cursor = 0;
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
@@ -421,7 +678,8 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 	}
 	if(prevCursor == -1)
 		cursor = 0;
-	if (length > 2 && cursor > 2) {
+	if (length > 2 && cursor > 2) 
+	{
 		cameraY = -(cursor - 2) * boxHeight;
 	}
 	while (1) {
@@ -453,6 +711,10 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 			}
 			if(blinkState)
 				callLogMenuDrawCursor(cursor, cameraY_actual);
+					if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+			}	
 
 			if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {
 				mp.buttons.update();
@@ -532,7 +794,8 @@ int callLogMenu(JsonArray& call_log, int prevCursor){
 	return cursor;
 }
 
-void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
+void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) 
+{
     uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
@@ -568,7 +831,8 @@ void callLogDrawBoxSD(JsonObject& object, uint8_t i, int32_t y) {
 	}
 }
 
-void callLogMenuDrawCursor(uint8_t i, int32_t y) {
+void callLogMenuDrawCursor(uint8_t i, int32_t y) 
+{
     uint8_t offset = 20;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
@@ -954,14 +1218,16 @@ void sendMMI(String code)
 				mp.display.setCursor(5, mp.display.getCursorY());
 			}
 		}
-		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+		if (mp.buttons.repeat(BTN_DOWN, 3)) 
+		{ //BUTTON DOWN
 			Serial.println(mp.display.cursor_y);
 			if (mp.display.cursor_y >= 110)
 			{
 				y -= 4;
 			}
 		}
-		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+		if (mp.buttons.repeat(BTN_UP, 3)) 
+		{ //BUTTON UP
 			Serial.println(y);
 			if (y < 1)
 				y += 4;
@@ -971,3 +1237,163 @@ void sendMMI(String code)
 	while(!mp.update());
 	mp.inCall = 0;
 }
+
+String sortAndGetFav()
+{
+	String ret = "";
+	uint16_t contactCount = 0;
+	String contacts[50][2] = {};
+	String numBuf [50] = {};
+	int i, j;
+	
+	//OPEN FILES START
+	File file1 = SD.open("/.core/contacts.json", "r");
+	if (file1.size() < 2)
+	{
+		Serial.println("Override");
+		file1.close();
+		jb.clear();
+		JsonArray& contactsjarr = jb.createArray();
+		delay(10);
+		File file2 = SD.open("/.core/contacts.json", "w");
+		contactsjarr.prettyPrintTo(file2);
+		file2.close();
+		file1 = SD.open("/.core/contacts.json", "r");
+		if (!file1)
+			Serial.println("CONTACTS ERROR");
+	}
+	jb.clear();
+	JsonArray& contactsjarr = jb.parseArray(file1);
+	file1.close();
+	//OPEN FILES END
+	
+	if(!contactsjarr.success())
+	{
+		Serial.println("Error");
+		mp.display.fillScreen(TFT_BLACK);
+        mp.display.setCursor(0, mp.display.height()/2 - 16);
+        mp.display.setTextFont(2);
+		mp.display.printCenter("Error: Contacts");
+		while (!mp.buttons.released(BTN_B))
+			mp.update();
+		while(!mp.update());
+	}
+	else
+	{
+		i = 0;
+		Serial.println("json contacts loop start---------------");
+		for (JsonObject& elem : contactsjarr) 
+		{
+			contacts[i][0] = elem["number"].as<char*>();
+			contacts[i][1] = "0";
+			numBuf[i] = contacts[i][0];
+			Serial.println(contacts[i][0]);
+			contactCount++;
+			i++;
+		}
+		Serial.println("json contacts loop end---------------");
+	}
+	
+	File file = SD.open("/.core/call_log.json", "r");
+	if(file.size() < 2)
+	{
+		Serial.println("Override");
+		file.close();
+		JsonArray& logjarr = jb.createArray();
+		delay(10);
+		File file1 = SD.open("/.core/call_log.json", "w");
+		logjarr.prettyPrintTo(file1);
+		file1.close();
+		file = SD.open("/.core/call_log.json", "r");
+		if(!file)
+			Serial.println("CALL LOG ERROR");
+	}
+	jb.clear();
+	JsonArray& logjarr = jb.parseArray(file);
+	file.close();
+
+	if(!logjarr.success())
+	{
+		Serial.println("Error");
+		mp.display.fillScreen(TFT_BLACK);
+        mp.display.setCursor(0, mp.display.height()/2 - 16);
+        mp.display.setTextFont(2);
+		mp.display.printCenter("Error: Call log");
+		while (!mp.buttons.released(BTN_B))
+			mp.update();
+		while(!mp.update());
+	}
+	else
+	{
+		int tempInt = 0;
+		for (i = 0; i < contactCount; i++)
+		{
+			/*
+			Serial.println("loop ins start----------------");
+			Serial.println(" ");
+			Serial.print("i: ");
+			Serial.print(i);
+			Serial.println(" ");
+			*/
+			for (JsonObject &logelem : logjarr)
+			{
+				/*
+				Serial.println("	json loop ins start---------------");
+				Serial.println(" ");
+				Serial.print("		number from log: ");
+				Serial.print(logelem["number"].as<char *>());
+				Serial.println(" ");
+				Serial.print("		number from array: ");
+				Serial.print(contacts[i][0]);
+				Serial.println(" ");
+				*/
+				if (contacts[i][0] == logelem["number"].as<char *>())
+				{
+					//Serial.println("			matches");
+					tempInt = contacts[i][1].toInt();
+					tempInt++;
+					contacts[i][1] = String(tempInt);
+				}
+				//Serial.println("	json loop ins end---------------");
+			}
+			//Serial.println("loop ins end----------------");
+			Serial.println("Contact: ");
+			Serial.println(contacts[i][0]);
+			Serial.println("Score: ");
+			Serial.println(contacts[i][1]);
+		}
+	}
+	Serial.println("SORTED BELOW THIS LINE");
+	//SORT START
+	String temp = "", temp2 = "";
+	for(i = 0; i < contactCount; i++)
+	{		
+		for(j = i + 1; j < contactCount; j++)
+		{
+			if(contacts[i][1].toInt() < contacts[j][1].toInt())
+			{
+				temp  = contacts[i][1];
+				temp2 = contacts[i][0];
+				contacts[i][1] = contacts[j][1];
+				contacts[i][0] = contacts[j][0];
+				contacts[j][1] = temp;
+				contacts[j][0] = temp2;
+			}
+		}
+	}
+	//SORT END
+	ret = String(contactCount) + "|";
+	for(i = 0; i < contactCount; i++)
+	{
+		ret += contacts[i][0] + "|";
+		/*
+		Serial.println("Contact: ");
+		Serial.println(contacts[i][0]);
+		Serial.println("Score: ");
+		Serial.println(contacts[i][1]);
+		*/
+	}
+	Serial.println(ret);
+	return ret;
+}
+

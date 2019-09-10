@@ -23,10 +23,10 @@ String backgroundColorsNames[7] PROGMEM = {
 };
 String titles[9] PROGMEM = {
 	"Messages",
-	"Media",
+	"Phone",
 	"Contacts",
 	"Settings",
-	"Phone",
+	"Media",
 	"Clock",
 	"Calculator",
 	"Flashlight",
@@ -337,7 +337,8 @@ uint16_t countSubstring(String string, String substring) {
 	}
 	return count;
 }
-void callNumber(String number) {
+void callNumber(String number) 
+{
 	String contact = mp.checkContact(number);
 	mp.inCall = 1;
 	mp.dataRefreshFlag = 0;
@@ -560,32 +561,19 @@ void callNumber(String number) {
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && ((mp.micGain < 15 && mp.sim_module_version == 1) ||
-		(mp.micGain < 8 && mp.sim_module_version == 0)) && callState == 2)
+		if(mp.buttons.released(BTN_UP) && mp.mediaVolume < 14)
 		{
-			mp.micGain++;
-			if(mp.sim_module_version == 1)
-				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			else if(mp.sim_module_version == 0)
-			{
-				String foo = "AT+CMICGAIN=";
-				foo+=mp.micGain;
-				Serial1.println(foo);
-				delay(10);
-			}
+			mp.mediaVolume++;
+			mp.display.fillRect(57, 111, 20, 15, TFT_RED);
+			mp.display.setCursor(58, 109);
+			mp.display.print(mp.mediaVolume);
 		}
-		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && callState == 2)
+		if(mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0)
 		{
-			mp.micGain--;
-			if(mp.sim_module_version == 1)
-				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			else if(mp.sim_module_version == 0)
-			{
-				String foo = "AT+CMICGAIN=";
-				foo+=mp.micGain;
-				Serial1.println(foo);
-				delay(10);
-			}
+			mp.mediaVolume--;
+			mp.display.fillRect(57, 111, 20, 15, TFT_RED);
+			mp.display.setCursor(58, 109);
+			mp.display.print(mp.mediaVolume);
 		}
 		switch (callState)
 		{
@@ -600,8 +588,8 @@ void callNumber(String number) {
 					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
-				mp.display.print("Mic gain: ");
-				mp.display.print(mp.micGain);
+				mp.display.print("Volume: ");
+				mp.display.print(mp.mediaVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -616,8 +604,8 @@ void callNumber(String number) {
 					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
-				mp.display.print("Mic gain: ");
-				mp.display.print(mp.micGain);
+				mp.display.print("Volume: ");
+				mp.display.print(mp.mediaVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -654,8 +642,8 @@ void callNumber(String number) {
 					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
-				mp.display.print("Mic gain: ");
-				mp.display.print(mp.micGain);
+				mp.display.print("Volume: ");
+				mp.display.print(mp.mediaVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -1914,10 +1902,28 @@ bool startupWizard()
 	mp.shutdownPopupEnable(1);
 	EEPROM.writeBool(33, 0);
 	EEPROM.commit();
-	return 1;
+  timeMenu();
+  mp.display.setTextColor(TFT_BLACK);
+	mp.display.setTextSize(1);
+	mp.display.setTextFont(2);
+  mp.display.fillScreen(TFT_WHITE);
+	mp.display.drawRect(10, 45, 138, 38, TFT_BLACK);
+	mp.display.drawRect(9, 44, 140, 40, TFT_BLACK);
+	mp.display.fillRect(11, 46, 136, 36, TFT_WHITE);
+	mp.display.setCursor(43, 55);
+	mp.display.printCenter("Setup wizard done!");
+	mp.update();
+	tempMillis = millis();
+	while(millis() < tempMillis + 2000)
+	mp.update();
+ 	return 1;
 }
 void controlTry() //for debug purposes
 {
+	int16_t oldSleepTimeActual = mp.sleepTimeActual;
+	int16_t oldSleepTime = mp.sleepTime;
+	mp.sleepTime = 0;
+	mp.sleepTimeActual = 0;
 	mp.textInput("");
 	mp.textPointer = 0;
 
@@ -2062,6 +2068,9 @@ void controlTry() //for debug purposes
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
+			mp.sleepTimeActual = oldSleepTimeActual;
+			mp.sleepTime = oldSleepTime;
+			mp.sleepTimer = millis();
 			Serial.println("B pressed");
 			while(!mp.update());
 			break;
@@ -2142,7 +2151,6 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
-	mp.pduDecode("0791839515001000040C9183953577164500009180906190928006325ACD76C301");
 	mp.shutdownPopupEnable(1);
 	// startupWizard();
 	// controlTry();
@@ -2183,6 +2191,8 @@ void loop()
 	// mp.display.printCenter("   USB INT: ");
 	// mp.display.setCursor(20,100);
 	// mp.display.printCenter(digitalRead(39));
+
+	
 	mainMenu();
 	// mediaApp();
 	// phoneApp();

@@ -1,4 +1,5 @@
 #include "messagesApp.h"
+#include "contactsApp.h"
 int16_t y;
 uint32_t start = 0;
 uint32_t end = 0;
@@ -16,7 +17,8 @@ String buffer;
 */
 
 //Messages app
-void messagesApp() {
+void messagesApp() 
+{
 	Serial.println("Load messages app");
 	int16_t menuChoice = -1;
 	mp.dataRefreshFlag = 0;
@@ -34,7 +36,7 @@ void messagesApp() {
 		jarr.prettyPrintTo(file1);
 		file1.close();
 		file = SD.open("/.core/messages.json", "r");
-		while(!file.available())
+		if(!file.available())
 			Serial.println("Messages ERROR");
 		Serial.println(file.size());
 	}
@@ -277,7 +279,7 @@ void messagesApp() {
 					jarr.prettyPrintTo(temp);
 					temp.close();
 					file = SD.open("/.core/messages.json", "r");
-					while(!file.available())
+					if(!file.available())
 						Serial.println("Messages ERROR");
 					JsonArray& jarr = jb.parseArray(file);
 					file.close();
@@ -294,13 +296,15 @@ void messagesApp() {
 	}
 }
 
-bool viewSms(String content, String contact, uint32_t date, bool direction) {
+bool viewSms(String content, String contact, uint32_t date, bool direction) 
+{
 	y = 14;  //Beggining point
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	DateTime time = DateTime(date);
-	
-	for(int i = 0; i < 10; i ++)
+	String contactLabel = mp.checkContact(contact);
+
+	for(int i = 0; i < 10; i++)
 	{
 		if(mp.notificationTypeList[i] == 2 && mp.notificationDescriptionList[i] == contact && mp.notificationTimeList[i] == DateTime(date))
 		{
@@ -312,10 +316,10 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
-
 		mp.display.setCursor(1, y);
 		mp.display.print(content);
-		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+		if (mp.buttons.repeat(BTN_DOWN, 3)) 
+		{ //BUTTON DOWN
 			Serial.println(mp.display.cursor_y);
 			if (mp.display.cursor_y >= 94)
 			{
@@ -345,7 +349,8 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 			break;
 		}
 
-		if (millis() - elapsedMillis >= 1000) {
+		if (millis() - elapsedMillis >= 1000) 
+		{
 			elapsedMillis = millis();
 			blinkState = !blinkState;
 		}
@@ -362,7 +367,10 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 			mp.display.setCursor(2,-1);
 			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 			mp.display.print(direction ? "From: " : "To: ");
-			mp.display.print(contact);
+			if(contactLabel != "")
+				mp.display.print(contactLabel);
+			else
+				mp.display.print(contact);
 		}
 		else
 		{
@@ -384,7 +392,8 @@ bool viewSms(String content, String contact, uint32_t date, bool direction) {
 	while(!mp.update());
 	return 0;
 }
-void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) {
+void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) 
+{
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
@@ -397,8 +406,11 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 	composeHeight=21;
 	boxHeight = 30;
 	mp.display.setTextFont(2);
+	String contactLabel = mp.checkContact(contact);
+
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
-	if (y < 0 || y > mp.display.height()) {
+	if (y < 0 || y > mp.display.height()) 
+	{
 		return;
 	}
 	String monthsList[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
@@ -412,7 +424,7 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 	mp.display.setTextColor(TFT_WHITE);
 	mp.display.setCursor(22, y - 1);
 	
-	if(contact.length() > 13)
+	if(contact.length() > 13 && contactLabel == "")
 	{
 		for(int i = 0; i < contact.length(); i++)
 		{
@@ -425,8 +437,13 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 		}
 	}
 	else
-		mp.display.print(contact);
-
+	{
+		if(contactLabel != "")
+			mp.display.print(contactLabel);
+		else
+			mp.display.print(contact);
+		
+	}
 	// mp.display.drawString(contact, 22, y-1);
 	mp.display.drawString(content, 22, y + 13);
 
@@ -436,7 +453,8 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 	mp.display.setCursor(mp.display.getCursorX() + 2, mp.display.getCursorY());
 	mp.display.print(sms_day);
 }
-void smsMenuDrawCursor(uint8_t i, int32_t y) {
+void smsMenuDrawCursor(uint8_t i, int32_t y) 
+{
 	uint8_t offset;
 	uint8_t boxHeight;
 	uint8_t composeHeight;
@@ -447,7 +465,8 @@ void smsMenuDrawCursor(uint8_t i, int32_t y) {
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
-int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
+int16_t smsMenu(JsonArray& messages, int16_t prevCursor) 
+{
 	int32_t cameraY = 0;
 	int16_t cursor = 0;
 	int32_t cameraY_actual = 0;
@@ -518,15 +537,18 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	scale = 2;
 	offset = 19;
 	boxHeight = 30;
-	if (length > 2 && cursor > 2) {
+	if (length > 2 && cursor > 2) 
+	{
 		cameraY = -(cursor - 1) * (boxHeight - 1) + offset + 11 ;
 	}
-	while (1) {
+	while (1) 
+	{
 		mp.update();
 		mp.display.fillScreen(TFT_BLACK);
 		mp.display.setCursor(0, 0);
 		cameraY_actual = (cameraY_actual + cameraY) / 2;
-		if (cameraY_actual - cameraY == 1) {
+		if (cameraY_actual - cameraY == 1) 
+		{
 			cameraY_actual = cameraY;
 		}
 
@@ -574,35 +596,47 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 
+		if(mp.buttons.released(BTN_HOME)) 
+		{
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
 
-		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
+		if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) 
+		{   //BUTTON CONFIRM
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 			while(!mp.update());// Exit when pressed
 			break;
 		}
 
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+		if (mp.buttons.released(BTN_UP)) 
+		{  //BUTTON UP
 			blinkMillis = millis();
 			blinkState = 1;
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
 
-			if (cursor == 0) {
+			if (cursor == 0) 
+			{
 				cursor = length;
-				if (length > 2) {
+				if (length > 2) 
+				{
 					cameraY = -(cursor - 1) * (boxHeight-1);
 				}
 			}
-			else {
+			else 
+			{
 				cursor--;
-				if (cursor > 0 && ((cursor-1) * (boxHeight-1) + cameraY + offset + 21) < 20) {
+				if (cursor > 0 && ((cursor-1) * (boxHeight-1) + cameraY + offset + 21) < 20) 
+				{
 					cameraY += (boxHeight-1);
 				}
 			}
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
+		if (mp.buttons.released(BTN_DOWN)) 
+		{ //BUTTON DOWN
 			blinkMillis = millis();
 			blinkState = 1;
 			mp.osc->note(75, 0.05);
@@ -611,17 +645,20 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 			cursor++;
 			if (cursor > 0)
 			{
-				if (((cursor - 1) * (boxHeight-1) + composeBoxHeight + cameraY + offset + 21) > 100) {
+				if (((cursor - 1) * (boxHeight-1) + composeBoxHeight + cameraY + offset + 21) > 100) 
+				{
 					cameraY -= boxHeight-1;
 				}
 			}
 			else
 			{
-				if ((cursor * (boxHeight-1) + cameraY + offset + 21) > 100) {
+				if ((cursor * (boxHeight-1) + cameraY + offset + 21) > 100) 
+				{
 					cameraY -= boxHeight-1;
 				}
 			}
-			if (cursor > length) {
+			if (cursor > length) 
+			{
 				cursor = 0;
 				cameraY = 0;
 
@@ -656,7 +693,8 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor) {
 	
 
 }
-void smsMenuComposeBoxCursor(uint8_t i, int32_t y) {
+void smsMenuComposeBoxCursor(uint8_t i, int32_t y) 
+{
 	uint8_t offset;
 	uint8_t boxHeight;
 	offset = 19;
@@ -664,7 +702,8 @@ void smsMenuComposeBoxCursor(uint8_t i, int32_t y) {
 	y += offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight+1, TFT_RED);
 }
-void smsMenuComposeBox(uint8_t i, int32_t y) {
+void smsMenuComposeBox(uint8_t i, int32_t y) 
+{
 	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
@@ -674,7 +713,8 @@ void smsMenuComposeBox(uint8_t i, int32_t y) {
     boxHeight=21;
     mp.display.setTextFont(2);
 	y += offset;
-	if (y < 0 || y > mp.display.height()) {
+	if (y < 0 || y > mp.display.height()) 
+	{
 		return;
 	}
 	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
@@ -692,12 +732,37 @@ void composeSMS(JsonArray *messages)
 	String content = "";
 	String contact = "+";
 	String prevContent = "";
+	int contactID = 0;
+	String contactTemp = "";
 	char key = NO_KEY;
 	bool cursor = 0; //editing contacts or text content
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	uint8_t scale = 2;
 	bool plusSign = 0;
+	bool helpPop;
+	bool contactsApp = false;
+	String contactLabel = "";
+
+	File file = SD.open("/.core/contacts.json", "r");
+	if (file.size() < 2)
+	{
+		Serial.println("Override");
+		file.close();
+		jb.clear();
+		JsonArray &jarr = jb.createArray();
+		delay(10);
+		File file1 = SD.open("/.core/contacts.json", "w");
+		jarr.prettyPrintTo(file1);
+		file1.close();
+		file = SD.open("/.core/contacts.json", "r");
+		if (!file)
+			Serial.println("CONTACTS ERROR");
+	}
+	jb.clear();
+	JsonArray &jarr = jb.parseArray(file);
+	file.close();
+
 	while (1)
 	{
 		mp.display.fillScreen(TFT_DARKGREY);
@@ -763,6 +828,8 @@ void composeSMS(JsonArray *messages)
 			{
 				mp.display.setTextColor(TFT_LIGHTGREY);
 				mp.display.print(F("Compose..."));
+				mp.display.setCursor(1*scale+1, y+14);
+				mp.display.print(F("Press A to send"));
 				mp.display.setTextColor(TFT_WHITE);
 			}
 			else
@@ -775,18 +842,26 @@ void composeSMS(JsonArray *messages)
 				}
         		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
 			}
+						
             mp.display.setCursor(27, -1);
 
-			mp.display.print(contact);
+			contactLabel = mp.checkContact(contact);
+			if(contactLabel != "")
+				mp.display.print(contactLabel);
+			else
+				mp.display.print(contact);
+
 			if (blinkState == 1)
                 mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
 		}
-		if ((mp.buttons.released(BTN_UP) || mp.buttons.released(BTN_A)) && cursor) { //BUTTON UP
+		if ((mp.buttons.released(BTN_UP)) && cursor) 
+		{ //BUTTON UP
 			mp.buttons.update();
 			cursor = 0;
 		}
 
-		if ((mp.buttons.released(BTN_DOWN) || mp.buttons.released(BTN_A)) && !cursor) { //BUTTON DOWN
+		if ((mp.buttons.released(BTN_DOWN)) && !cursor) 
+		{ //BUTTON DOWN
 			mp.buttons.update();
 			cursor = 1;
 		}
@@ -796,7 +871,51 @@ void composeSMS(JsonArray *messages)
 			while(!mp.update());
 			break;
 		}
-		if (mp.buttons.released(BTN_FUN_RIGHT) && contact.length() > 1 && content != "") // SEND SMS
+
+
+		if(mp.buttons.released(BTN_FUN_RIGHT) && cursor == 1)
+		{
+			helpPop = !helpPop;
+			mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);	
+			while(!mp.update());
+		}
+		while (helpPop) 
+		{
+			if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B))
+			{
+				helpPop = !helpPop;
+			}
+			mp.update();
+		}
+		if(mp.buttons.released(BTN_FUN_RIGHT) && cursor == 0 && contactsApp == false)
+		{
+			contactsApp = true;
+			contactID = 0;
+			if (!jarr.success())
+				Serial.println("Error loading contacts");
+			else
+			{
+				contactID = contactsMenuSD(&jarr, true); //call contacts app with smsFlag set to true
+				contactTemp = jarr[contactID+1]["number"].as<String>();
+				Serial.println("contactID");
+				Serial.println(contactID);
+				contactID = 0;
+			}
+			if(contactTemp != "")
+				contact = contactTemp;
+			while(!mp.update());
+			contactsApp = false;
+			mp.update();
+		}
+		while(contactsApp) 
+		{
+			if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B))
+			{
+				contactsApp = !contactsApp;
+			}
+			mp.update();
+		}
+		if (mp.buttons.released(BTN_A) && contact.length() > 1 && content != "") // SEND SMS
 		{
 			mp.display.fillScreen(TFT_BLACK);
             mp.display.setCursor(0, mp.display.height()/2 - 16);
@@ -858,13 +977,24 @@ void composeSMS(JsonArray *messages)
         mp.display.setCursor(2,-1);
         mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
 		mp.display.print("To: ");
-		mp.display.print(contact);
+		if(contactLabel != "")
+			mp.display.print(contactLabel);
+		else
+			mp.display.print(contact);
 		mp.display.fillRect(0,110, 160, 18, TFT_DARKGREY);
 		mp.display.drawFastHLine(0,111, 160, TFT_WHITE);
 		mp.display.setCursor(4, 112);
 		mp.display.print("Erase");
-		mp.display.setCursor(125,112);
-		mp.display.print("Send");
+		if(cursor == 0)
+		{	
+			mp.display.setCursor(102,112);
+			mp.display.print("Contacts");
+		}
+		else if(cursor == 1)
+		{
+			mp.display.setCursor(130,112);
+			mp.display.print("Help");
+		}
 		mp.update();
 		if(mp.newMessage)
 		{

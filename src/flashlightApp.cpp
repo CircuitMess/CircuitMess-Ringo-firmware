@@ -1,4 +1,37 @@
 #include "flashlightApp.h"
+
+void colorChange(uint8_t col){
+			for(int i = 0; i < 8; i++)
+		{
+			switch(col)
+			{
+				case 0:
+					mp.leds[i] = CRGB::Cyan;
+					break;
+				case 1:
+					mp.leds[i] = CRGB::Green;
+					break;
+				case 2:
+					mp.leds[i] = CRGB::Red;
+					break;
+				case 3:
+					mp.leds[i] = CRGB::Yellow;
+					break;
+				case 4:
+					mp.leds[i] = CRGB::White;
+					break;
+				case 5:
+					mp.leds[i] = CRGB::Orange;
+					break;
+				case 6:
+					mp.leds[i] = CRGB::Fuchsia;
+					break;
+			}
+		}
+		mp.pixelsBrightness = 5;
+	//	mp.update();
+}
+
 void flashlightApp()
 {
 	bool state = 0;
@@ -52,6 +85,11 @@ void flashlightApp()
 		else
 			mp.display.drawIcon(flashlightOn, 46, 10, 34, 50, 2, TFT_GREEN);
 
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
+		}
+
 		if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
 		{
 			state = !state;
@@ -59,18 +97,26 @@ void flashlightApp()
 			delay(5);
 			while(!mp.update());
 		}
-		if(mp.buttons.released(BTN_B))
+ 		if(mp.buttons.released(BTN_B))
 		{
 			for(int i = 0; i < 8; i++)
 				mp.leds[i] = CRGB::Black;
 				
-			mp.pixelsBrightness = localBrightness;
+			mp.pixelsBrightness = localBrightness;  // rad lampe u pozadini
 			break;
-		}
+		} 
 		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
 			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 			{
+				if(!state)
+					{
+					mp.pixelsBrightness = 0;
+					mp.display.drawIcon(flashlightOff, 46, 10, 34, 50, 2, TFT_GREEN);
+				}
+				else
+					mp.display.drawIcon(flashlightOn, 46, 10, 34, 50, 2, TFT_GREEN);
+
 				mp.display.fillRect(15, 51, 130, 24, backgroundColors[color]);
 				mp.display.drawRect(14, 50, 132, 26, TFT_BLACK);
 				mp.display.setTextColor(TFT_BLACK);
@@ -98,8 +144,9 @@ void flashlightApp()
 						mp.display.drawBitmap(22, 57, arrowLeft, backgroundColors[color], 2);
 						mp.display.drawBitmap(10*2, 57, arrowLeft, TFT_BLACK, 2);
 						mp.display.drawBitmap(66*2, 57, arrowRight, TFT_BLACK, 2);
-					}
+					}	
 				}
+				
 				if (mp.buttons.released(BTN_LEFT) && color > 0)
 				{
 					mp.osc->note(75, 0.05);
@@ -114,7 +161,16 @@ void flashlightApp()
 					color++;
 					while(!mp.update());
 				}
+				if(state) colorChange(color);
 				mp.update();
+				if(mp.buttons.released(BTN_FUN_LEFT)) break;
+				if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT))
+					{
+						state = !state;
+						Serial.println(state);
+						delay(5);
+						while(!mp.update());
+					}
 			}
 			while(!mp.update());
 		}

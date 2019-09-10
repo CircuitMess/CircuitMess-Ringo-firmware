@@ -133,9 +133,14 @@ void calculatorApp()
 		}
 		if(mp.buttons.released(BTN_FUN_LEFT))
 		{
-			input.remove(input.length() - 1);
+			if(input == "Error") input = "";
+			else input.remove(input.length() - 1);
 			if(input == "")
 				input = "0";
+		}
+		if(mp.buttons.released(BTN_HOME)) {
+			mp.exitedLockscreen = true;
+			mp.lockscreen(); // Robert
 		}
 		if(mp.buttons.released(BTN_LEFT))
 		{
