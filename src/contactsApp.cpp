@@ -500,7 +500,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		{
 			mp.display.printCenter("Select               View");
 		}
-		elses
+		else
 		{
 			mp.display.printCenter("Delete               View");
 		}
