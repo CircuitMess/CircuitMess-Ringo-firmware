@@ -111,6 +111,14 @@ void flashlightApp()
 			mp.buttons.update();
 			while(1)
 			{
+				mp.display.fillScreen(TFT_BLACK);
+				 mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextFont(2);
+				mp.display.setTextSize(1);
+				mp.display.setCursor(2, 110);
+				mp.display.print("Color");
+				mp.display.setCursor(112, 110);
+				mp.display.print("On/Off");
 				if(!state)
 				{
 					mp.pixelsBrightness = 0;
