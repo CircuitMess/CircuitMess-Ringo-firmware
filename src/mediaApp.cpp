@@ -413,14 +413,12 @@ int16_t audioPlayer(uint16_t index) {
 			if (mp.buttons.released(BTN_B))
 			{
 				mp.buttons.update();
-				mp3->stop();
+			//	mp3->stop();
 				Serial.println(F("Stopped"));
 				delay(5);
 				return index;
 			}
-			if(mp.buttons.released(BTN_HOME)) 
-			{
-				mp3->stop();
+			if(mp.buttons.released(BTN_HOME)) {
 				mp.exitedLockscreen = true;
 				mp.lockscreen();
 			}
@@ -496,7 +494,7 @@ int16_t audioPlayer(uint16_t index) {
 				playState = !playState;
 				isPlaying[index] = 1;
 			}
-			/*
+
 			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0) //DOWN
 			{
 				mp.buttons.update();
@@ -519,8 +517,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
 			}
-			*/
-			if (mp.buttons.repeat(BTN_DOWN,13) && mp.mediaVolume > 0) //DOWN
+			if (mp.buttons.repeat(BTN_DOWN,2) && mp.mediaVolume > 0) //DOWN
 			{
 				mp.buttons.update();
 				mp.mediaVolume--;
@@ -542,7 +539,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
 			}
-			/*
+
 			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
 			{
 				mp.buttons.update();
@@ -564,8 +561,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
 			}
-			*/
-			if (mp.buttons.repeat(BTN_UP,13) && mp.mediaVolume < 14) //UP
+			if (mp.buttons.repeat(BTN_UP,2) && mp.mediaVolume < 14) //UP
 			{
 				mp.buttons.update();
 				mp.mediaVolume++;
