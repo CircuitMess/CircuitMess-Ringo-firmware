@@ -905,8 +905,8 @@ void soundMenu()
 
 			case 2: //MIC SENSITIVITY
 			
-				mp.display.drawBitmap(125, 88, micPlus, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				mp.display.drawBitmap(1, 94, micMinus, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(137, 82, fullMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(6, 82, noMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				if(mp.buttons.released(BTN_RIGHT))
 				{
 					if(mp.micGain < 15)
