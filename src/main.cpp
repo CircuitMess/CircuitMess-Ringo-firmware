@@ -22,9 +22,9 @@ String backgroundColorsNames[7] PROGMEM = {
 	"Pink"
 };
 String titles[9] PROGMEM = {
-	"Messages",
-	"Media",
+	"Phone",
 	"Contacts",
+	"Messages",
 	"Settings",
 	"Phone",
 	"Clock",
