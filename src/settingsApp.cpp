@@ -786,8 +786,8 @@ void soundMenu()
 			else
 				micDraw = mp.micGain;
 			mp.display.fillRect(38, 94, micDraw * 6, 4, TFT_BLACK);
-			mp.display.drawBitmap(1, 94, micMinus, TFT_BLACK, 2);
-			mp.display.drawBitmap(125, 88, micPlus, TFT_BLACK, 2);
+			mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
+			mp.display.drawBitmap(137, 82, fullMic, TFT_BLACK, 2);
 			mp.display.drawBitmap(66, 114, arrowDown, TFT_BLACK, 2);
 		}
 		else if(currentScreen == 1) //SCREEN 2
@@ -905,8 +905,8 @@ void soundMenu()
 
 			case 2: //MIC SENSITIVITY
 			
-				mp.display.drawBitmap(125, 88, micPlus, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				mp.display.drawBitmap(1, 94, micMinus, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(137, 82, fullMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(6, 82, noMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				if(mp.buttons.released(BTN_RIGHT))
 				{
 					if(mp.micGain < 15)
