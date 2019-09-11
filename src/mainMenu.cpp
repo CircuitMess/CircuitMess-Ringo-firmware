@@ -145,13 +145,13 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 						// Serial.println(tempY);
 						// Serial.println(F("-------------"));
 						// delay(5);
-						mp.display.drawIcon(bigMessages, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
-						break;
-					case 1:
 						mp.display.drawIcon(bigPhone, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
-					case 2:
+					case 1:
 						mp.display.drawIcon(bigContacts, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
+						break;
+					case 2:
+						mp.display.drawIcon(bigMessages, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
 						break;
 					case 3:
 						mp.display.drawIcon(bigSettings, 4 + tempX * 52, 18 + tempY * 56, width, bigIconHeight, 2);
@@ -387,13 +387,13 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 						// Serial.println(tempY);
 						// Serial.println(F("-------------"));
 						// delay(5);
-						mp.display.drawIcon(bigMessages, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
-						break;
-					case 1:
 						mp.display.drawIcon(bigPhone, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
-					case 2:
+					case 1:
 						mp.display.drawIcon(bigContacts, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
+						break;
+					case 2:
+						mp.display.drawIcon(bigMessages, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
 						break;
 					case 3:
 						mp.display.drawIcon(bigSettings, 4 + tempX*52, 18 + tempY*56, width, bigIconHeight, 2);
