@@ -431,7 +431,7 @@ void mm(){
 	if(menuSignal == 3)mp.display.setTextColor(TFT_YELLOW);
     mp.display.setCursor(54, 94, 2);
     mp.display.print(F("EXIT"));
-
+	delayMicroseconds(100);
     mp.update(0);
   }
   snakeMenuInt = 0;
@@ -650,12 +650,12 @@ void loop() {
   // ---------------------------------
   control();
   if(eaten) mp.display.fillRect(foodX,foodY, foodSize, foodSize, TFT_BLACK);
+  crash();
+  touchedItSelf();
   drawSnake();
   if(eaten)  drawFood();
   mp.display.fillRect(foodX, foodY, foodSize, foodSize, TFT_YELLOW);
   foodCheck();
-  crash();
-  touchedItSelf();
   //----------------------------------
   if(mp.buttons.released(BTN_B)) paused();
 
