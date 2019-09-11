@@ -781,7 +781,7 @@ void soundMenu()
 			mp.display.setCursor(29, 75);
 			mp.display.printCenter("Mic sensitivity");
 			mp.display.drawRect(36, 92, 88, 8, TFT_BLACK);
-			if(mp.micGain > 14) //silly fix
+			if(mp.micGain > 14)
 				micDraw = 14;
 			else
 				micDraw = mp.micGain;
@@ -824,7 +824,7 @@ void soundMenu()
 			case 0: //RING VOLUME
 				mp.display.drawBitmap(8, 20, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				mp.display.drawBitmap(134, 20, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				if (mp.buttons.released(BTN_LEFT) && mp.ringVolume > 0)
+				if (mp.buttons.repeat(BTN_LEFT,7) && mp.ringVolume > 0)
 				{
 					mp.ringVolume--;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
@@ -833,25 +833,7 @@ void soundMenu()
 					while(!mp.update());
 					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
-				if (mp.buttons.repeat(BTN_LEFT,5) && mp.ringVolume > 0)
-				{
-					mp.ringVolume--;
-					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
-					mp.osc->note(75, 0.05);
-					mp.osc->play();
-					while(!mp.update());
-					// Serial.print("Volume: "); Serial.println(mp.volume);
-				}
-				if (mp.buttons.released(BTN_RIGHT) && mp.ringVolume < 14)
-				{
-					mp.ringVolume++;
-					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
-					mp.osc->note(75, 0.05);
-					mp.osc->play();
-					while(!mp.update());
-					// Serial.print("Volume: "); Serial.println(mp.volume);
-				}
-				if (mp.buttons.repeat(BTN_RIGHT,5) && mp.ringVolume < 14)
+				if (mp.buttons.repeat(BTN_RIGHT,7) && mp.ringVolume < 14)
 				{
 					mp.ringVolume++;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.ringVolume]);
@@ -865,7 +847,7 @@ void soundMenu()
 			case 1: //MEDIA VOLUME
 				mp.display.drawBitmap(8, 54, noSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				mp.display.drawBitmap(134, 54, fullSound, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				if (mp.buttons.released(BTN_LEFT) && mp.mediaVolume > 0)
+				if (mp.buttons.repeat(BTN_LEFT,7) && mp.mediaVolume > 0)
 				{
 					mp.mediaVolume--;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
@@ -874,25 +856,7 @@ void soundMenu()
 					while(!mp.update());
 					// Serial.print("Volume: "); Serial.println(mp.volume);
 				}
-				if (mp.buttons.repeat(BTN_LEFT,5) && mp.mediaVolume > 0)
-				{
-					mp.mediaVolume--;
-					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
-					mp.osc->note(75, 0.05);
-					mp.osc->play();
-					while(!mp.update());
-					// Serial.print("Volume: "); Serial.println(mp.volume);
-				}
-				if (mp.buttons.released(BTN_RIGHT) && mp.mediaVolume < 14)
-				{
-					mp.mediaVolume++;
-					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
-					mp.osc->note(75, 0.05);
-					mp.osc->play();
-					while(!mp.update());
-					// Serial.print("Volume: "); Serial.println(mp.volume);
-				}
-				if (mp.buttons.repeat(BTN_RIGHT,5) && mp.mediaVolume < 14)
+				if (mp.buttons.repeat(BTN_RIGHT,7) && mp.mediaVolume < 14)
 				{
 					mp.mediaVolume++;
 					mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
@@ -905,24 +869,14 @@ void soundMenu()
 
 			case 2: //MIC SENSITIVITY
 			
-				mp.display.drawBitmap(137, 82, fullMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				mp.display.drawBitmap(6, 82, noMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				if(mp.buttons.released(BTN_RIGHT))
+				mp.display.drawBitmap(125, 88, micPlus, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				mp.display.drawBitmap(1, 94, micMinus, blinkState ? TFT_BLACK : 0xA7FF, 2);
+				if(mp.buttons.repeat(BTN_RIGHT, 7))
 				{
 					if(mp.micGain < 15)
 						mp.micGain++;
 				}
-				if(mp.buttons.repeat(BTN_RIGHT, 5))
-				{
-					if(mp.micGain < 15)
-						mp.micGain++;
-				}
-				if(mp.buttons.released(BTN_LEFT))
-				{
-					if(mp.micGain > 0)
-						mp.micGain--;
-				}
-				if(mp.buttons.repeat(BTN_LEFT, 5))
+				if(mp.buttons.repeat(BTN_LEFT, 7))
 				{
 					if(mp.micGain > 0)
 						mp.micGain--;
