@@ -360,11 +360,11 @@ int16_t audioPlayer(uint16_t index) {
 		
 		if(playState);
 			mp3->play();
-			mp.osc->setVolume(0);
+			//mp.osc->setVolume(0);
 		if(mp.mediaVolume == 0)
 			mp3->setVolume(0);
 		else
-			mp3->setVolume(mp.mediaVolume*21);
+			mp3->setVolume(mp.mediaVolume*40);
 
 		while (1) 
 		{
@@ -525,7 +525,7 @@ int16_t audioPlayer(uint16_t index) {
 				if(mp.mediaVolume == 0)
 					mp3->setVolume(0);
 				else
-				mp3->setVolume(mp.mediaVolume*21);
+				mp3->setVolume(mp.mediaVolume*40);
 				
 				// mp3->setVolume(256/14*mp.mediaVolume);
 				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
@@ -570,7 +570,7 @@ int16_t audioPlayer(uint16_t index) {
 				if(mp.mediaVolume == 0)
 					mp3->setVolume(0);
 				else
-					mp3->setVolume(mp.mediaVolume*21);
+					mp3->setVolume(mp.mediaVolume*40);
 				// mp3->setVolume(256/14*mp.mediaVolume);
 				mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
 				//prepare for text printing
