@@ -35,6 +35,7 @@ String titles[9] PROGMEM = {
 StaticJsonBuffer<capacity> jb;
 uint16_t audioCount = 0;
 String audioFiles[100];
+uint8_t callSpeakerVolume1 = 100;
 
 void menuDrawBox(String text, uint8_t i, int32_t y) {
 	uint8_t scale;
@@ -567,31 +568,32 @@ void callNumber(String number) {
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && ((mp.micGain < 15 && mp.sim_module_version == 1) ||
-		(mp.micGain < 8 && mp.sim_module_version == 0)) && callState == 2)
+		if(mp.buttons.released(BTN_UP) && (callSpeakerVolume1 + 10) <= 100)
 		{
-			mp.micGain++;
-			if(mp.sim_module_version == 1)
-				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			else if(mp.sim_module_version == 0)
+			
+			if(mp.setCallVolume(callSpeakerVolume1 + 10))
 			{
-				String foo = "AT+CMICGAIN=";
-				foo+=mp.micGain;
-				Serial1.println(foo);
-				delay(10);
+				callSpeakerVolume1 += 10;
+				mp.display.fillRect(57, 111, 28, 15, TFT_RED);
+				mp.display.setCursor(58, 109);
+				if(callSpeakerVolume1 != 0)
+					mp.display.print(callSpeakerVolume1 / 10);
+				else
+					mp.display.print(callSpeakerVolume1);
 			}
 		}
-		if(mp.buttons.released(BTN_DOWN) && mp.micGain > 0 && callState == 2)
+		if(mp.buttons.released(BTN_DOWN) && (callSpeakerVolume1 - 10) >= 0)
 		{
-			mp.micGain--;
-			if(mp.sim_module_version == 1)
-				Serial1.printf("AT+CMIC=0,%d\r", mp.micGain);
-			else if(mp.sim_module_version == 0)
+			
+			if(mp.setCallVolume(callSpeakerVolume1 - 10))
 			{
-				String foo = "AT+CMICGAIN=";
-				foo+=mp.micGain;
-				Serial1.println(foo);
-				delay(10);
+				mp.display.fillRect(57, 111, 28, 15, TFT_RED);
+				mp.display.setCursor(58, 109);
+				callSpeakerVolume1 -= 10;
+				if(callSpeakerVolume1 != 0)
+					mp.display.print(callSpeakerVolume1 / 10);
+				else
+					mp.display.print(callSpeakerVolume1);
 			}
 		}
 		switch (callState)
@@ -607,8 +609,8 @@ void callNumber(String number) {
 					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
-				mp.display.print("Mic gain: ");
-				mp.display.print(mp.micGain);
+				mp.display.print("Volume: ");
+				mp.display.print(callSpeakerVolume1 / 10);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -623,8 +625,8 @@ void callNumber(String number) {
 					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
-				mp.display.print("Mic gain: ");
-				mp.display.print(mp.micGain);
+				mp.display.print("Volume: ");
+				mp.display.print(callSpeakerVolume1 / 10);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
