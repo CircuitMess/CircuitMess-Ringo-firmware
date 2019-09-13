@@ -104,8 +104,8 @@ void mediaApp() {
 					while(1)
 					{
 						if(mp.buttons.released(BTN_HOME)) {
-						mp.exitedLockscreen = true;
-						mp.lockscreen(); 
+							mp.exitedLockscreen = true;
+							mp.lockscreen(); 
 						}
 						if(mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B) || !mp.SDinsertedFlag)
 							break;
@@ -413,12 +413,13 @@ int16_t audioPlayer(uint16_t index) {
 			if (mp.buttons.released(BTN_B))
 			{
 				mp.buttons.update();
-			mp3->stop();
+				mp3->stop();
 				Serial.println(F("Stopped"));
 				delay(5);
 				return index;
 			}
-			if(mp.buttons.released(BTN_HOME)) {
+			if(mp.buttons.released(BTN_HOME)) 
+			{
 				mp3->stop();
 				mp.exitedLockscreen = true;
 				mp.lockscreen();
@@ -430,6 +431,7 @@ int16_t audioPlayer(uint16_t index) {
 				if(playState)
 				{
 					mp3->pause();
+					//mp.osc->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]); // Robert v1 -- turns on menu sounds when song stops playing
 					mp.display.fillScreen(backgroundColors[mp.backgroundIndex]);
 
 					//draw bitmaps
@@ -494,7 +496,7 @@ int16_t audioPlayer(uint16_t index) {
 				playState = !playState;
 				isPlaying[index] = 1;
 			}
-		/*
+			/*
 			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0) //DOWN
 			{
 				mp.buttons.update();
@@ -540,7 +542,7 @@ int16_t audioPlayer(uint16_t index) {
 				mp.display.setCursor(24, 2);
 				mp.display.print(mp.mediaVolume);
 			}
-		/*
+			/*
 			if (mp.buttons.released(BTN_UP) && mp.mediaVolume < 14) //UP
 			{
 				mp.buttons.update();
@@ -601,8 +603,8 @@ int16_t audioPlayer(uint16_t index) {
 						memset(shuffleList, 0, sizeof(shuffleList));
 						if(!loop)
 						{
-							playState = 0;
-							shuffleReset = 1;
+							playState = 0; // Robert -- added 1
+							shuffleReset = 1; // Robert -- added 0
 						}
 					}
 					uint16_t randNumber = random(0,audioCount);

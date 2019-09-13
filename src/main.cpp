@@ -26,7 +26,7 @@ String titles[9] PROGMEM = {
 	"Contacts",
 	"Messages",
 	"Settings",
-	"Phone",
+	"Media",
 	"Clock",
 	"Calculator",
 	"Flashlight",
@@ -338,7 +338,8 @@ uint16_t countSubstring(String string, String substring) {
 	}
 	return count;
 }
-void callNumber(String number) {
+void callNumber(String number) 
+{
 	String contact = mp.checkContact(number);
 	mp.inCall = 1;
 	mp.dataRefreshFlag = 0;
@@ -663,8 +664,8 @@ void callNumber(String number) {
 					mp.display.printCenter(contact);
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
-				mp.display.print("Mic gain: ");
-				mp.display.print(mp.micGain);
+				mp.display.print("Volume: ");
+				mp.display.print(mp.mediaVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -1940,6 +1941,10 @@ bool startupWizard()
 }
 void controlTry() //for debug purposes
 {
+	int16_t oldSleepTimeActual = mp.sleepTimeActual;
+	int16_t oldSleepTime = mp.sleepTime;
+	mp.sleepTime = 0;
+	mp.sleepTimeActual = 0;
 	mp.textInput("");
 	mp.textPointer = 0;
 
@@ -2084,6 +2089,9 @@ void controlTry() //for debug purposes
 
 		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
+			mp.sleepTimeActual = oldSleepTimeActual;
+			mp.sleepTime = oldSleepTime;
+			mp.sleepTimer = millis();
 			Serial.println("B pressed");
 			while(!mp.update());
 			break;
@@ -2164,7 +2172,6 @@ void setup()
 	Serial.println(EEPROM.readBool(33));
 	if(EEPROM.readBool(33))
 		startupWizard();
-
 	mp.shutdownPopupEnable(1);
 	// startupWizard();
 	// controlTry();
@@ -2205,6 +2212,8 @@ void loop()
 	// mp.display.printCenter("   USB INT: ");
 	// mp.display.setCursor(20,100);
 	// mp.display.printCenter(digitalRead(39));
+
+	
 	mainMenu();
 	// mediaApp();
 	// phoneApp();
