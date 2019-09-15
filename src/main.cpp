@@ -35,7 +35,6 @@ String titles[9] PROGMEM = {
 StaticJsonBuffer<capacity> jb;
 uint16_t audioCount = 0;
 String audioFiles[100];
-uint8_t callSpeakerVolume1 = 100;
 
 void menuDrawBox(String text, uint8_t i, int32_t y) {
 	uint8_t scale;
@@ -400,12 +399,12 @@ void callNumber(String number)
 		// Serial.println("---------------");
 		// Serial.println(buffer);
 		// delay(5);
-		if(buffer.indexOf("OK", buffer.indexOf("AT+CMIC=")) != -1)
+		if(buffer.indexOf("OK", buffer.indexOf("AT+CLVL=")) != -1)
 			buffer = "";
-		if (localBuffer.indexOf(String("CLCC: " + String(callIdNumber))) != -1 || localBuffer.indexOf("AT+CMIC") != -1)
+		if (localBuffer.indexOf(String("CLCC: " + String(callIdNumber))) != -1 || localBuffer.indexOf("AT+CLVL") != -1)
 		{
 			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,0,0,0")) != -1 
-			|| localBuffer.indexOf("AT+CMIC") != -1  )
+			|| localBuffer.indexOf("AT+CLVL") != -1  )
 			{
 				callState = 2;
 				
@@ -569,33 +568,27 @@ void callNumber(String number)
 			delay(1000);
 			break;
 		}
-		if(mp.buttons.released(BTN_UP) && (callSpeakerVolume1 + 10) <= 100)
+		if(mp.buttons.released(BTN_UP) && mp.callSpeakerVolume < 5)
 		{
-			
-			if(mp.setCallVolume(callSpeakerVolume1 + 10))
-			{
-				callSpeakerVolume1 += 10;
-				mp.display.fillRect(57, 111, 28, 15, TFT_RED);
-				mp.display.setCursor(58, 109);
-				if(callSpeakerVolume1 != 0)
-					mp.display.print(callSpeakerVolume1 / 10);
-				else
-					mp.display.print(callSpeakerVolume1);
-			}
+			mp.callSpeakerVolume++;
+			if (mp.sim_module_version == 1)
+				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume*20);
+			else if (mp.sim_module_version == 0)
+				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume);
+			mp.display.fillRect(56, 111, 20, 15, TFT_RED);
+			mp.display.setCursor(59, 109);
+			mp.display.print(mp.callSpeakerVolume);
 		}
-		if(mp.buttons.released(BTN_DOWN) && (callSpeakerVolume1 - 10) >= 0)
+		if(mp.buttons.released(BTN_DOWN) && mp.callSpeakerVolume > 0)
 		{
-			
-			if(mp.setCallVolume(callSpeakerVolume1 - 10))
-			{
-				mp.display.fillRect(57, 111, 28, 15, TFT_RED);
-				mp.display.setCursor(58, 109);
-				callSpeakerVolume1 -= 10;
-				if(callSpeakerVolume1 != 0)
-					mp.display.print(callSpeakerVolume1 / 10);
-				else
-					mp.display.print(callSpeakerVolume1);
-			}
+			mp.callSpeakerVolume--;
+			if (mp.sim_module_version == 1)
+				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume*20);
+			else if (mp.sim_module_version == 0)
+				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume);
+			mp.display.fillRect(56, 111, 20, 15, TFT_RED);
+			mp.display.setCursor(59, 109);
+			mp.display.print(mp.callSpeakerVolume);
 		}
 		switch (callState)
 		{
@@ -611,7 +604,7 @@ void callNumber(String number)
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
 				mp.display.print("Volume: ");
-				mp.display.print(callSpeakerVolume1 / 10);
+				mp.display.print(mp.callSpeakerVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -627,7 +620,7 @@ void callNumber(String number)
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
 				mp.display.print("Volume: ");
-				mp.display.print(callSpeakerVolume1 / 10);
+				mp.display.print(mp.callSpeakerVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
@@ -665,7 +658,7 @@ void callNumber(String number)
 				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
 				mp.display.setCursor(5, 109);
 				mp.display.print("Volume: ");
-				mp.display.print(mp.mediaVolume);
+				mp.display.print(mp.callSpeakerVolume);
 				mp.display.setCursor(100, 109);
 				mp.display.print("Hang up");
 				break;
