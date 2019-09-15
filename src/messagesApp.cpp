@@ -1,18 +1,6 @@
 #include "messagesApp.h"
 #include "contactsApp.h"
-int16_t y;
-uint32_t start = 0;
-uint32_t end = 0;
-String input;
-String buffer;
-uint16_t awayX;
-String helpString;
-int16_t leftX;
-int16_t oldX;
-uint32_t helpM;
-int16_t oldY;
-bool lineFlag;
-char moveChar;
+int16_t y = 0;
 /*
 [
 	{
@@ -329,6 +317,14 @@ void messagesApp()
 
 bool viewSms(String content, String contact, uint32_t date, bool direction) 
 {
+	String input = "";
+	String buffer = "";
+	uint16_t awayX = 0;
+	String helpString = "";
+	int16_t leftX = 0;
+	int16_t oldX = 0;
+	int16_t oldY = 0;
+	bool lineFlag = 0;
 	y = 14;  //Beggining point
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
@@ -350,7 +346,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 		mp.display.setCursor(2, y);
 		for(uint16_t i = 0; i < content.length(); i++)
 		{
-			leftX = 155 - mp.display.getCursorX();
+			leftX = 152 - mp.display.getCursorX();
 
 
 			if( content[i] == ' ' || i==0) {
@@ -377,7 +373,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 				}
 			}
 			else mp.display.print(content[i]);
-			if (lineFlag && mp.display.getCursorX() > 144 ) {
+			if (lineFlag && mp.display.getCursorX() > 130 ) {
 				mp.display.print("-");
 				mp.display.println();
 				mp.display.setCursor(2, mp.display.getCursorY());

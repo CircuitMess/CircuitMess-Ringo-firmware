@@ -1950,6 +1950,7 @@ void controlTry() //for debug purposes
 {
 	int16_t oldSleepTimeActual = mp.sleepTimeActual;
 	int16_t oldSleepTime = mp.sleepTime;
+	int16_t y = 0;
 	mp.sleepTime = 0;
 	mp.sleepTimeActual = 0;
 	mp.textInput("");
