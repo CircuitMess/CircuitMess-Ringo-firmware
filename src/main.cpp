@@ -699,6 +699,10 @@ void callNumber(String number)
 }
 bool startupWizard()
 {
+	int16_t oldSleepTimeActual = mp.sleepTimeActual;
+	int16_t oldSleepTime = mp.sleepTime;
+	mp.sleepTime = 0;
+	mp.sleepTimeActual = 0;
 	mp.homePopupEnable(0);
 	mp.shutdownPopupEnable(0);
 	mp.display.fillScreen(TFT_WHITE);
@@ -1937,6 +1941,9 @@ bool startupWizard()
 	tempMillis = millis();
 	while(millis() < tempMillis + 2000)
 	mp.update();
+	mp.sleepTimeActual = oldSleepTimeActual;
+	mp.sleepTime = oldSleepTime;
+	mp.sleepTimer = millis();
  	return 1;
 }
 void controlTry() //for debug purposes

@@ -786,8 +786,8 @@ void soundMenu()
 			else
 				micDraw = mp.micGain;
 			mp.display.fillRect(38, 94, micDraw * 6, 4, TFT_BLACK);
-			mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
 			mp.display.drawBitmap(137, 82, fullMic, TFT_BLACK, 2);
+			mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
 			mp.display.drawBitmap(66, 114, arrowDown, TFT_BLACK, 2);
 		}
 		else if(currentScreen == 1) //SCREEN 2
