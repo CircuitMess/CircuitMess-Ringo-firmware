@@ -16,4 +16,6 @@ void callNumber(String number);
 int8_t viewContact(JsonObject &object);
 extern int textPointer;
 String searchContacts(String input);
+void contactsMenuSearchBox(uint8_t i, int32_t y, String input); 
+void contactsMenuSearchBoxCursor(uint8_t i, int32_t y);
 #endif
