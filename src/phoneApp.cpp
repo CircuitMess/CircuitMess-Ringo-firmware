@@ -1143,8 +1143,8 @@ void sendMMI(String code)
 	uint16_t helper = buffer.indexOf("\"") + 1;
 	buffer = buffer.substring(helper, buffer.indexOf("\"", helper + 1));
 	Serial.println(buffer);
-	int32_t y = 1;
-	while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	int32_t y = -1;
+	while(!mp.buttons.released(BTN_B))
 	{
 		mp.display.fillScreen(TFT_WHITE);
 		// mp.display.drawRect(10, 20, 142, 88, TFT_BLACK);
@@ -1154,7 +1154,9 @@ void sendMMI(String code)
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
 		mp.display.setCursor(2, y);
-/* 		for(int i = 0; i < buffer.length();i++)
+		mp.display.setTextWrap(0);
+		
+		/* 		for(int i = 0; i < buffer.length();i++)
 		{
 			mp.display.print(buffer[i]);
 			if(mp.display.getCursorX() > 150)
@@ -1165,7 +1167,7 @@ void sendMMI(String code)
 		} */
 		for(uint16_t i = 0; i < buffer.length(); i++)
 		{
-			int16_t leftX = 155 - mp.display.getCursorX();
+			int16_t leftX = 154 - mp.display.getCursorX();
 			if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
 			bool lineFlag = false;
 			if( buffer[i] == ' ' || i==0) {
@@ -1177,8 +1179,8 @@ void sendMMI(String code)
 				}
 				else if(buffer[i+j] != ' ' && i+j != buffer.length()-1) helpString += buffer[i+j];
 				else {
-					uint8_t oldX = mp.display.getCursorX();
-		        	uint8_t oldY = mp.display.getCursorY();
+					int16_t oldX = mp.display.getCursorX();
+		        	int16_t oldY = mp.display.getCursorY();
 					mp.display.setCursor(0, -20);
 					mp.display.print(helpString);
 					int16_t awayX = mp.display.getCursorX();
@@ -1202,24 +1204,29 @@ void sendMMI(String code)
 			if(mp.display.getCursorY() > 120)
 				break; 
 		}
-
-		if (mp.buttons.repeat(BTN_DOWN, 3)) 
-		{ //BUTTON DOWN
-			Serial.println(mp.display.cursor_y);
-			if (mp.display.cursor_y >= 110)
+		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+			if (mp.display.cursor_y >= 96)
 			{
 				y -= 4;
+				Serial.println(y);
 			}
 		}
-		if (mp.buttons.repeat(BTN_UP, 3)) 
-		{ //BUTTON UP
-			Serial.println(y);
-			if (y < 1)
+
+		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+			if (y < -1)
+			{
 				y += 4;
+				Serial.println(y);
+			}
 		}
+		mp.display.fillRect(0, 111, 160, 20, TFT_DARKGREY);
+		mp.display.setCursor(2, 111);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Press B to go back");
+	
 		mp.update();
 	}
-	while(!mp.update());
+	mp.buttons.update();
 	mp.inCall = 0;
 }
 

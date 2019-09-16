@@ -346,7 +346,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 		mp.display.setCursor(2, y);
 		for(uint16_t i = 0; i < content.length(); i++)
 		{
-			leftX = 155 - mp.display.getCursorX();
+			leftX = 154 - mp.display.getCursorX();
 			if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
 			if( content[i] == ' ' || i==0) {
 				helpString = "";
