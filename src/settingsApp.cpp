@@ -2527,7 +2527,7 @@ bool updateMenu()
 						while(!mp.update());
 
 						String contacts_default = "[]";
-						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 15}";
+						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 14, \"callVolume\" : 5}";
 
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
@@ -2557,6 +2557,7 @@ bool updateMenu()
 						mp.ringtone_path = String(settings["ringtone"].as<char*>());
 						mp.ringVolume = settings["ringVolume"];
 						mp.micGain = settings["micGain"];
+						mp.callSpeakerVolume = settings["callVolume"];
 						Serial.println("ERASED");
 						delay(5);
 						mp.applySettings();
@@ -2573,6 +2574,10 @@ bool updateMenu()
 						mp.mediaVolume = 10;
 						mp.ringtone_path = "/Music/Default ringtone.wav";
 						mp.notification = 0;
+						if(mp.sim_module_version == 0)
+							mp.micGain = 1;
+						else
+							mp.micGain = 14;
 						mp.applySettings();
 					}
 					mp.display.setTextColor(TFT_BLACK);
