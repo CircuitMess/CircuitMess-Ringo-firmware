@@ -4,7 +4,7 @@
 //Contacts app
 void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y);
 uint8_t deleteContactSD(String name, String number);
-uint8_t newContactSD(String *name, String *number);
+uint8_t newContact(String *name, String *number);
 void parse_contacts();
 void contactsMenuNewBox(uint8_t i, int32_t y);
 void contactsMenuDrawCursor(uint8_t i, int32_t y);

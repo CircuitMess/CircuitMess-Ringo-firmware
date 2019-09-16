@@ -201,7 +201,7 @@ void contactsAppSD(bool smsFlag)
 				{
 					String name;  
 					String number = "+";
-					if(newContactSD(&name, &number))
+					if(newContact(&name, &number))
 					{
 						JsonObject& newContact = jb.createObject();
 						newContact["name"] = name;
@@ -223,7 +223,7 @@ void contactsAppSD(bool smsFlag)
 						name = jarr[id]["name"].as<String>();
 						number = jarr[id]["number"].as<String>();
 
-						if(newContactSD(&name, &number)){
+						if(newContact(&name, &number)){
 							JsonObject& newContact = jb.createObject();
 							newContact["name"] = name;
 							newContact["number"] = number;
@@ -309,7 +309,7 @@ void contactsAppSD(bool smsFlag)
 }
 
 
-uint8_t newContactSD(String *name, String *number)
+uint8_t newContact(String *name, String *number)
 {
 	mp.textInput("");
 	String content = *name;
@@ -449,7 +449,30 @@ uint8_t newContactSD(String *name, String *number)
 		}
 		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
 			while(!mp.update());
-			break;
+			mp.display.setTextColor(TFT_WHITE);
+			mp.display.setTextSize(1);
+			mp.display.setTextFont(2);
+			mp.display.drawRect(10, 45, 142, 38, TFT_BLACK);
+			mp.display.drawRect(9, 44, 144, 40, TFT_BLACK);
+			mp.display.fillRect(11, 46, 140, 36, TFT_DARKGREY);
+			mp.display.setCursor(47, 48);
+			mp.display.printCenter("Exit without saving?");
+			mp.display.setCursor(47, 61);
+			mp.display.printCenter("A: Yes      B: No");
+			while(1)
+			{
+				if(mp.buttons.released(BTN_B))
+				{
+					mp.buttons.update();
+					break;
+				}
+				if(mp.buttons.released(BTN_A))
+				{
+					mp.buttons.update();
+					return 0;
+				}
+				mp.update();
+			}
 		}
 		if (mp.buttons.released(BTN_A)) // SAVE CONTACT
 		{
