@@ -2528,7 +2528,10 @@ bool updateMenu()
 
 						String contacts_default = "[]";
 						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 14, \"callVolume\" : 5}";
-
+						if(mp.sim_module_version == 0)
+						{
+							settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 1, \"callVolume\" : 5}";
+						}
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
 
