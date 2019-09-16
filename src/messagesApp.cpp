@@ -346,9 +346,8 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 		mp.display.setCursor(2, y);
 		for(uint16_t i = 0; i < content.length(); i++)
 		{
-			leftX = 152 - mp.display.getCursorX();
-
-
+			leftX = 155 - mp.display.getCursorX();
+			if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
 			if( content[i] == ' ' || i==0) {
 				helpString = "";
 				for(uint8_t j = 1; j < 24; j++){
@@ -471,7 +470,8 @@ void smsMenuDrawBox(String contact, DateTime date, String content, bool directio
 	composeHeight=21;
 	boxHeight = 30;
 	mp.display.setTextFont(2);
-	String contactLabel = mp.checkContact(contact);
+	//String contactLabel = mp.checkContact(contact);
+	String contactLabel = "";
 
 	y += (i-1) * (boxHeight-1) + composeHeight + offset;
 	if (y < 0 || y > mp.display.height()) 

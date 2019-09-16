@@ -1153,8 +1153,8 @@ void sendMMI(String code)
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(5, y);
-		for(int i = 0; i < buffer.length();i++)
+		mp.display.setCursor(2, y);
+/* 		for(int i = 0; i < buffer.length();i++)
 		{
 			mp.display.print(buffer[i]);
 			if(mp.display.getCursorX() > 150)
@@ -1162,7 +1162,47 @@ void sendMMI(String code)
 				mp.display.print("\n");
 				mp.display.setCursor(5, mp.display.getCursorY());
 			}
+		} */
+		for(uint16_t i = 0; i < buffer.length(); i++)
+		{
+			int16_t leftX = 155 - mp.display.getCursorX();
+			if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
+			bool lineFlag = false;
+			if( buffer[i] == ' ' || i==0) {
+				String helpString = "";
+				for(uint8_t j = 1; j < 24; j++){
+				if (j == 21) {
+					lineFlag = true;
+					mp.display.print(buffer[i]);
+				}
+				else if(buffer[i+j] != ' ' && i+j != buffer.length()-1) helpString += buffer[i+j];
+				else {
+					uint8_t oldX = mp.display.getCursorX();
+		        	uint8_t oldY = mp.display.getCursorY();
+					mp.display.setCursor(0, -20);
+					mp.display.print(helpString);
+					int16_t awayX = mp.display.getCursorX();
+					mp.display.setCursor(oldX, oldY);
+					//mp.display.print(content[i]);
+					if(awayX > leftX) mp.display.println("");
+					else mp.display.print(buffer[i]);
+					if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
+					break;
+					}
+				}
+			}
+			else mp.display.print(buffer[i]);
+			if (lineFlag && mp.display.getCursorX() > 144 ) {
+				mp.display.print("-");
+				mp.display.println();
+				mp.display.setCursor(2, mp.display.getCursorY());
+				lineFlag = false;
+			}
+
+			if(mp.display.getCursorY() > 120)
+				break; 
 		}
+
 		if (mp.buttons.repeat(BTN_DOWN, 3)) 
 		{ //BUTTON DOWN
 			Serial.println(mp.display.cursor_y);

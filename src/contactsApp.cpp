@@ -5,44 +5,75 @@ bool helpPop;
 
 void contactsMenuDrawCursor(uint8_t i, int32_t y) 
 {
-    uint8_t offset = 19;
+    uint8_t offset = 29;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
 }
 void contactsMenuNewBoxCursor(uint8_t i, int32_t y)
 {
-	uint8_t offset = 19;
-    uint8_t boxHeight = 28;
+	uint8_t offset = 14;
+    uint8_t boxHeight = 20;
+	y += offset + 1;
+	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
+}
+void contactsMenuSearchBoxCursor(uint8_t i, int32_t y)
+{
+	uint8_t offset = 34;
+    uint8_t boxHeight = 20;
 	y += offset + 1;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
 void contactsMenuNewBox(uint8_t i, int32_t y) 
 {
-	uint8_t offset = 19;
-    uint8_t boxHeight = 28;
+	uint8_t offset = 14;
+    uint8_t boxHeight = 20;
+	y += offset + 1;
+	if (y < 0 || y > mp.display.height()) 
+	{
+		return;
+	}
+    mp.display.setFreeFont(TT1);
+    mp.display.setTextSize(1);
+    mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
+    mp.display.drawBitmap(2, y, newContactIcon, TFT_WHITE, 2);
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.setCursor(32, y + 1);
+    mp.display.setTextFont(2);
+    mp.display.print("New contact");
+
+}
+void contactsMenuSearchBox(uint8_t i, int32_t y, String typed, String suggested) 
+{
+	uint8_t offset = 34;
+    uint8_t boxHeight = 20;
 	y += offset + 1;
 	if (y < 0 || y > mp.display.height()) 
 	{
 		return;
 	}
     mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
-    mp.display.drawBitmap(0, y + 2, newContactIcon, TFT_WHITE);
-    mp.display.setTextColor(TFT_WHITE);
-    mp.display.setCursor(12, y + 3);
-    mp.display.setTextFont(1);
-    mp.display.print("New contact");
-    mp.display.setFreeFont(TT1);
-    mp.display.setTextSize(1);
-    mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
-    mp.display.drawBitmap(2, y + 4, newContactIcon, TFT_WHITE, 2);
-    mp.display.setTextColor(TFT_WHITE);
-    mp.display.setCursor(32, y + 6);
-    mp.display.setTextFont(2);
-    mp.display.print("New contact");
+   
+	
+	if(typed != "")
+	{
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(2, y + 1);
+		mp.display.setTextFont(2);
+		mp.display.print(typed);
+		mp.display.setTextColor(TFT_CYAN);
+		mp.display.setCursor(2 + suggested.length(), y + 1);
+		suggested.remove(0, typed.length());
+		mp.display.print(suggested);
+	}
+	else
+	{
+		mp.display.setCursor(5, y + 1);
+    	mp.display.print("Search contacts...");
+	}
+	
 
 }
-
 uint8_t deleteContactSD(String name, String number)
 {
 	// unsigned long elapsedMillis = millis();
@@ -113,7 +144,7 @@ void contactsAppSD(bool smsFlag)
 	Serial.println("");
 	Serial.println("Begin contacts");
 	File file = SD.open("/.core/contacts.json", "r");
-
+	
 	if(file.size() < 2)
 	{ // empty -> FILL
 		Serial.println("Override");
@@ -163,6 +194,7 @@ void contactsAppSD(bool smsFlag)
 			int menuChoice = -1;
 			menuChoice = contactsMenuSD(&jarr, false);
 			mp.update();
+			Serial.println(menuChoice);
 			if (menuChoice != -2) 
 			{
 				if (menuChoice == 0) //creating new contact
@@ -181,7 +213,7 @@ void contactsAppSD(bool smsFlag)
 						file.close();
 					}
 				}
-				else if(menuChoice < -2000) // view contact
+				else if(menuChoice < -2000 && menuChoice != -3000) // view contact
 				{
 					int id = menuChoice + 3000 - 1;
 					int8_t info = viewContact(jarr[id]);
@@ -249,7 +281,7 @@ void contactsAppSD(bool smsFlag)
 							
 					}
 				}
-				else if (menuChoice < -10 && !smsFlag) //deleting contact
+				else if (menuChoice < -10 && !smsFlag && menuChoice != -1000 && menuChoice != -3000) //deleting contact
 				{
 					int id = menuChoice + 1000 - 1;
 					if(deleteContactSD(jarr[id]["name"], jarr[id]["number"]))
@@ -443,11 +475,18 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 	uint8_t boxHeight = 28;
 	bool blinkState = 0;
 	String number = "";
+	String searchBuf = "", prevContent = "";
+	unsigned long elapsedMillis = millis();
 	uint32_t blinkMillis = millis();
 	if (length > 2 && contactsMenuCursor > 2) 
 	{
 		cameraY = -(contactsMenuCursor - 1) * (boxHeight + 1) + offset + 11 ;
 	}
+	if(!smsFlag)
+	{
+		length += 1;
+	}
+	
 	while (1) 
 	{
 		mp.display.fillScreen(TFT_BLACK);
@@ -466,6 +505,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		if(!smsFlag)
 		{
 			contactsMenuNewBox(0, cameraY_actual);
+			contactsMenuSearchBox(0, cameraY_actual, searchBuf, searchContacts(searchBuf));
 		}
 		else
 		{
@@ -480,15 +520,38 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		{
 			if(contactsMenuCursor == 0 && smsFlag == 0)
 				contactsMenuNewBoxCursor(contactsMenuCursor, cameraY_actual);
+			else if(contactsMenuCursor == 1 && smsFlag == 0)
+				contactsMenuSearchBoxCursor(contactsMenuCursor, cameraY_actual);
+			else if(smsFlag == 0)
+				contactsMenuDrawCursor(contactsMenuCursor - 1, cameraY_actual);
 			else
 				contactsMenuDrawCursor(contactsMenuCursor, cameraY_actual);
+			
 		}
 
+		//--------------------------------SEARCH INPUT START----------------------------------------
+		if(contactsMenuCursor == 1 && !smsFlag)
+		{
+			//mp.display.print(searchBuf);
+			prevContent = searchBuf;
+			searchBuf = mp.textInput(searchBuf, 32);
+			if (prevContent != searchBuf)
+			{
+				blinkState = 1;
+				elapsedMillis = millis();
+				
+			}
+
+		
+			Serial.println(searchBuf);
+		}
+		//--------------------------------SEARCH INPUT END------------------------------------------
+
 		// last draw the top entry thing
-		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+		mp.display.fillRect(0, 0, mp.display.width(), 13, TFT_DARKGREY);
 		mp.display.setTextFont(2);
 		mp.display.setCursor(0,-2);
-		mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+		mp.display.drawFastHLine(0, 13, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
@@ -508,21 +571,32 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		if(mp.buttons.released(BTN_HOME)) 
 		{
 			mp.exitedLockscreen = true;
-			mp.lockscreen(); // Robert
+			mp.lockscreen();
 		}
 		if (mp.buttons.released(BTN_A) && contactsMenuCursor == 0 && smsFlag == false) 
 		{   //BUTTON CONFIRM
 			while(!mp.update());// Exit when pressed
 			break;
 		}
-		if (mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor != 0 && smsFlag == false) 
+		if (mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor != 0 && smsFlag == false && contactsMenuCursor != 1) 
 		{
 			while(!mp.update()); // Delete
-			return -1000 + contactsMenuCursor;
+			return -1000 + contactsMenuCursor - 1;
+		}
+		else if(mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor == 1)
+		{
+			if(searchBuf != "")
+			{
+				if(searchBuf.length() == 1)
+					searchBuf = "";
+				else
+					searchBuf.remove(searchBuf.length() - 1);
+			}
+				
 		}
 		//Check if we're picking a number for sending a message (smsFlag == true)
 		//if so, return the number of the picked contact
-		else if((mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_A))&& smsFlag == true)
+		else if((mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_A)) && smsFlag == true)
 		{
 			while(!mp.update());
 			return contactsMenuCursor - 1;
@@ -530,7 +604,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		if ((mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) && contactsMenuCursor != 0 && smsFlag == false) 
 		{
 			while(!mp.update()); // View contact
-			return -3000 + contactsMenuCursor;
+			return -3000 + contactsMenuCursor - 1;
 		}
 
 		if (mp.buttons.released(BTN_UP)) 
@@ -604,7 +678,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 
 void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y) 
 {
-    uint8_t offset = 19;
+    uint8_t offset = 29;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
 	if (y < 0 || y > mp.display.height()) 
@@ -638,10 +712,10 @@ int8_t viewContact(JsonObject &contact)
 	while (1)
 	{
 		mp.display.fillScreen(TFT_BLACK);
-        mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
+        mp.display.fillRect(0, 0, mp.display.width(), 13, TFT_DARKGREY);
         mp.display.setTextFont(2);
         mp.display.setCursor(0,-2);
-        mp.display.drawFastHLine(0, 14, BUF2WIDTH, TFT_WHITE);
+        mp.display.drawFastHLine(0, 13, BUF2WIDTH, TFT_WHITE);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
 
@@ -739,15 +813,23 @@ String searchContacts(String input)
 	}
 	else
 	{
-		String nameBuf = "";
+		//Serial.println(input);
+		input.toLowerCase();
+		//Serial.println(input);
+		String nameBuf = "", real = "";
 		for (JsonObject &elem : contactsjarr)
 		{
 			nameBuf = elem["name"].as<char*>();
+			real = nameBuf;
+			nameBuf.toLowerCase();
 			if(nameBuf.startsWith(input))
 			{
-				ret = nameBuf;
+				ret = real;
+				//Serial.println(nameBuf);
+				//Serial.println(real);
 				break;
 			}
+			//Serial.println(ret);
 		}
 	}
 
