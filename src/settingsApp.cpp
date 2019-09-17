@@ -755,6 +755,8 @@ void soundMenu()
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
 	uint8_t micDraw = 0;
+	if(mp.micGain > 8 && mp.sim_module_version == 0)
+		mp.sim_module_version = 8;
 	while (1)
 	{
 		if(currentScreen == 0) //SCREEN 1
@@ -780,15 +782,23 @@ void soundMenu()
 
 			mp.display.setCursor(29, 75);
 			mp.display.printCenter("Mic sensitivity");
-			mp.display.drawRect(36, 92, 88, 8, TFT_BLACK);
-			if(mp.micGain > 14)
-				micDraw = 14;
+			
+			if(mp.sim_module_version == 0)
+			{
+				mp.display.drawRect(30, 92, 100, 8, TFT_BLACK);
+				mp.display.fillRect(32, 94, mp.micGain * 12, 4, TFT_BLACK);
+				mp.display.drawBitmap(137, 82, fullMic, TFT_BLACK, 2);
+				mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
+				mp.display.drawBitmap(66, 114, arrowDown, TFT_BLACK, 2);
+			}
 			else
-				micDraw = mp.micGain;
-			mp.display.fillRect(38, 94, micDraw * 6, 4, TFT_BLACK);
-			mp.display.drawBitmap(137, 82, fullMic, TFT_BLACK, 2);
-			mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
-			mp.display.drawBitmap(66, 114, arrowDown, TFT_BLACK, 2);
+			{
+				mp.display.drawRect(36, 92, 88, 8, TFT_BLACK);
+				mp.display.fillRect(38, 94, mp.micGain * 6, 4, TFT_BLACK);
+				mp.display.drawBitmap(137, 82, fullMic, TFT_BLACK, 2);
+				mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
+				mp.display.drawBitmap(66, 114, arrowDown, TFT_BLACK, 2);
+			}
 		}
 		else if(currentScreen == 1) //SCREEN 2
 		{
@@ -868,20 +878,13 @@ void soundMenu()
 				break;
 
 			case 2: //MIC SENSITIVITY
-			
 				mp.display.drawBitmap(137, 82, fullMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				mp.display.drawBitmap(6, 82, noMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
-				if(mp.buttons.repeat(BTN_RIGHT, 7))
-				{
-					if(mp.micGain < 15)
+				if(mp.buttons.repeat(BTN_RIGHT, 7) && ((mp.micGain < 15 && mp.sim_module_version == 1) ||
+				(mp.micGain < 8 && mp.sim_module_version == 0)))
 						mp.micGain++;
-				}
-				if(mp.buttons.repeat(BTN_LEFT, 7))
-				{
-					if(mp.micGain > 0)
+				if(mp.buttons.repeat(BTN_LEFT, 7) && mp.micGain > 0)
 						mp.micGain--;
-				}
-
 				break;
 
 			case 3: //ARROWDOWN
@@ -2524,8 +2527,11 @@ bool updateMenu()
 						while(!mp.update());
 
 						String contacts_default = "[]";
-						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 15}";
-
+						String settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 14, \"callVolume\" : 5}";
+						if(mp.sim_module_version == 0)
+						{
+							settings_default = "{\"airplane_mode\": 0, \"brightness\": 5, \"sleep_time\": 0, \"background_color\": 0, \"notification\" : 0, \"ringtone\" : \"/Music/Default ringtone.wav\" , \"ringVolume\" : 10, \"mediaVolume\" : 10, \"micGain\" : 1, \"callVolume\" : 5}";
+						}
 						const char contacts_path[] = "/.core/contacts.json";
 						const char settings_path[] = "/.core/settings.json";
 
@@ -2554,6 +2560,7 @@ bool updateMenu()
 						mp.ringtone_path = String(settings["ringtone"].as<char*>());
 						mp.ringVolume = settings["ringVolume"];
 						mp.micGain = settings["micGain"];
+						mp.callSpeakerVolume = settings["callVolume"];
 						Serial.println("ERASED");
 						delay(5);
 						mp.applySettings();
@@ -2570,6 +2577,10 @@ bool updateMenu()
 						mp.mediaVolume = 10;
 						mp.ringtone_path = "/Music/Default ringtone.wav";
 						mp.notification = 0;
+						if(mp.sim_module_version == 0)
+							mp.micGain = 1;
+						else
+							mp.micGain = 14;
 						mp.applySettings();
 					}
 					mp.display.setTextColor(TFT_BLACK);

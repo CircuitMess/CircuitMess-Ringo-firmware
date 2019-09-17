@@ -1143,8 +1143,8 @@ void sendMMI(String code)
 	uint16_t helper = buffer.indexOf("\"") + 1;
 	buffer = buffer.substring(helper, buffer.indexOf("\"", helper + 1));
 	Serial.println(buffer);
-	int32_t y = 1;
-	while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+	int32_t y = -1;
+	while(!mp.buttons.released(BTN_B))
 	{
 		mp.display.fillScreen(TFT_WHITE);
 		// mp.display.drawRect(10, 20, 142, 88, TFT_BLACK);
@@ -1153,8 +1153,10 @@ void sendMMI(String code)
 		mp.display.setTextColor(TFT_BLACK);
 		mp.display.setTextFont(2);
 		mp.display.setTextSize(1);
-		mp.display.setCursor(5, y);
-		for(int i = 0; i < buffer.length();i++)
+		mp.display.setCursor(2, y);
+		mp.display.setTextWrap(0);
+		
+		/* 		for(int i = 0; i < buffer.length();i++)
 		{
 			mp.display.print(buffer[i]);
 			if(mp.display.getCursorX() > 150)
@@ -1162,24 +1164,69 @@ void sendMMI(String code)
 				mp.display.print("\n");
 				mp.display.setCursor(5, mp.display.getCursorY());
 			}
+		} */
+		for(uint16_t i = 0; i < buffer.length(); i++)
+		{
+			int16_t leftX = 154 - mp.display.getCursorX();
+			if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
+			bool lineFlag = false;
+			if( buffer[i] == ' ' || i==0) {
+				String helpString = "";
+				for(uint8_t j = 1; j < 24; j++){
+				if (j == 21) {
+					lineFlag = true;
+					mp.display.print(buffer[i]);
+				}
+				else if(buffer[i+j] != ' ' && i+j != buffer.length()-1) helpString += buffer[i+j];
+				else {
+					int16_t oldX = mp.display.getCursorX();
+		        	int16_t oldY = mp.display.getCursorY();
+					mp.display.setCursor(0, -20);
+					mp.display.print(helpString);
+					int16_t awayX = mp.display.getCursorX();
+					mp.display.setCursor(oldX, oldY);
+					//mp.display.print(content[i]);
+					if(awayX > leftX) mp.display.println("");
+					else mp.display.print(buffer[i]);
+					if(mp.display.getCursorX() < 2)	mp.display.setCursor(2, mp.display.getCursorY()); 
+					break;
+					}
+				}
+			}
+			else mp.display.print(buffer[i]);
+			if (lineFlag && mp.display.getCursorX() > 144 ) {
+				mp.display.print("-");
+				mp.display.println();
+				mp.display.setCursor(2, mp.display.getCursorY());
+				lineFlag = false;
+			}
+
+			if(mp.display.getCursorY() > 120)
+				break; 
 		}
-		if (mp.buttons.repeat(BTN_DOWN, 3)) 
-		{ //BUTTON DOWN
-			Serial.println(mp.display.cursor_y);
-			if (mp.display.cursor_y >= 110)
+		if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
+			if (mp.display.cursor_y >= 96)
 			{
 				y -= 4;
+				Serial.println(y);
 			}
 		}
-		if (mp.buttons.repeat(BTN_UP, 3)) 
-		{ //BUTTON UP
-			Serial.println(y);
-			if (y < 1)
+
+		if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
+			if (y < -1)
+			{
 				y += 4;
+				Serial.println(y);
+			}
 		}
+		mp.display.fillRect(0, 111, 160, 20, TFT_DARKGREY);
+		mp.display.setCursor(2, 111);
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.print("Press B to go back");
+	
 		mp.update();
 	}
-	while(!mp.update());
+	mp.buttons.update();
 	mp.inCall = 0;
 }
 
