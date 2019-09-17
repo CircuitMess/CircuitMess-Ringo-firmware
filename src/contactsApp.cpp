@@ -155,6 +155,7 @@ void contactsAppSD(bool smsFlag)
 	}
 	else
 	{
+		/*
 		Serial.println("Read from .json");
 		for (JsonObject& elem : jarr) 
 		{
@@ -162,7 +163,7 @@ void contactsAppSD(bool smsFlag)
 			Serial.println(elem["name"].as<char*>());
 			Serial.println(elem["number"].as<char*>());
 		}
-
+		*/
 		while(1)
 		{
 			int menuChoice = -1;
@@ -562,15 +563,8 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && contactsMenuCursor == 1 && !smsFlag )
 		{
 			while(!mp.update());
-			Serial.println("searchId: ");
-			Serial.println(searchId);
-			Serial.println("searchBuf");
-			Serial.println(searchBuf);
 			if(searchContacts(searchBuf).length() > 0)
 			{
-				Serial.println("hit len > 0");
-				Serial.println("returning: ");
-				Serial.println(-3000 + 1 + searchId);
 				searchBuf= "";
 				mp.textInput("");
 				mp.textPointer = 0;
@@ -815,9 +809,7 @@ String searchContacts(String input)
 	}
 	else
 	{
-		//Serial.println(input);
 		input.toLowerCase();
-		//Serial.println(input);
 		String nameBuf = "", real = "";
 		int16_t i = 0;
 		for (JsonObject &elem : contactsjarr)
@@ -829,8 +821,6 @@ String searchContacts(String input)
 			{
 				ret = real;
 				searchId = i;
-				//Serial.println(nameBuf);
-				//Serial.println(real);
 				break;
 			}
 			i++;
