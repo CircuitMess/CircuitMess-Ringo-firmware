@@ -2219,7 +2219,7 @@ void loop()
 	// mediaApp();
 	// phoneApp();
 	// calculatorApp();
-	// contactsAppSD();
+	// contactsApp();
 
 	// mp.display.fillScreen(TFT_BLACK);
 	// mp.display.setTextColor(TFT_WHITE);

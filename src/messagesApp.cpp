@@ -988,7 +988,7 @@ void composeSMS(JsonArray *messages)
 				Serial.println("Error loading contacts");
 			else
 			{
-				contactID = contactsMenuSD(&jarr, true); //call contacts app with smsFlag set to true
+				contactID = contactsMenu(&jarr, true); //call contacts app with smsFlag set to true
 				contactTemp = jarr[contactID+1]["number"].as<String>();
 				Serial.println("contactID");
 				Serial.println(contactID);
@@ -1080,7 +1080,7 @@ void composeSMS(JsonArray *messages)
 		mp.display.setCursor(4, 112);
 		mp.display.print("Erase");
 		if(cursor == 0)
-		{	
+		{
 			mp.display.setCursor(102,112);
 			mp.display.print("Contacts");
 		}

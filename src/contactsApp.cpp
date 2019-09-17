@@ -4,9 +4,9 @@ uint8_t contactsMenuCursor = 0;
 uint8_t searchId = 0;
 bool helpPop;
 
-void contactsMenuDrawCursor(uint8_t i, int32_t y) 
+void contactsMenuDrawCursor(uint8_t i, int32_t y, bool smsflag) 
 {
-    uint8_t offset = 29;
+    uint8_t offset = smsflag ? 19 : 29;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 1, TFT_RED);
@@ -14,69 +14,76 @@ void contactsMenuDrawCursor(uint8_t i, int32_t y)
 void contactsMenuNewBoxCursor(uint8_t i, int32_t y)
 {
 	uint8_t offset = 14;
-    uint8_t boxHeight = 20;
+    uint8_t boxHeight = 22;
 	y += offset + 1;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
 void contactsMenuSearchBoxCursor(uint8_t i, int32_t y)
 {
-	uint8_t offset = 34;
-    uint8_t boxHeight = 20;
+	uint8_t offset = 35;
+    uint8_t boxHeight = 22;
 	y += offset + 1;
 	mp.display.drawRect(0, y, mp.display.width(), boxHeight, TFT_RED);
 }
 void contactsMenuNewBox(uint8_t i, int32_t y) 
 {
 	uint8_t offset = 14;
-    uint8_t boxHeight = 20;
+    uint8_t boxHeight = 22;
 	y += offset + 1;
-	if (y < 0 || y > mp.display.height()) 
+	if (y < -22 || y > mp.display.height()) 
 	{
 		return;
 	}
     mp.display.setFreeFont(TT1);
     mp.display.setTextSize(1);
     mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
-    mp.display.drawBitmap(2, y, newContactIcon, TFT_WHITE, 2);
+    mp.display.drawBitmap(2, y + 1, newContactIcon, TFT_WHITE, 2);
     mp.display.setTextColor(TFT_WHITE);
-    mp.display.setCursor(32, y + 1);
+    mp.display.setCursor(32, y + 2);
     mp.display.setTextFont(2);
     mp.display.print("New contact");
 
 }
-void contactsMenuSearchBox(uint8_t i, int32_t y, String typed, String suggested) 
+void contactsMenuSearchBox(uint8_t i, int32_t y, String typed, String suggested, bool blinkState) 
 {
-	uint8_t offset = 34;
-    uint8_t boxHeight = 20;
+	uint8_t offset = 35;
+    uint8_t boxHeight = 22;
 	
 	y += offset + 1;
-	if (y < 0 || y > mp.display.height()) 
+	if (y < -22 || y > mp.display.height()) 
 	{
 		return;
 	}
     mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - 2, TFT_DARKGREY);
+	mp.display.drawBitmap(0, y + 2, contactSearchIcon, TFT_WHITE, 2);
+	
 	if(typed.length() >= 1)
 	{
 		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(2, y + 1);
+		mp.display.setCursor(32, y + 2);
 		mp.display.setTextFont(2);
 		mp.display.print(typed);
 		mp.display.setTextColor(TFT_CYAN);
 		//mp.display.setCursor(typed.length() * 10 + 1, y + 1);
-		mp.display.setCursor(mp.display.getCursorX(), y + 1);
+		mp.display.setCursor(mp.display.getCursorX(), y + 2);
 		if(suggested.length() > 1)
 			suggested.remove(0, typed.length());
 		else
 			suggested = "";
 		
 		mp.display.print(suggested);
+		
 	}
 	else
 	{
-		mp.textInput("");
-		mp.display.setCursor(5, y + 1);
-    	mp.display.print("Search contacts...");
+		// mp.textInput("");
+		mp.display.setCursor(32, y + 2);
+		mp.display.setTextColor(TFT_LIGHTGREY);
+    	mp.display.print("Search");
+		mp.display.setCursor(32, y + 2);
 	}
+	if(blinkState == 1)	
+		mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
 }
 uint8_t deleteContactSD(String name, String number)
 {
@@ -117,7 +124,7 @@ uint8_t deleteContactSD(String name, String number)
 	return 0;
 }
 
-void contactsAppSD(bool smsFlag)
+void contactsApp(bool smsFlag)
 {
 	Serial.println("");
 	Serial.println("Begin contacts");
@@ -167,7 +174,7 @@ void contactsAppSD(bool smsFlag)
 		while(1)
 		{
 			int menuChoice = -1;
-			menuChoice = contactsMenuSD(&jarr, false);
+			menuChoice = contactsMenu(&jarr, false);
 			mp.update();
 			
 			if (menuChoice != -2) 
@@ -451,7 +458,7 @@ uint8_t newContact(String *name, String *number)
 	return 0;
 }
 
-int contactsMenuSD(JsonArray *contacts, bool smsFlag)
+int contactsMenu(JsonArray *contacts, bool smsFlag)
 {
 	mp.textInput("");
 	mp.textPointer = 0;
@@ -464,6 +471,8 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 	String number = "";
 	String searchBuf = "", tmpSearchBuf = "";
 	uint32_t blinkMillis = millis();
+	bool cursorState = 0;
+	uint32_t cursorMillis = millis();
 	if (length > 2 && contactsMenuCursor > 2) 
 	{
 		cameraY = -(contactsMenuCursor - 1) * (boxHeight + 1) + offset + 11 ;
@@ -491,7 +500,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		if(!smsFlag)
 		{
 			contactsMenuNewBox(0, cameraY_actual);
-			contactsMenuSearchBox(0, cameraY_actual, searchBuf, searchContacts(searchBuf));
+			contactsMenuSearchBox(0, cameraY_actual, searchBuf, searchContacts(searchBuf), cursorState);
 		}
 		else
 		{
@@ -499,7 +508,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		}
 		for (JsonObject& elem : *contacts) 
 		{
-			contactsMenuDrawBoxSD(elem["name"].as<char*>(), elem["number"].as<char*>(), i+1, cameraY_actual);
+			contactsMenuDrawBox(elem["name"].as<char*>(), elem["number"].as<char*>(), i+1, cameraY_actual, smsFlag);
 			i++;
 		}
 		if(blinkState)
@@ -509,16 +518,27 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 			else if(contactsMenuCursor == 1 && smsFlag == 0)
 				contactsMenuSearchBoxCursor(contactsMenuCursor, cameraY_actual);
 			else if(smsFlag == 0)
-				contactsMenuDrawCursor(contactsMenuCursor - 1, cameraY_actual);
+				contactsMenuDrawCursor(contactsMenuCursor - 1, cameraY_actual, smsFlag);
 			else
-				contactsMenuDrawCursor(contactsMenuCursor, cameraY_actual);
+				contactsMenuDrawCursor(contactsMenuCursor, cameraY_actual, smsFlag);
 			
 		}
-
+		Serial.println(mp.textPointer);
 		//--------------------------------SEARCH INPUT START----------------------------------------
 		if(contactsMenuCursor == 1 && !smsFlag)
 		{
-			searchBuf = mp.textInput(searchBuf, 18);
+			if(millis() - cursorMillis > multi_tap_threshold)
+			{
+				cursorState = !cursorState;
+				cursorMillis = millis();
+			}
+			tmpSearchBuf = searchBuf;
+			searchBuf = mp.textInput(searchBuf, 14);
+			if(searchBuf != tmpSearchBuf)
+			{
+				cursorMillis = millis();
+				cursorState = 1;
+			}
 		}
 		else
 		{
@@ -526,9 +546,9 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 			mp.textPointer = 0;
 			searchBuf = "";
 			tmpSearchBuf = "";
+			cursorMillis = millis();
+			cursorState = 0;
 		}
-		
-		
 		//--------------------------------SEARCH INPUT END------------------------------------------
 		mp.display.fillRect(0, 0, mp.display.width(), 13, TFT_DARKGREY);
 		mp.display.setTextFont(2);
@@ -537,7 +557,7 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 		mp.display.setTextSize(1);
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Contacts");
-		mp.display.fillRect(0, 104, 160, 28, TFT_BLACK);
+		mp.display.fillRect(0, smsFlag ? 104 : 112, 160, 28, TFT_BLACK);
 		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
 		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
 		mp.display.setCursor(110, 113);
@@ -607,6 +627,15 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
+			if(contactsMenuCursor == 1 && !smsFlag)
+			{
+				Serial.println("cleared");
+				mp.textInput("");
+				mp.textPointer = 0;
+				mp.prevKeyMillis = 0;
+				searchBuf = "";
+				tmpSearchBuf = "";
+			}
 			if (contactsMenuCursor == 0) 
 			{
 				if(smsFlag)
@@ -619,15 +648,16 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 				}
 				if (length > 2) 
 				{
-					cameraY = -(contactsMenuCursor - 2) * (boxHeight+1);
+					cameraY = -(contactsMenuCursor - 2) * (boxHeight);
 				}
 			}
 			else 
 			{
+				
 				contactsMenuCursor--;
-				if (contactsMenuCursor > 0 && (contactsMenuCursor * (boxHeight+1) + cameraY + offset) < (boxHeight+1)) 
+				if (contactsMenuCursor > 0 && (contactsMenuCursor * (boxHeight) + cameraY + offset) < (boxHeight)) 
 				{
-					cameraY += (boxHeight+1);
+					cameraY += (boxHeight);
 				}
 			}
 		}
@@ -637,11 +667,19 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 			blinkState = 1;
 			blinkMillis = millis();
 			while(!mp.update());
-
-			contactsMenuCursor++;
-			if ((contactsMenuCursor * (boxHeight+1) + cameraY + offset) > 80) 
+			if(contactsMenuCursor == 1 && !smsFlag)
 			{
-				cameraY -= (boxHeight+1);
+				Serial.println("cleared");
+				mp.textInput("");
+				mp.textPointer = 0;
+				mp.prevKeyMillis = 0;
+				searchBuf = "";
+				tmpSearchBuf = "";
+			}
+			contactsMenuCursor++;
+			if ((contactsMenuCursor * (boxHeight) + cameraY + offset) > 80) 
+			{
+				cameraY -= (boxHeight);
 			}
 			if(smsFlag)
 			{
@@ -671,12 +709,12 @@ int contactsMenuSD(JsonArray *contacts, bool smsFlag)
 	return contactsMenuCursor;
 }
 
-void contactsMenuDrawBoxSD(String name, String number, uint8_t i, int32_t y) 
+void contactsMenuDrawBox(String name, String number, uint8_t i, int32_t y, bool smsflag) 
 {
-    uint8_t offset = 29;
+    uint8_t offset = smsflag ? 19 : 29;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
-	if (y < 0 || y > mp.display.height()) 
+	if (y < smsflag ? -28 : 0 || y > mp.display.height()) 
 	{
 		return;
 	}

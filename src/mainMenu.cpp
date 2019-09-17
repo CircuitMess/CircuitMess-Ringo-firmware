@@ -529,7 +529,7 @@ void mainMenu()
 						mp.display.fillScreen(TFT_BLACK);
 						mp.display.setCursor(0,mp.display.height()/2 -16);
 						mp.display.printCenter(F("Loading contacts..."));
-						contactsAppSD(false);
+						contactsApp(false);
 					}
 					else if(!mp.SDinsertedFlag)
 					{
