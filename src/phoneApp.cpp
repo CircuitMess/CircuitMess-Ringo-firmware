@@ -72,7 +72,6 @@ void phoneApp()
 			else if(favs[k].compareTo("") != 0)
 			{
 				phoneMenuDrawBox(favsNames[k], favs[k], i+1, cameraY_actual, blinkState, cursorPos, k);
-				//phoneMenuDrawBox(mp.checkContact(favs[k]), favs[k], i+1, cameraY_actual, blinkState, cursorPos, k);
 				length++;
 				/*
 				if(blinkState)
@@ -254,7 +253,7 @@ void phoneApp()
 			callBuffer += key;
 		}
 
-		if (mp.buttons.released(BTN_A) && (callBuffer != "" || cursorPos != 0))//initate call
+		if (mp.buttons.released(BTN_A) && (callBuffer != "" || cursorPos != 0))//initiate call
 		{
 			while(!mp.update());
 			if(mp.sim_module_version == 255)
@@ -524,24 +523,38 @@ void phoneMenuDrawBox(String name, String number, uint8_t i, int32_t y, bool blS
 	if(blState && cPos == 0 && !inputFlag)
 	{
 		mp.display.setTextSize(2);
-		mp.display.drawString(number + "|", 4, y - 2);
-		Serial.println(mp.display.cursor_x);
-		if (number.length() > 9)
+		mp.display.setCursor(4, y - 2);
+		mp.display.print(number);
+		if (mp.display.cursor_x + 4  >= mp.display.width())
 		{
-			mp.display.fillRect(0, 19, mp.display.width() - 1, 26, TFT_DARKGREY);
-			mp.display.setCursor((mp.display.cursor_x - (14 * (number.length() - 8))), 17);
-			mp.display.print(number + "|");
+   			mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
+			mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, y - 2);
+			mp.display.print(number);
 		}
+		// mp.display.drawString(number + "|", 4, y - 2);
+		mp.display.drawFastVLine(mp.display.getCursorX() + 1, mp.display.getCursorY() + 6, 20, TFT_WHITE);
+		mp.display.drawFastVLine(mp.display.getCursorX() + 2, mp.display.getCursorY() + 6, 20, TFT_WHITE);
+		Serial.println(mp.display.cursor_x);
+		// if (number.length() > 9)
+		// {
+		// 	mp.display.fillRect(0, 19, mp.display.width() - 1, 26, TFT_DARKGREY);
+		// 	mp.display.setCursor((mp.display.cursor_x - (14 * (number.length() - 8))), 17);
+		// 	mp.display.print(number + "|");
+		// }
+		// mp.display.setCursor(0, 76);
+		// mp.display.setTextSize(2);
+
+		
 	}
-	else if(cPos == 0 && !inputFlag)
+	else if((cPos == 0 && !inputFlag) || i == 0)
 	{
 		mp.display.setTextSize(2);
-		mp.display.drawString(number, 4, y - 2);
-		Serial.println(mp.display.cursor_x);
-		if (number.length() > 9)
+		mp.display.setCursor(4, y - 2);
+		mp.display.print(number);
+		if (mp.display.cursor_x + 4  >= mp.display.width())
 		{
-			mp.display.fillRect(0, 19, mp.display.width() - 1, 26, TFT_DARKGREY);
-			mp.display.setCursor((mp.display.cursor_x - (14 * (number.length() - 8))), 17);
+   			mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight-1, TFT_DARKGREY);
+			mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 14, y - 2);
 			mp.display.print(number);
 		}
 	}
@@ -626,13 +639,6 @@ void callLog()
 	if(!jarr.success())
 	{
 		Serial.println("Error");
-		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
-		mp.display.printCenter("Error: Call log - loading data");
-		while (!mp.buttons.released(BTN_B))//BUTTON BACK
-			mp.update();
-		while(!mp.update());
 	}
 	else
 	{
@@ -1262,13 +1268,6 @@ String sortAndGetFav()
 	if(!contactsjarr.success())
 	{
 		Serial.println("Error");
-		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
-		mp.display.printCenter("Error: Contacts");
-		while (!mp.buttons.released(BTN_B))
-			mp.update();
-		while(!mp.update());
 	}
 	else
 	{
@@ -1307,13 +1306,6 @@ String sortAndGetFav()
 	if(!logjarr.success())
 	{
 		Serial.println("Error");
-		mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(0, mp.display.height()/2 - 16);
-        mp.display.setTextFont(2);
-		mp.display.printCenter("Error: Call log");
-		while (!mp.buttons.released(BTN_B))
-			mp.update();
-		while(!mp.update());
 	}
 	else
 	{

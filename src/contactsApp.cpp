@@ -523,7 +523,6 @@ int contactsMenu(JsonArray *contacts, bool smsFlag)
 				contactsMenuDrawCursor(contactsMenuCursor, cameraY_actual, smsFlag);
 			
 		}
-		Serial.println(mp.textPointer);
 		//--------------------------------SEARCH INPUT START----------------------------------------
 		if(contactsMenuCursor == 1 && !smsFlag)
 		{
@@ -837,13 +836,6 @@ String searchContacts(String input)
 	if (!contactsjarr.success())
 	{
 		Serial.println("Error");
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, mp.display.height() / 2 - 16);
-		mp.display.setTextFont(2);
-		mp.display.printCenter("Error: Contacts");
-		while (!mp.buttons.released(BTN_B))
-			mp.update();
-		while (!mp.update());
 	}
 	else
 	{
