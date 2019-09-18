@@ -324,7 +324,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 	int16_t leftX = 0;
 	int16_t oldX = 0;
 	int16_t oldY = 0;
-	bool lineFlag = 0;
+	bool lineFlag = false;
 	y = 14;  //Beggining point
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
@@ -344,6 +344,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 		mp.display.fillScreen(TFT_DARKGREY);
 		mp.display.setTextWrap(1);
 		mp.display.setCursor(2, y);
+		lineFlag = false;
 		for(uint16_t i = 0; i < content.length(); i++)
 		{
 			leftX = 154 - mp.display.getCursorX();
@@ -351,7 +352,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 			if( content[i] == ' ' || i==0) {
 				helpString = "";
 				for(uint8_t j = 1; j < 24; j++){
-				if (j == 21) {
+				if (j == 22) {
 					lineFlag = true;
 					mp.display.print(content[i]);
 				}
@@ -372,7 +373,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 				}
 			}
 			else mp.display.print(content[i]);
-			if (lineFlag && mp.display.getCursorX() > 130 ) {
+			if (lineFlag && mp.display.getCursorX() > 140 ) {
 				mp.display.print("-");
 				mp.display.println();
 				mp.display.setCursor(2, mp.display.getCursorY());
