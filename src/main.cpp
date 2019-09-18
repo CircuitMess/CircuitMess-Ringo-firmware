@@ -26,6 +26,7 @@ const int maxSnakeLength = 600;
 uint16_t snakeLength = 12;
 uint8_t hScore;
 uint16_t tempScore = 0;
+uint16_t tempScore2 = 0;
 
 int snakeX[maxSnakeLength];
 int snakeY[maxSnakeLength];
@@ -51,6 +52,7 @@ uint8_t foodSize = 4;
 void mm();
 void control();
 void enterScore();
+void highScores();
 
 void defaultInt(){
   for(int i = 0; i < maxSnakeLength; i++){
@@ -221,13 +223,14 @@ void endScreen(){
         mp.display.setCursor(5, 55, 2);
         mp.display.setTextColor(TFT_YELLOW);
         mp.display.setTextSize(1);
-        mp.display.print(F("Your score:"));
-        mp.display.setCursor(90, 50, 2);
+        mp.display.printCenter(F("Your score:"));
+        mp.display.println();
         mp.display.setTextSize(2);
-        mp.display.print(hScore);
+        mp.display.printCenter(hScore);
         while(!mp.update());
         delay(2000);
         enterScore();
+        highScores();
         reset();
       }
 void touchedItSelf()
@@ -263,29 +266,32 @@ void highScores(){
 	while(1)
 	{
 		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(32, 1);
-		mp.display.setTextSize(1);
+		mp.display.setCursor(20, 1);
+		mp.display.setTextSize(2);
 		mp.display.setTextFont(1);
-		mp.display.setTextColor(TFT_GREEN);
+		mp.display.setTextColor(TFT_YELLOW);
 		mp.display.printCenter(F("HIGHSCORES"));
+    mp.display.setTextColor(TFT_GREEN);
 		mp.display.setCursor(3, 110);
 		for (int i = 1; i < 6;i++)
 		{
-			mp.display.setCursor(24, i * 21);
+			mp.display.setCursor(18, i * 19);
 			if(i <= hiscores.size())
 			{
 				for(JsonObject& element:hiscores)
 				{
 					if(element["Rank"] == i)
-						mp.display.printf("%d.   %.3s    %3d", i, element["Name"].as<char*>(), element["Score"].as<uint16_t>());
+						mp.display.printf("%d. %.3s %3d", i, element["Name"].as<char*>(), element["Score"].as<uint16_t>());
 				}
 			}
 			else
-				mp.display.printf("%d.    ---   ---", i);
+				mp.display.printf("%d. --- ---", i);
 		}
     if(mp.buttons.released(BTN_B)) break;
-    mp.display.setCursor(120, 120);
-		mp.display.print("B:Back");
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(2);
+    mp.display.setCursor(110, 110);
+		mp.display.print("B: Back");
 		mp.update();
 	}
 //	mp.homePopupEnable(1);
@@ -450,8 +456,9 @@ void enterInitials() {
   mp.textInput("");
   mp.textPointer = 0;
   while (!mp.buttons.released(BTN_A) || name.length() != 3) {
-    if(mp.update())
-      name = mp.textInput(name, 3);
+    //if(mp.update())
+    mp.update();
+    name = mp.textInput(name, 3);
     if(mp.buttons.released(BTN_B)){
       exitFlag = true;
       break;
@@ -461,7 +468,7 @@ void enterInitials() {
 			elapsedMillis = millis();
 			blinkState = !blinkState;
 		}
-    if(millis()-hiscoreMillis >= 1000)
+    if(millis()-hiscoreMillis >= 500)
     {
       hiscoreMillis = millis();
       hiscoreBlink = !hiscoreBlink;
@@ -491,15 +498,15 @@ void enterInitials() {
     mp.display.setCursor(2, 110);
 		mp.display.print("Erase");
     mp.display.setCursor(110, 110);
-		mp.display.print("B:Back");
+		mp.display.print("B: Back");
     mp.display.setCursor(50, 40);
     mp.display.printCenter(name);
     if(blinkState)
       mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_GREEN);
     mp.display.drawRect(30, 38, 100, 20, TFT_GREEN);
-    //mp.update(0);
+    //mp.update();
   }
-  while(!mp.update());
+  mp.update();
 }
 
 void enterScore(){
@@ -511,12 +518,21 @@ void enterScore(){
 			{
 				if(element["Rank"] == 1)
 					tempScore = element["Score"].as<int>();
-			}
+        if(element["Rank"] == 5)
+          tempScore2 = element["Score"].as<int>();
+      }
 			Serial.println("HERE");
 			delay(5);
 			
 
-			if(hScore != 0) enterInitials();
+			if(hScore != 0 && hScore >= tempScore2) enterInitials();
+      else {
+        file = SD.open(highscoresPath, "w");
+			  hiscores.prettyPrintTo(file);
+			  file.close();
+			  while(!mp.update());	
+        return;
+      }
       if(exitFlag){
         exitFlag = 0;
         return;
@@ -568,8 +584,7 @@ void enterScore(){
 			file = SD.open(highscoresPath, "w");
 			hiscores.prettyPrintTo(file);
 			file.close();
-			while(!mp.update());
-			highScores();	
+			while(!mp.update());	
 			
 }
 void paused(){
