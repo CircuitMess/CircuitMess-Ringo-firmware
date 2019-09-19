@@ -333,7 +333,7 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 
 	for(int i = 0; i < 10; i++)
 	{
-		if(mp.notificationTypeList[i] == 2 && mp.notificationDescriptionList[i] == contact && mp.notificationTimeList[i] == DateTime(date))
+		if(mp.notificationTypeList[i] == 2 && mp.notificationDescriptionList[i] == contact && mp.notificationTimeList[i] == time)
 		{
 			mp.removeNotification(i);
 			break;
@@ -1024,6 +1024,7 @@ void composeSMS(JsonArray *messages)
 			Serial1.print("AT+CMGS=\"");
 			Serial1.print(contact);
 			Serial1.println("\"");
+			// mp.waitForOK();
 			uint32_t temp = millis();
 			bool goAhead = 1;
 			while (!Serial1.available())
@@ -1050,11 +1051,12 @@ void composeSMS(JsonArray *messages)
 				delay(5);
 				Serial1.println((char)26);
 				while (Serial1.readString().indexOf("OK") != -1);
+				while(!Serial1.available());
 				mp.display.fillScreen(TFT_BLACK);
 				mp.display.printCenter("Text sent!");
 				while(!mp.update());
 				// String temp = mp.checkContact(contact);
-				mp.saveMessage((char*)content.c_str(), mp.checkContact(contact), contact, 1, 0);
+				mp.saveMessage((char*)content.c_str(), mp.checkContact(contact), contact, 1, 0, mp.RTC.now());
 				delay(1000);
 			}
 			else
@@ -1064,7 +1066,26 @@ void composeSMS(JsonArray *messages)
 				while(!mp.update());
 				delay(1000);
 			}
-			
+			Serial.println("cmgf checking");
+			Serial1.println("AT+CMGF=0");
+			mp.waitForOK();
+			bool pduModeCheck = 0;
+			uint32_t timeout = millis();
+			while(!pduModeCheck && millis() - timeout < 10000)
+			{
+				Serial1.println("AT+CMGF?");
+				String ret = mp.waitForOK();
+				Serial.println(ret);
+				Serial.println("---------");
+				if(ret.indexOf("+CMGF: ") != -1 && ret.substring(ret.indexOf("+CMGF: ") + 7, ret.indexOf("+CMGF: ") + 8) == "0")
+					pduModeCheck = 1;
+				else if(ret.indexOf("+CMGF: ") != -1 && ret.substring(ret.indexOf("+CMGF: ") + 7, ret.indexOf("+CMGF: ") + 8) != "0")
+				{
+					Serial1.println("AT+CMGF=0");
+					mp.waitForOK();
+					delay(1000);
+				}
+			}
 			break;
 		}
 		mp.display.setTextColor(TFT_WHITE);
