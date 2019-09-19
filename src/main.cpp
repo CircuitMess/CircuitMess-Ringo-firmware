@@ -634,7 +634,7 @@ void setup() {
 	file.close();
 	if(!SD.exists("/Snake"))
 		SD.mkdir("/Snake");
-	if(hiscores.size() > 0)
+	if(hiscores.success())
 		savePresent = 1;
 	else
 	{
