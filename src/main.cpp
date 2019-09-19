@@ -456,6 +456,7 @@ void enterInitials() {
   mp.textInput("");
   mp.textPointer = 0;
   while (!mp.buttons.released(BTN_A) || name.length() != 3) {
+    if(mp.buttons.released(BTN_HOME));
     //if(mp.update())
     mp.update();
     name = mp.textInput(name, 3);
@@ -664,9 +665,9 @@ void loop() {
   mp.display.print(hScore);
   // ---------------------------------
   control();
-  if(eaten) mp.display.fillRect(foodX,foodY, foodSize, foodSize, TFT_BLACK);
   crash();
   touchedItSelf();
+  if(eaten) mp.display.fillRect(foodX,foodY, foodSize, foodSize, TFT_BLACK);
   drawSnake();
   if(eaten)  drawFood();
   mp.display.fillRect(foodX, foodY, foodSize, foodSize, TFT_YELLOW);
