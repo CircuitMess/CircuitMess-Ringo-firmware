@@ -511,9 +511,14 @@ void enterInitials() {
 }
 
 void enterScore(){
-			File file;
+      mp.jb.clear();
+      File file;
 			file = SD.open(highscoresPath);
-			JsonArray &hiscores = mp.jb.parseArray(file);
+      JsonArray &hiscores = mp.jb.parseArray(file);
+      /* if(!hiscores.success()){
+        file = SD.open(highscoresPath);
+       JsonArray &hiscores = mp.jb.parseArray(file);
+      } */
 			file.close();
 			for (JsonObject& element : hiscores)
 			{
@@ -528,10 +533,6 @@ void enterScore(){
 
 			if(hScore != 0 && hScore >= tempScore2) enterInitials();
       else {
-        file = SD.open(highscoresPath, "w");
-			  hiscores.prettyPrintTo(file);
-			  file.close();
-			  while(!mp.update());	
         return;
       }
       if(exitFlag){
@@ -580,12 +581,13 @@ void enterScore(){
 					}
 				}
 			}
-
-			hiscores.add(newHiscore);
+      hiscores.add(newHiscore);
 			file = SD.open(highscoresPath, "w");
 			hiscores.prettyPrintTo(file);
 			file.close();
 			while(!mp.update());	
+
+
 			
 }
 void paused(){
@@ -632,16 +634,21 @@ void setup() {
 	file.close();
 	if(!SD.exists("/Snake"))
 		SD.mkdir("/Snake");
-	if(hiscores.success())
+	if(hiscores.size() > 0)
 		savePresent = 1;
 	else
 	{
 		JsonArray &hiscores = mp.jb.createArray();
 		JsonObject &test = mp.jb.createObject();
+    test["Name"] = "ABC";
+		test["Score"] = 0;
+		test["Rank"] = 1;
+		hiscores.add(test);
 		File file = SD.open(highscoresPath, "w");
 		hiscores.prettyPrintTo(file);
 		file.close();
 		mp.readFile(highscoresPath);
+    savePresent = 1;
 	}
   startAnimation();
   mm();
@@ -652,6 +659,7 @@ void loop() {
   //while(!mp.update());
 
   mp.update();
+  mp.sleepTimer = millis();
   //----------------------------------
   millisTwo = millis();
   if(millisTwo - millisOne > 90) buttonDir();
