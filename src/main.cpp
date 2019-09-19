@@ -1,2239 +1,1176 @@
-#include <Arduino.h>
-#include "main.h"
-#include "mainMenu.h"
+/*
+    Invaderz
+    Copyright (C) 2019 CircuitMess
+    original game:
+    Invaders by Yoda Zhang
+    http://www.yodasvideoarcade.com/images/gamebuino-invaders.zip
+    Ported to MAKERphone by CircuitMess
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+//----------------------------------------------------------------------------    
+// define variables and constants
+//----------------------------------------------------------------------------    
+#include <MAKERphone.h>
+#include "Star.h"
 MAKERphone mp;
-Oscillator *osc;
-int backgroundColors[7] PROGMEM = {
-	TFT_CYAN,
-	TFT_GREEN,
-	TFT_RED,
-	TFT_YELLOW,
-	TFT_WHITE,
-	TFT_ORANGE,
-	TFT_PINK
-};
-String backgroundColorsNames[7] PROGMEM = {
-	"Cyan",
-	"Green",
-	"Red",
-	"Yellow",
-	"White",
-	"Orange",
-	"Pink"
-};
-String titles[9] PROGMEM = {
-	"Phone",
-	"Contacts",
-	"Messages",
-	"Settings",
-	"Media",
-	"Clock",
-	"Calculator",
-	"Flashlight",
-	"Calendar"
-};
-StaticJsonBuffer<capacity> jb;
-uint16_t audioCount = 0;
-String audioFiles[100];
+uint32_t pixelsTimer=0;
+bool pixelsState=0;
+String gamestatus;
+int score;
+int lives;
+int gamelevel;
+int shipx;
+int invaderx[55];
+int invadery[55];
+int invaders[55];
+int invaderframe[55];
+int invaderanz;
+int invaderctr;
+int invadersound;
+int checkdir;
+int nextxdir;
+int nextydir;
+int invaderxr;
+int invaderyr;
+int invadershotx[4];
+int invadershoty[4];
+int invadershotframe;
+int invadershots;
+int invadershottimer;
+int bunkers[4];
+int shotx;
+int shoty;
+int checkl;
+int checkr;
+int checkt;
+int checkb;
+int yeahtimer;
+int infoshow;
+int deadcounter;
+int saucerx;
+int saucerdir;
+int saucers;
+int saucertimer;
+int saucerwait;
+int delayBip;
 
-void menuDrawBox(String text, uint8_t i, int32_t y) {
-	uint8_t scale;
-	uint8_t offset;
-	uint8_t boxHeight;
-	if(mp.resolutionMode)
-	{
-		scale = 1;
-		offset = menuYOffset;
-		boxHeight = 7;
+
+// MPTrack *shootSound;
+// MPTrack *invaderDestroyed;
+// MPTrack *mainMusic;
+// MPTrack *titleMusic;
+// MPTrack *playerDestroyed;
+// MPTrack *ufoSound;
+// MPTrack *gameoverMusic;
+Oscillator *shoot;
+Oscillator *destroyed;
+const char *highscoresPath = "/Invaderz/hiscores.sav";
+bool savePresent = 0;
+uint16_t tempScore = 0;
+String name = "";
+uint8_t cursor = 0;
+char key = NO_KEY;
+#define STAR_COUNT 50            // Number of stars on the screen. Arduino UNO maxes out around 250.
+#define BACKGROUND_COLOR 0x0000   // Background color in hex. 0x0000 is black.
+#define STAR_SPEED_MIN 1          // Minimum movement in pixels per update. (value is inclusive)
+#define STAR_SPEED_MAX 3         // Maximum movement in pixels per update. (value is inclusive)
+#define STAR_COLOR 0xffff  
+Star stars[STAR_COUNT]; 
+void starsSetup()
+{
+    // Loop through each star.
+    for(int i = 0; i < STAR_COUNT; i++)
+    {
+        // Randomize its position and speed.
+        stars[i].randomize(0, mp.display.width(), 0, mp.display.height(), STAR_SPEED_MIN, STAR_SPEED_MAX);
+    }
+} 
+
+//----------------------------------------------------------------------------    
+// define images & sounds
+//----------------------------------------------------------------------------    
+extern const byte gamelogo[];
+extern const byte invader[8][7];
+extern const byte playership[3][6];
+extern const byte bunker[5][7];
+extern const byte bomb[2][6];
+extern const byte saucer[2][10];
+extern const int soundfx[8][8];
+
+//ported images
+//----------------------------------------------------------------------------
+const unsigned short titleLogo[0x5FD] PROGMEM ={
+  0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF,   // 0x0010 (16)
+  0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0x7BCF, 0x7BCF,   // 0x0020 (32)
+  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0x7BCF,   // 0x0030 (48)
+  0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF,   // 0x0040 (64)
+  0xFFFF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800,   // 0x0050 (80)
+  0xF800, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0060 (96)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800,   // 0x0070 (112)
+  0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800,   // 0x0080 (128)
+  0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800,   // 0x0090 (144)
+  0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800,   // 0x00A0 (160)
+  0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800,   // 0x00B0 (176)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF,   // 0x00C0 (192)
+  0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800,   // 0x00D0 (208)
+  0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x00E0 (224)
+  0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x00F0 (240)
+  0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800,   // 0x0100 (256)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0110 (272)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0120 (288)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xFFFF,   // 0x0130 (304)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x0140 (320)
+  0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800,   // 0x0150 (336)
+  0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF,   // 0x0160 (352)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800,   // 0x0170 (368)
+  0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800,   // 0x0180 (384)
+  0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xFFFF,   // 0x0190 (400)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x01A0 (416)
+  0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x01B0 (432)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800,   // 0x01C0 (448)
+  0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0x7BCF,   // 0x01D0 (464)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF,   // 0x01E0 (480)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x01F0 (496)
+  0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800,   // 0x0200 (512)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x0210 (528)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800,   // 0x0220 (544)
+  0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800,   // 0x0230 (560)
+  0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x0240 (576)
+  0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800,   // 0x0250 (592)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800,   // 0x0260 (608)
+  0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x0270 (624)
+  0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800,   // 0x0280 (640)
+  0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x0290 (656)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800,   // 0x02A0 (672)
+  0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x02B0 (688)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800,   // 0x02C0 (704)
+  0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x02D0 (720)
+  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800,   // 0x02E0 (736)
+  0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x02F0 (752)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800,   // 0x0300 (768)
+  0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0310 (784)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800,   // 0x0320 (800)
+  0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0x7BCF, 0xF800,   // 0x0330 (816)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800,   // 0x0340 (832)
+  0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800,   // 0x0350 (848)
+  0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800,   // 0x0360 (864)
+  0xF800, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x0370 (880)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800,   // 0x0380 (896)
+  0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xFFFF,   // 0x0390 (912)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF,   // 0x03A0 (928)
+  0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800,   // 0x03B0 (944)
+  0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800,   // 0x03C0 (960)
+  0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800,   // 0x03D0 (976)
+  0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800,   // 0x03E0 (992)
+  0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x03F0 (1008)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800,   // 0x0400 (1024)
+  0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF,   // 0x0410 (1040)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800,   // 0x0420 (1056)
+  0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x0430 (1072)
+  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800,   // 0x0440 (1088)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x0450 (1104)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0x7BCF,   // 0x0460 (1120)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF,   // 0x0470 (1136)
+  0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800,   // 0x0480 (1152)
+  0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0490 (1168)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x04A0 (1184)
+  0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800,   // 0x04B0 (1200)
+  0xF800, 0xF800, 0x7BCF, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800,   // 0x04C0 (1216)
+  0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF,   // 0x04D0 (1232)
+  0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xF800, 0xF800,   // 0x04E0 (1248)
+  0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0xF800,   // 0x04F0 (1264)
+  0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800,   // 0x0500 (1280)
+  0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800,   // 0x0510 (1296)
+  0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xF800, 0xF800, 0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0520 (1312)
+  0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF,   // 0x0530 (1328)
+  0xF800, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF,   // 0x0540 (1344)
+  0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0x7BCF, 0x7BCF, 0xF800, 0xFFFF, 0xF800, 0xFFFF,   // 0x0550 (1360)
+  0xF800, 0xFFFF, 0xF800, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF,   // 0x0560 (1376)
+  0xF800, 0xFFFF, 0xF800, 0xF800, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0x7BCF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0570 (1392)
+  0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF,   // 0x0580 (1408)
+  0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x0590 (1424)
+  0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF,   // 0x05A0 (1440)
+  0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800,   // 0x05B0 (1456)
+  0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x05C0 (1472)
+  0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800,   // 0x05D0 (1488)
+  0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF,   // 0x05E0 (1504)
+  0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xFFFF,   // 0x05F0 (1520)
+  0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF, 0xF800, 0xFFFF,
+};
+//----------------------------------------------------------------------------
+const byte invader[8][7] PROGMEM = {
+  {8,5, B00111000,B11010110,B11111110,B00101000,B11000110},
+  {8,5, B00111000,B11010110,B11111110,B01000100,B00101000},
+  {8,5, B00010000,B10111010,B11010110,B01111100,B00101000},
+  {8,5, B00111000,B01010100,B11111110,B10010010,B00101000},
+  {8,5, B00111000,B01010100,B01111100,B01000100,B00101000},
+  {8,5, B00111000,B01010100,B01111100,B00101000,B01010100},
+  {8,5, B01010100,B10000010,B01010100,B10000010,B01010100},
+  {8,5, B01010100,B10000010,B01010100,B10000010,B01010100},
+};
+//----------------------------------------------------------------------------
+const byte playership[3][6] PROGMEM = {
+  {8,4, B00010000,B01111100,B11111110,B11111110},
+  {8,4, B10001010,B01000000,B00000100,B10010010},
+  {8,4, B10010010,B00000100,B01000000,B10001010},
+};
+//----------------------------------------------------------------------------
+const byte bunker[5][7] PROGMEM = {
+  {8,5, B01111110,B11111111,B11111111,B11100111,B11000011},
+  {8,5, B01111110,B11011011,B11111111,B10100101,B11000011},
+  {8,5, B01101110,B11011011,B01110110,B10100101,B11000011},
+  {8,5, B01100110,B11011001,B01010110,B10100101,B01000010},
+  {8,5, B00100010,B10001001,B01010010,B10100101,B01000010},
+};
+//----------------------------------------------------------------------------
+const byte bomb[2][6] PROGMEM = {
+  {2,4, B10000000,B01000000,B10000000,B01000000},
+  {2,4, B01000000,B10000000,B01000000,B10000000},
+};
+//----------------------------------------------------------------------------
+const byte saucer[2][10] PROGMEM = {
+  {11,4, B00011111,B00000000,B01101010,B11000000,B11111111,B11100000,B01100100,B11000000},
+  {11,4, B01011101,B11000000,B01010101,B01000000,B01010101,B01000000,B01011101,B11000000},
+};
+//----------------------------------------------------------------------------
+
+
+
+
+//ported nonstandard
+//----------------------------------------------------------------------------
+void newgame() {
+	score = 0;
+	lives = 3;
+	gamelevel = 0;
+	shipx = 80;
+	shotx = -1;
+	shoty = -1;
+	deadcounter = -1;
+	saucers = -1;
+  // removeTrack(titleMusic);
+  // addTrack(mainMusic);
+  // mainMusic->play();
+  // addTrack(shootSound);
+  // addTrack(invaderDestroyed);
+  // addTrack(playerDestroyed);
+  starsSetup();
+	for (int i = 0; i < 4; i++) {
+		invadershotx[i] = -1;
+		invadershoty[i] = -1;
 	}
-	else
-	{
-		scale = 2;
-		offset = 17;
-		boxHeight = 15;
-	}
-	y += i * (boxHeight + 1) + offset;
-	if (y < 0 || y > mp.display.height()) {
-		return;
-	}
-	mp.display.fillRect(1, y + 1, mp.display.width() - 2, boxHeight - (scale-1), TFT_DARKGREY);
-	mp.display.setTextColor(TFT_WHITE);
-	mp.display.setCursor(2, y + 2);
-	mp.display.drawString(text, 3, y - 1);
+	gamestatus = "newlevel";
 }
-int8_t menu(const char* title, String* items, uint8_t length) {
-	int32_t cameraY = 0;
-	int32_t cameraY_actual = 0;
-	int16_t cursor = 0;
-	uint8_t offset;
-	uint8_t boxHeight;
-	bool blinkState = 0;
-	uint32_t blinkMillis = millis();
-	if(mp.resolutionMode)
-	{
-		offset = menuYOffset;
-		boxHeight = 7;
+//----------------------------------------------------------------------------
+void newlevel() {
+	invaderanz = 40;
+	invaderctr = 39;
+	invaderxr = 4;
+	invaderyr = 4;
+	checkdir = 0;
+	nextxdir = 4;
+	nextydir = 0;
+	yeahtimer = 0;
+	delayBip = 0;
+	invadershottimer = 60;
+	saucertimer = 240;
+	int down = gamelevel;
+	if (gamelevel > 8) { down = 16*2; }
+	for (int i = 0; i < 8; i++) {
+		invaderx[i] = 10 + i * 8*2;
+		invaderx[i + 8] = 10 + i * 8*2;
+		invaderx[i + 16] = 10 + i * 8*2;
+		invaderx[i + 24] = 10 + i * 8*2;
+		invaderx[i + 32] = 10 + i * 8*2;
+		invadery[i] = 14 + down;
+		invadery[i + 8] = 13*2 + down;
+		invadery[i + 16] = 19*2 + down;
+		invadery[i + 24] = 25*2 + down;
+		invadery[i + 32] = 31*2 + down;
+		invaders[i] = 4;
+		invaders[i + 8] = 2;
+		invaders[i + 16] = 2;
+		invaders[i + 24] = 0;
+		invaders[i + 32] = 0;
+		invaderframe[i] = 0;
+		invaderframe[i + 8] = 0;
+		invaderframe[i + 16] = 0;
+		invaderframe[i + 24] = 0;
+		invaderframe[i + 32] = 0;
 	}
-	else
-	{
-		offset = 19;
-		boxHeight = 15;
+	for (int i = 0; i < 4; i++) {
+		bunkers[i] = 0;
+		if (gamelevel > 5) { bunkers[i] = -1; }
 	}
-	while (1) {
-		mp.update();
-		
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, 0);
-		cameraY_actual = (cameraY_actual + cameraY) / 2;
-		if (cameraY_actual - cameraY == 1) {
-			cameraY_actual = cameraY;
+	gamestatus = "running";
+}
+//----------------------------------------------------------------------------
+void showscore() {
+	if (infoshow == 1 and saucers == -1) {
+		if (lives > 1) { mp.display.drawBitmap(0, 0, playership[0], TFT_WHITE, 2); }
+		if (lives > 2) { mp.display.drawBitmap(18, 0, playership[0], TFT_WHITE, 2); }
+		mp.display.cursor_x= 42*2 - 4 * (score > 9) - 4 * (score > 99) - 4 * (score > 999);
+		mp.display.cursor_y = 10;
+		mp.display.print(score);
+		mp.display.cursor_x = 144;
+		mp.display.cursor_y = 10;
+		mp.display.print(gamelevel + 1);
+	}
+}
+//----------------------------------------------------------------------------
+void nextlevelcheck() {
+	// increment timer after all invaders killed
+	if (invaderanz == 0) {
+		yeahtimer++;
+		if (yeahtimer >= 90) {
+			gamelevel++;
+			gamestatus = "newlevel";
 		}
-		if(millis() - blinkMillis > 350)
+	}
+}
+//----------------------------------------------------------------------------
+void handledeath() {
+	deadcounter--;
+	if (deadcounter == 0) {
+		deadcounter = -1;
+		lives--;
+		shipx = 0;
+		if (lives == 0) { gamestatus = "gameover"; }
+	}
+}
+
+
+//ported specific
+//----------------------------------------------------------------------------
+void checkbuttons() {
+	if (shipx < 0) shipx = 0;
+
+	if (mp.buttons.repeat(BTN_LEFT, 1) && shipx > 0 && deadcounter == -1) { shipx-=2; }
+	if (mp.buttons.repeat(BTN_RIGHT, 1) and shipx < 143 and deadcounter == -1) { shipx+=2; }
+
+	if (mp.buttons.pressed(BTN_A) and shotx == -1 and deadcounter == -1) {
+		shotx = shipx + 6;
+		shoty = 106;
+		// shoot->setADSR(10,10,15,20);
+		shoot->note(70, 0.05);
+		// shootSound->play();
+		for (uint8_t i = 0; i < 8; i++)
 		{
-			blinkMillis = millis();
-			blinkState = !blinkState;
+			mp.leds[i] = CRGB(255,0,0);
+			pixelsTimer=millis();
+			pixelsState=1;  
+	 	}
+	}
+  if(millis()-pixelsTimer >= 50 && pixelsState==1){
+    FastLED.clear();
+  }
+}
+//----------------------------------------------------------------------------
+void drawplayership() {
+	if (deadcounter == -1) {
+		mp.display.drawBitmap(shipx, 110, playership[0], TFT_WHITE, 2);
+	}
+	else {
+		mp.display.drawBitmap(shipx, 110, playership[1 + invadershotframe], TFT_YELLOW, 2);
+		handledeath();
+	}
+}
+//----------------------------------------------------------------------------
+void drawplayershot() {
+	if (shotx != -1) {
+		shoty = shoty - 4;
+		mp.display.drawLine(shotx, shoty, shotx, shoty + 6, TFT_YELLOW);
+    mp.display.drawLine(shotx+1, shoty, shotx+1, shoty + 6, TFT_YELLOW);
+		if (shoty < 0) {
+			shotx = -1;
+			shoty = -1;
 		}
-		for (uint8_t i = 0; i < length; i++) {
-			menuDrawBox(items[i], i, cameraY_actual);
-		}
-		if(blinkState)
-			menuDrawCursor(cursor, cameraY_actual);
-
-		// last draw the top entry thing
-		if(mp.resolutionMode)
-		{
-			mp.display.fillRect(0, 0, mp.display.width(), 6, TFT_DARKGREY);
-			mp.display.setFreeFont(TT1);
-			mp.display.setCursor(0,5);
-			mp.display.drawFastHLine(0, 6, mp.display.width(), TFT_WHITE);
-		}
-		else
-		{
-			mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(1,-2);
-			mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-		}
-		mp.display.print(title);
-
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			mp.osc->note(75, 0.05);
-			mp.osc->play();
-			while(!mp.update());// Exit when pressed
-			break;
-		}
-		if (mp.buttons.released(BTN_B))   //BUTTON BACK
-			return -1;
-
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			blinkState = 1;
-			blinkMillis = millis();
-			mp.osc->note(75, 0.05);
-			mp.osc->play();
-			mp.leds[3] = CRGB::Blue;
-			mp.leds[4] = CRGB::Blue;
-			while(!mp.update());
-
-			if (cursor == 0) {
-				cursor = length - 1;
-				if (length > 6) {
-					cameraY = -(cursor - 5) * 8;
+	}
+}
+//----------------------------------------------------------------------------
+void invaderlogic() {
+	// increment invader counter
+	if (invaderanz > 0) {
+		checkdir = 0;
+		do {
+			invaderctr++;
+			if (invaderctr > 39) {
+				invaderctr = 0;
+				checkdir = 1;
+				invadersound = ++invadersound % 4;
+				if (delayBip <= 0) {
+					//gb.sound.fx(inv_move);
+					if (invaderanz < 6) {
+						delayBip = 5;
+					}
+					else if (invaderanz < 11) {
+						delayBip = 3;
+					} if (invaderanz < 21) {
+						delayBip = 2;
+					}
 				}
+				else { delayBip--; }
+			}
+		} while (invaders[invaderctr] == -1);
+
+		// change direction?
+		if (checkdir == 1) {
+			if (nextydir != 0) {
+				invaderxr = 0;
+				invaderyr = 2;
 			}
 			else {
-				cursor--;
-				if (cursor > 0 && (cursor * 8 + cameraY + offset) < 14) {
-					cameraY += 8;
+				invaderxr = nextxdir;
+				invaderyr = 0;
+			}
+			checkdir = 0;
+		}
+
+		// change invader position
+		invaderx[invaderctr] = invaderx[invaderctr] + invaderxr;
+		invadery[invaderctr] = invadery[invaderctr] + invaderyr;
+
+		// determine bunker removal if invaders are too low
+		if (invadery[invaderctr] > 80) {
+			for (int i = 0; i < 4; i++) {
+				bunkers[i] = -1;
+			}
+		}
+
+		// determine game over if invaders reach bottom
+		if (invadery[invaderctr] > 100) {
+			gamestatus = "gameover";
+		}
+
+		// determine screen border hit -> go down, then change direction
+		if (invaderx[invaderctr] > 140 and invaderxr > 0) {
+			nextxdir = -4;
+			nextydir = 4;
+		}
+		if (invaderx[invaderctr] < 4 and invaderxr < 0) {
+			nextxdir = 4;
+			nextydir = 4;
+		}
+		if (invaderyr != 0) { nextydir = 0; }
+
+		//change invader shape
+		invaderframe[invaderctr] = ++invaderframe[invaderctr] % 2;
+
+		// remove killed invader
+		if (invaders[invaderctr] == 6) {
+			invaders[invaderctr] = -1;
+			invaderanz--;
+		}
+
+		// release invadershoot
+		if (invadershottimer <= 0 and invadershots < gamelevel + 1 and invadershots < 4 and invadery[invaderctr] < 80) {
+			invadershottimer = 40 - gamelevel * 10;
+			invadershots++;
+			int flag = 0;
+			for (int u = 0; u < 4; u++) {
+				if (flag == 0 and invadershotx[u] == -1) {
+					invadershotx[u] = invaderx[invaderctr] + 2;
+					invadershoty[u] = invadery[invaderctr];
+					flag = 1;
 				}
 			}
 		}
-
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			blinkState = 1;
-			blinkMillis = millis();
-			mp.osc->note(75, 0.05);
-			mp.osc->play();
-			mp.leds[0] = CRGB::Blue;
-			mp.leds[7] = CRGB::Blue;
-			while(!mp.update());
-
-
-			cursor++;
-			if ((cursor * 8 + cameraY + offset) > 54) {
-				cameraY -= 8;
-			}
-			if (cursor >= length) {
-				cursor = 0;
-				cameraY = 0;
-
-			}
-
-		}
 	}
-	return cursor;
-
 }
-void menuDrawCursor(uint8_t i, int32_t y) {
-	uint8_t offset;
-	uint8_t boxHeight;
-	if(mp.resolutionMode)
-	{
-		offset = menuYOffset;
-		boxHeight = 7;
+//----------------------------------------------------------------------------
+void drawinvaders() {
+	infoshow = 1;
+	for (int i = 0; i < 40; i++) {
+		if (invaders[i] != -1) {
+			if (invaders[i] == 0) mp.display.drawBitmap(invaderx[i], invadery[i], invader[invaders[i] + invaderframe[i]], TFT_ORANGE, 2);
+			if (invaders[i] == 2) mp.display.drawBitmap(invaderx[i], invadery[i], invader[invaders[i] + invaderframe[i]], TFT_PINK, 2);
+			if (invaders[i] == 4) mp.display.drawBitmap(invaderx[i], invadery[i], invader[invaders[i] + invaderframe[i]], TFT_BLUE, 2);
+			if (invaders[i] == 6) mp.display.drawBitmap(invaderx[i], invadery[i], invader[invaders[i] + invaderframe[i]], TFT_YELLOW, 2);
+			
+			if (invadery[i] < 5) {
+				infoshow = 0;
+			}
+		}
+
+		// determine collission: invader & player shoot
+		checkl = invaderx[i];
+		checkr = invaderx[i] + 12;
+		checkt = invadery[i];
+		checkb = invadery[i] + 8;
+		if (invaders[i] == 4) {
+			checkl++;
+			checkr--;
+		}
+		if (invaders[i] != -1 and invaders[i] != 6 and shotx >= checkl and shotx <= checkr and shoty + 2 >= checkt and shoty <= checkb) {
+			score = score + invaders[i] * 10 + 10;
+			invaders[i] = 6;
+			shotx = -1;
+			shoty = -1;
+			destroyed->note(10, 0.05);
+			// invaderDestroyed->play();
+		}
 	}
-	else
-	{
-		offset = 17;
-		boxHeight = 15;
-	}
-	y += i * (boxHeight + 1) + offset;
-	mp.display.drawRect(0, y, mp.display.width(), boxHeight + 2, TFT_RED);
 }
-int16_t audioPlayerMenu(const char* title, String* items, uint16_t length, uint16_t index) {
-	int32_t cameraY = 0;
-	int32_t cameraY_actual = 0;
-	String Name;
-	uint8_t scale = 2;
-	uint8_t offset = 17;
-	uint8_t boxHeight = 15;
-	uint16_t start = 0;
-	int16_t cursor = index;
-	bool blinkState = 0;
-	uint32_t blinkMillis = millis();
-	if (length > 6) {
-		cameraY = -cursor * (boxHeight + 1) - 1;
-	}
-	while (1) {
-		if(!mp.SDinsertedFlag)
-			return -1;
-		mp.display.fillScreen(TFT_BLACK);
-		mp.display.setCursor(0, 0);
-		cameraY_actual = (cameraY_actual + cameraY) / 2;
-		if (cameraY_actual - cameraY == 1) {
-			cameraY_actual = cameraY;
-		}
-		if(millis() - blinkMillis > 350)
-		{
-			blinkMillis = millis();
-			blinkState = !blinkState;
-		}
-		for (uint8_t i = 0; i < length; i++) {
-			Name = items[i];
-			while (Name.indexOf("/", start) != -1)
-				start = Name.indexOf("/", start) + 1;
-			Name = Name.substring(start, Name.indexOf("."));
-			start = 0;
-			menuDrawBox(Name, i, cameraY_actual);
-		}
-		if(blinkState)
-			menuDrawCursor(cursor, cameraY_actual);
+//----------------------------------------------------------------------------
+void invadershot() {
+	// handle invadershoot timer & framecounter
+	invadershottimer--;
+  
+	invadershotframe = ++invadershotframe % 2;
 
-		mp.display.fillRect(0, 0, mp.display.width(), 14, TFT_DARKGREY);
-		mp.display.setTextFont(2);
-		mp.display.setCursor(0,-2);
-		mp.display.drawFastHLine(0, 14, mp.display.width(), TFT_WHITE);
-		mp.display.setTextSize(1);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.print(title);
+	// move invadershots, draw & check collission
+	for (int i = 0; i < 4; i++) {
+		if (invadershotx[i] != -1) {
+			invadershoty[i] = invadershoty[i] + 2;
+			mp.display.drawBitmap(invadershotx[i], invadershoty[i], bomb[invadershotframe], TFT_RED, 2);
 
-		if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-			while(!mp.update());
-			break;
-		}
-
-		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
-			blinkState = 1;
-			blinkMillis = millis();
-			while(!mp.update());
-			if (cursor == 0) {
-				cursor = length - 1;
-				if (length > 6) {
-					cameraY = -(cursor - 5) * (boxHeight + 1) - 1;
+			// check collission: invadershot & bunker
+			for (int u = 0; u < 4; u++) {
+        
+				checkl = 22 + u * 36;
+        checkr = 22 + u * 36 + 14;
+        checkt = 90;
+        checkb = 100;
+				if (bunkers[u] != -1 and invadershotx[i] + 1 >= checkl and invadershotx[i] <= checkr and invadershoty[i] + 3 >= checkt and invadershoty[i] <= checkb) {
+					bunkers[u]++;
+					if (bunkers[u] > 4) { bunkers[u] = -1; }
+					invadershotx[i] = -1;
+					invadershoty[i] = -1;
+					invadershots--;
 				}
+			}
+
+			// check collission: invadershot & player
+			checkl = shipx;
+			checkr = shipx + 12;
+			checkt = 107;
+			checkb = 110;
+			if (deadcounter == -1 and invadershotx[i] + 1 >= checkl and invadershotx[i] <= checkr and invadershoty[i] + 3 >= checkt and invadershoty[i] <= checkb) {
+				deadcounter = 60;
+				destroyed->note(10, 0.05);
+				// playerDestroyed->play();
+			}
+
+			//check collission: invadershot & playershoot
+			checkl = invadershotx[i];
+			checkr = invadershotx[i] + 1;
+			checkt = invadershoty[i];
+			checkb = invadershoty[i] + 3;
+			if (shotx >= checkl and shotx <= checkr and shoty + 2 >= checkt and shoty <= checkb) {
+				shotx = -1;
+				shoty = -1;
+				invadershotx[i] = -1;
+				invadershoty[i] = -1;
+				invadershots--;
+			}
+
+			// invadershoot on bottom off screen?
+			if (invadershoty[i] > 128) {
+				invadershotx[i] = -1;
+				invadershoty[i] = -1;
+				invadershots--;
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void drawbunkers() {
+	for (int i = 0; i < 4; i++) {
+		checkl = 22 + i * 36;
+		checkr = 22 + i * 36 + 14;
+		checkt = 90;
+		checkb = 100;
+		if (bunkers[i] != -1 and shotx >= checkl and shotx <= checkr and shoty + 2 >= checkt and shoty <= checkb) {
+			bunkers[i]++;
+			shotx = -1;
+			shoty = -1;
+			if (bunkers[i] > 4) { bunkers[i] = -1; }
+		}
+
+		if (bunkers[i] != -1) {
+			mp.display.drawBitmap(22 + i * 36, 90, bunker[bunkers[i]], TFT_GREEN, 2);
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void saucerappears() {
+	saucertimer--;
+	if (saucertimer <= 0) {
+		saucertimer = 240;
+		if (infoshow == 1 and saucers == -1) {
+      // mainMusic->pause();
+      // removeTrack(mainMusic);
+      // addTrack(ufoSound);
+      // ufoSound->setSpeed(2);
+      // ufoSound->setRepeat(1);
+      // ufoSound->play();
+      
+			saucers = 0;
+			int i = random(2);
+			if (i == 0) {
+				saucerx = 0;
+				saucerdir = 2;
 			}
 			else {
-				if (cursor > 0 && (cursor * (boxHeight + 1) + cameraY + offset) < 20) {
-					cameraY += (boxHeight + 1);
-				}
-				cursor--;
+				saucerx = 146;
+				saucerdir = -2;
 			}
-
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void movesaucer() {
+	if (saucers == 0) {
+		saucerx = saucerx + saucerdir;
+		if (saucerx <= 0 or saucerx >= 146) {
+      // removeTrack(ufoSound);
+      // mainMusic->resume();
+      // addTrack(mainMusic);
+			saucers = -1;
 		}
 
-		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
-			blinkState = 1;
-			blinkMillis = millis();
-			while(!mp.update());
-			cursor++;
-			if ((cursor * (boxHeight + 1) + cameraY + offset) > 54*scale) {
-				cameraY -= (boxHeight + 1);
+		// check collission: player shot & saucer  
+		checkl = saucerx;
+		checkr = saucerx + 20;
+		checkt = 0;
+		checkb = 6;
+		if (shotx >= checkl and shotx <= checkr and shoty + 2 >= checkt and shoty <= checkb) {
+			score += 100;
+			saucers = 1;
+			shotx = -1;
+			shoty = -1;
+			saucerwait = 30;
+      // removeTrack(ufoSound);
+      // invaderDestroyed->play();
+      // mainMusic->resume();
+      // addTrack(mainMusic);
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void drawsaucer() {
+	if (saucers != -1) {
+		mp.display.drawBitmap(saucerx, 0, saucer[saucers], TFT_RED, 2);
+		if (saucers == 1) {
+			saucerwait--;
+			if (saucerwait <= 0) {
+        // removeTrack(ufoSound);
+        // addTrack(mainMusic);
+        // mainMusic->play();
+        // mainMusic->setRepeat(1);
+				saucers = -1;
 			}
-			if (cursor >= length) {
-				cursor = 0;
-				cameraY = 0;
-
-			}
-
 		}
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
-		{
-			while(!mp.update());
-			return -1;
-		}
-		mp.update();
 	}
-	return cursor;
+}
 
-}
-void listAudio(const char * dirname, uint8_t levels) {
-	audioCount = 0;
-	while(!SD.begin(5, SPI, 8000000))
-		Serial.println(F("SD ERROR"));
-	File root = SD.open(dirname);
-	if (!root) {
-		Serial.println(F("Failed to open directory"));
-		return;
-	}
-	if (!root.isDirectory()) {
-		Serial.println(F("Not a directory"));
-		return;
-	}
-	int counter = 1;
-	uint8_t start = 0;
-	File file = root.openNextFile();
-	while (file) {
-		String Name(file.name());
-		if (Name.endsWith(F(".MP3")) || Name.endsWith(F(".mp3"))
-		 || Name.endsWith(F(".wav")) || Name.endsWith(F(".WAV")))
-		{
-			audioFiles[counter - 1] = Name;
-			audioCount++;
-			counter++;
-		}
-		file = root.openNextFile();
-	}
-	root.close();
-	file.close();
-}
-String readSerial() {
-	uint8_t _timeout = 0;
-	while (!Serial1.available() && _timeout < 300)
-	{
-		delay(20);
-		_timeout++;
-	}
-	if (Serial1.available()) {
-		return Serial1.readString();
-	}
-	return "";
-}
-uint16_t countSubstring(String string, String substring) {
-	if (substring.length() == 0) return 0;
-	int count = 0;
-	for (size_t offset = string.indexOf(substring); offset != -1;
-		offset = string.indexOf(substring, offset + substring.length()))
-	{
-		count++;
-	}
-	return count;
-}
-void callNumber(String number) 
+//----------------------------------------------------------------------------
+void eraseData()
 {
-	String contact = mp.checkContact(number);
-	mp.inCall = 1;
-	mp.dataRefreshFlag = 0;
-	char c;
-	String localBuffer = "";
-	String buffer = "";
-	Serial1.print(F("ATD"));
-	Serial1.print(number);
-	Serial1.print(";\r\n");
-	mp.display.setFreeFont(TT1);
-	mp.display.setTextColor(TFT_BLACK);
-	bool firstPass = 1;
-	uint32_t timeOffset = 0;
-	uint8_t scale;
-	String temp;
-	unsigned int tmp_time = 0;
-	if(mp.resolutionMode)
-	{
-		scale = 1;
-		mp.display.setFreeFont(TT1);
-	}
-	else
-	{
-		scale = 2;
-		mp.display.setTextFont(2);
-	}
-	mp.display.setTextSize(1);
-	digitalWrite(soundSwitchPin, 1);
-	if(contact == "")
-		mp.display.printCenter(number);
-	else
-		mp.display.printCenter(contact);
-	uint8_t callState = 1;
-	uint8_t callIdNumber = 0;
-	
-	while (1)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		if (Serial1.available())
-		{
-			c = Serial1.read();
-			buffer += c;
-		}
-		if(buffer.indexOf("CLCC:") != -1 && buffer.indexOf("\r", buffer.indexOf("CLCC:")) != -1)
-		{
-			if(callIdNumber < 1)
-			{
-				uint16_t helper = buffer.indexOf("+CLCC: ") + 7;
-				callIdNumber = buffer.substring(helper, helper + 1).toInt();
-				Serial.print("call id: ");
-				Serial.println(callIdNumber);
-			}
-			localBuffer = buffer;
-			buffer = "";
-		}
-		if(buffer.indexOf("\r") != -1)
-			buffer = "";
-		// Serial.println("---------------");
-		// Serial.println(buffer);
-		// delay(5);
-		if(buffer.indexOf("OK", buffer.indexOf("AT+CLVL=")) != -1)
-			buffer = "";
-		if (localBuffer.indexOf(String("CLCC: " + String(callIdNumber))) != -1 || localBuffer.indexOf("AT+CLVL") != -1)
-		{
-			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,0,0,0")) != -1 
-			|| localBuffer.indexOf("AT+CLVL") != -1  )
-			{
-				callState = 2;
-				
-			}
-
-			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,3,0,0")) != -1 )
-			{
-				callState = 0;
-				
-			}
-
-			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,2,0,0")) != -1)
-			{
-				callState = 1;
-
-			}
-
-			if(localBuffer.indexOf(String(String(callIdNumber) + ",0,6,0,0")) != -1)
-			{
-				mp.display.fillScreen(TFT_WHITE);
-				mp.display.setCursor(32, 9);
-				if (timeOffset == 0)
-					mp.display.printCenter("00:00");
-				else
-				{
-					temp = "";
-					if ((int((millis() - timeOffset) / 1000) / 60) > 9)
-						temp += (int((millis() - timeOffset) / 1000) / 60) ;
-					else
-					{
-						temp += "0";
-						temp += (int((millis() - timeOffset) / 1000) / 60);
-					}
-					temp += ":";
-					if (int((millis() - timeOffset) / 1000) % 60 > 9)
-						temp += (int((millis() - timeOffset) / 1000) % 60);
-					else
-					{
-						temp += "0";
-						temp += (int((millis() - timeOffset) / 1000) % 60);
-					}
-					mp.display.setCursor(9, 9);
-					mp.display.printCenter(temp);
-				}
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
-				if(mp.resolutionMode)
-					mp.display.setCursor(11, 20);
-				else
-					mp.display.setCursor(11, 28);
-				if(contact == "")
-					mp.display.printCenter(number);
-				else
-					mp.display.printCenter(contact);
-				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				if(mp.resolutionMode)
-					mp.display.setCursor(2, 62);
-				else
-					mp.display.setCursor(2, 112);
-				mp.display.print("Call ended");
-				Serial.println("ENDED");
-				while(!mp.update());
-
-				mp.updateTimeRTC();
-				if(mp.SDinsertedFlag)
-					mp.addCall(number, mp.checkContact(number), mp.RTC.now().unixtime(), tmp_time, 1);
-
-				delay(1000);
-				break;
-			}
-		}
-
-
-		else if (localBuffer.indexOf("CLCC:") == -1)
-		{
-			if (localBuffer.indexOf("ERROR") != -1)
-			{
-
-				mp.display.setCursor(3, 9);
-				mp.display.printCenter("Couldn't dial number!");
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
-				if(mp.resolutionMode)
-					mp.display.setCursor(11, 20);
-				else
-					mp.display.setCursor(11, 28);
-				if(contact == "")
-					mp.display.printCenter(number);
-				else
-					mp.display.printCenter(contact);
-				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				if(mp.resolutionMode)
-				{
-					mp.display.setCursor(2, 57);
-					mp.display.print("Invalid number or");
-					mp.display.setCursor(2, 63);
-					mp.display.print("SIM card missing!");
-				}
-				else
-				{
-					mp.display.setCursor(2, 100);
-					mp.display.print("Invalid number or");
-					mp.display.setCursor(2, 112);
-					mp.display.print("SIM card missing!");
-				}
-				while (!mp.buttons.released(BTN_B))
-					mp.update();
-				break;
-			}
-			else
-			{
-				callState = 1;
-			}
-		}
-		if (mp.buttons.pressed(BTN_FUN_RIGHT)) // hanging up
-		{
-			
-			mp.display.fillScreen(TFT_WHITE);
-			mp.display.setCursor(32, 9);
-			if (timeOffset == 0)
-				mp.display.printCenter("00:00");
-			else
-			{
-				temp = "";
-				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
-					temp += (int((millis() - timeOffset) / 1000) / 60) ;
-				else
-				{
-					temp += "0";
-					temp += (int((millis() - timeOffset) / 1000) / 60);
-				}
-				temp += ":";
-				if (int((millis() - timeOffset) / 1000) % 60 > 9)
-					temp += (int((millis() - timeOffset) / 1000) % 60);
-				else
-				{
-					temp += "0";
-					temp += (int((millis() - timeOffset) / 1000) % 60);
-				}
-				mp.display.setCursor(9, 9);
-				mp.display.printCenter(temp);
-			}
-			mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_RED, scale);
-			mp.display.setCursor(11, 28);
-			if(contact == "")
-				mp.display.printCenter(number);
-			else
-				mp.display.printCenter(contact);
-			mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-			mp.display.setCursor(2, 112);
-			mp.display.print("Call ended");
-			Serial.println("ENDED");
-			while(!mp.update());
-			mp.updateTimeRTC();
-			Serial.println("B PRESSED");
-			// Serial1.println("ATH");
-			// mp.waitForOK();
-			Serial1.println("ATH");
-			buffer = mp.waitForOK();
-			Serial.println(buffer);
-			if(mp.SDinsertedFlag)
-				mp.addCall(number, mp.checkContact(number), mp.RTC.now().unixtime(), tmp_time, 1);
-			delay(1000);
-			break;
-		}
-		if(mp.buttons.released(BTN_UP) && mp.callSpeakerVolume < 5)
-		{
-			mp.callSpeakerVolume++;
-			if (mp.sim_module_version == 1)
-				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume*20);
-			else if (mp.sim_module_version == 0)
-				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume);
-			mp.display.fillRect(56, 111, 20, 15, TFT_RED);
-			mp.display.setCursor(59, 109);
-			mp.display.print(mp.callSpeakerVolume);
-		}
-		if(mp.buttons.released(BTN_DOWN) && mp.callSpeakerVolume > 0)
-		{
-			mp.callSpeakerVolume--;
-			if (mp.sim_module_version == 1)
-				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume*20);
-			else if (mp.sim_module_version == 0)
-				Serial1.printf("AT+CLVL=%d\r", mp.callSpeakerVolume);
-			mp.display.fillRect(56, 111, 20, 15, TFT_RED);
-			mp.display.setCursor(59, 109);
-			mp.display.print(mp.callSpeakerVolume);
-		}
-		switch (callState)
-		{
-			case 0:
-				mp.display.setCursor(25, 9);
-				mp.display.printCenter("Ringing...");
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
-				mp.display.setCursor(11, 28);
-				if(contact == "")
-					mp.display.printCenter(number);
-				else
-					mp.display.printCenter(contact);
-				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				mp.display.setCursor(5, 109);
-				mp.display.print("Volume: ");
-				mp.display.print(mp.callSpeakerVolume);
-				mp.display.setCursor(100, 109);
-				mp.display.print("Hang up");
-				break;
-			case 1:
-				mp.display.setCursor(25, 9);
-				mp.display.printCenter("Calling...");
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_DARKGREY, scale);
-				mp.display.setCursor(11, 28);
-				if(contact == "")
-					mp.display.printCenter(number);
-				else
-					mp.display.printCenter(contact);
-				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				mp.display.setCursor(5, 109);
-				mp.display.print("Volume: ");
-				mp.display.print(mp.callSpeakerVolume);
-				mp.display.setCursor(100, 109);
-				mp.display.print("Hang up");
-				break;
-			case 2:
-				if (firstPass == 1)
-				{
-					timeOffset = millis();
-					firstPass = 0;
-				}
-
-				String temp = "";
-				if ((int((millis() - timeOffset) / 1000) / 60) > 9)
-					temp += (int((millis() - timeOffset) / 1000) / 60) ;
-				else
-				{
-					temp += "0";
-					temp += (int((millis() - timeOffset) / 1000) / 60);
-				}
-				temp += ":";
-				if (int((millis() - timeOffset) / 1000) % 60 > 9)
-					temp += (int((millis() - timeOffset) / 1000) % 60);
-				else
-				{
-					temp += "0";
-					temp += (int((millis() - timeOffset) / 1000) % 60);
-				}
-				mp.display.setCursor(9, 9);
-				mp.display.printCenter(temp);
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
-				mp.display.setCursor(11, 28);
-				if(contact == "")
-					mp.display.printCenter(number);
-				else
-					mp.display.printCenter(contact);
-				mp.display.fillRect(0, 51*scale, 80*scale, 13*scale, TFT_RED);
-				mp.display.setCursor(5, 109);
-				mp.display.print("Volume: ");
-				mp.display.print(mp.callSpeakerVolume);
-				mp.display.setCursor(100, 109);
-				mp.display.print("Hang up");
-				break;
-		}
-		for(int i = 0; i < 12;i++)
-		{
-			
-			if(mp.buttons.released(i))
-			{
-				if(i == 9)
-					Serial1.println("AT+VTS=*");
-				else if(i == 10)
-					Serial1.println("AT+VTS=0");
-				else if(i == 11)
-					Serial1.println("AT+VTS=#");
-				else
-				{
-					Serial1.print("AT+VTS=");
-					Serial1.println(i+1);
-				}
-				break;
-			}
-		}
-		tmp_time = int((millis() - timeOffset) / 1000);
-		mp.update();
-	}
-	if(mp.SDinsertedFlag)
-		mp.saveSettings();
-	digitalWrite(soundSwitchPin, 0);
-	mp.inCall = 0;
-}
-bool startupWizard()
-{
-	int16_t oldSleepTimeActual = mp.sleepTimeActual;
-	int16_t oldSleepTime = mp.sleepTime;
-	mp.sleepTime = 0;
-	mp.sleepTimeActual = 0;
-	mp.homePopupEnable(0);
-	mp.shutdownPopupEnable(0);
-	mp.display.fillScreen(TFT_WHITE);
-	uint32_t tMillis = millis();
-	bool goOut = 1;
-	// Connect charger
-	while(digitalRead(CHRG_INT))
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Startup wizard");
-		mp.display.setCursor(0, mp.display.height()/2 - 14);
-		mp.display.printCenter("Connect your charger");
-		mp.display.drawBitmap(72, 74, batteryChargingIcon, TFT_BLACK, 3);
-		Serial.println(mp.batteryVoltage);
-		mp.update();
-	}
-	mp.display.setTextColor(TFT_BLACK);
-	mp.display.setTextSize(1);
-	mp.display.setTextFont(2);
-	mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-	mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-	mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-	mp.display.setCursor(47, 55);
-	mp.display.printCenter("Charger connected!");
-	tMillis = millis();
-	while(millis() < tMillis + 1500)
-	{
-		mp.update();
-		if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-		{
-			while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-				mp.update();
-			break;
-		}
-	}
-	while(!mp.update());
-	mp.display.setTextColor(TFT_BLACK);
-	mp.display.setTextSize(1);
-	mp.display.setTextFont(2);
-	mp.display.drawRect(4, 25, 154, 78, TFT_BLACK);
-	mp.display.drawRect(3, 24, 156, 80, TFT_BLACK);
-	mp.display.fillRect(5, 26, 152, 76, TFT_WHITE);
-	mp.display.setCursor(47, 30);
-	mp.display.printCenter("Charge the phone");
-	mp.display.setCursor(47, 48);
-	mp.display.printCenter("for at least an hour.");
-	mp.display.setCursor(47, 74);
-	mp.display.printCenter("Press A to continue");
-	tMillis = millis();
-	while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-		mp.update();
-	while(!mp.update());
- 
-	mp.shutdownPopupEnable(0);
-
-	// Buttons testing
-	bool buttonsArray[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	bool allPressed = 1;
-	while(1)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Let's test the buttons");
-		mp.display.setCursor(3, 97);
-		mp.display.print("Press every button");
-		mp.display.setCursor(3, 112);
-		mp.display.print("to continue");
-		allPressed = 1;
-		for(int i = 0; i < 18; i++)
-		{
-			if(buttonsArray[i])
-				mp.display.fillCircle(13 + 26*(i%6), 33 + int(i/6)*22, 8, TFT_GREEN);
-			else
-			{
-				allPressed = 0;
-				switch (i)
-				{
-				case 0:
-					if(mp.buttons.pressed(BTN_FUN_LEFT))
-						buttonsArray[i] = 1;
-					break;
-				case 1:
-					if(mp.buttons.pressed(14))
-						buttonsArray[i] = 1;
-					break;
-				case 2:
-					if(mp.buttons.pressed(13))
-						buttonsArray[i] = 1;
-					break;
-				case 3:
-					if(mp.buttons.pressed(BTN_FUN_RIGHT))
-						buttonsArray[i] = 1;
-					break;
-				case 4:
-					if(mp.buttons.pressed(BTN_A))
-						buttonsArray[i] = 1;
-					break;
-				case 5:
-					if(mp.buttons.pressed(BTN_B))
-						buttonsArray[i] = 1;
-					break;
-				case 6:
-					if(mp.buttons.pressed(BTN_1))
-						buttonsArray[i] = 1;
-					break;
-				case 7:
-					if(mp.buttons.pressed(BTN_2))
-						buttonsArray[i] = 1;
-					break;
-				case 8:
-					if(mp.buttons.pressed(BTN_3))
-						buttonsArray[i] = 1;
-					break;
-				case 9:
-					if(mp.buttons.pressed(BTN_4))
-						buttonsArray[i] = 1;
-					break;
-				case 10:
-					if(mp.buttons.pressed(BTN_5))
-						buttonsArray[i] = 1;
-					break;
-				case 11:
-					if(mp.buttons.pressed(BTN_6))
-						buttonsArray[i] = 1;
-					break;
-				case 12:
-					if(mp.buttons.pressed(BTN_7))
-						buttonsArray[i] = 1;
-					break;
-				case 13:
-					if(mp.buttons.pressed(BTN_8))
-						buttonsArray[i] = 1;
-					break;
-				case 14:
-					if(mp.buttons.pressed(BTN_9))
-						buttonsArray[i] = 1;
-					break;
-				case 15:
-					if(mp.buttons.pressed(BTN_ASTERISK))
-						buttonsArray[i] = 1;
-					break;
-				case 16:
-					if(mp.buttons.pressed(BTN_0))
-						buttonsArray[i] = 1;
-					break;
-				case 17:
-					if(mp.buttons.pressed(BTN_HASHTAG))
-						buttonsArray[i] = 1;
-					break;
-				}
-			}
-		}
-		mp.display.setCursor(12, 25);
-		mp.display.drawBitmap(59, 27, homeButton);
-		mp.display.drawBitmap(33, 27, powerButton);
-		mp.display.print("-            -   A   B");
-		mp.display.setCursor(10, 47);
-		mp.display.print("1   2   3   4   5   6");
-		mp.display.setCursor(10, 69);
-		mp.display.print("7   8   9   *   0   #");
-		mp.update();
-
-		if(allPressed)
-		{
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 55);
-			mp.display.printCenter("Buttons OK!");
-			uint32_t tempMillis = millis();
-			while(millis() < tempMillis + 1500)
-			{
-				mp.update();
-				if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-				{
-					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					break;
-				}
-			}
-			while(!mp.update());
-			break;
-		}
-	}
-
-	// Joystick testing
-	bool tested[8] = {0,0,0,0,0,0,0,0};
-	bool allTested = 1;
-	while(1)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Let's test the joystick");
-		mp.display.setCursor(3, 97);
-		mp.display.print("Test every direction");
-		mp.display.setCursor(3, 112);
-		mp.display.print("to continue");
-		mp.display.drawBitmap(74, 24, joystickArrowUp);
-		mp.display.drawBitmap(98, 30, joystickArrowUpRight);
-		mp.display.drawBitmap(100, 54, joystickArrowRight);
-		mp.display.drawBitmap(98, 73, joystickArrowDownRight);
-		mp.display.drawBitmap(74, 76, joystickArrowDown);
-		mp.display.drawBitmap(45, 73, joystickArrowDownLeft);
-		mp.display.drawBitmap(40, 54, joystickArrowLeft);
-		mp.display.drawBitmap(45, 30, joystickArrowUpLeft);
-		allTested = 1;
-		for(uint8_t i = 0; i < 8; i++)
-		{
-			if(tested[i])
-			{
-				switch (i)
-				{
-					case 0:
-						mp.display.drawBitmap(74, 24, joystickArrowUp, TFT_GREEN);
-						break;
-					case 1:
-						mp.display.drawBitmap(98, 30, joystickArrowUpRight, TFT_GREEN);
-						break;
-					case 2:
-						mp.display.drawBitmap(100, 54, joystickArrowRight, TFT_GREEN);
-						break;
-					case 3:
-						mp.display.drawBitmap(98, 73, joystickArrowDownRight, TFT_GREEN);
-						break;
-					case 4:
-						mp.display.drawBitmap(74, 76, joystickArrowDown, TFT_GREEN);
-						break;
-					case 5:
-						mp.display.drawBitmap(45, 73, joystickArrowDownLeft, TFT_GREEN);
-						break;
-					case 6:
-						mp.display.drawBitmap(40, 54, joystickArrowLeft, TFT_GREEN);
-						break;
-					case 7:
-						mp.display.drawBitmap(45, 30, joystickArrowUpLeft, TFT_GREEN);
-						break;
-
-				}
-			}
-			else
-			{
-				allTested = 0;
-				switch (i)
-				{
-					case 0:
-						if(mp.buttons.getJoystickY() < 100 && mp.buttons.getJoystickX() < 750 && mp.buttons.getJoystickX() > 350)
-							tested[i] = 1;
-						break;
-					case 1:
-						if(mp.buttons.getJoystickY() < 200 && mp.buttons.getJoystickX() < 200)
-							tested[i] = 1;
-						break;
-					case 2:
-						if(mp.buttons.getJoystickY() < 750 && mp.buttons.getJoystickY() > 350 && mp.buttons.getJoystickX() < 100)
-							tested[i] = 1;
-						break;
-					case 3:
-						if(mp.buttons.getJoystickY() > 900 && mp.buttons.getJoystickX() < 200)
-							tested[i] = 1;
-						break;
-					case 4:
-						if(mp.buttons.getJoystickY() > 1000 && mp.buttons.getJoystickX() < 750 && mp.buttons.getJoystickX() > 350)
-							tested[i] = 1;
-						break;
-					case 5:
-						if(mp.buttons.getJoystickY() > 900 && mp.buttons.getJoystickX() > 900)
-							tested[i] = 1;
-						break;
-					case 6:
-						if(mp.buttons.getJoystickY() < 750 && mp.buttons.getJoystickY() > 350 && mp.buttons.getJoystickX() > 1000)
-							tested[i] = 1;
-						break;
-					case 7:
-						if(mp.buttons.getJoystickY() < 200 && mp.buttons.getJoystickX() > 900)
-							tested[i] = 1;
-						break;
-
-				}
-			}
-		}
-		if(allTested)
-		{
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 55);
-			mp.display.printCenter("Joystick OK!");
-			uint32_t tempMillis = millis();
-			while(millis() < tempMillis + 1500)
-			{
-				mp.update();
-				if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-				{
-					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					break;
-				}
-			}
-			while(!mp.update());
-			break;
-		}
-		mp.update();
-	}
-
-	
-
-	//Speaker testing
-	bool state = 0;
-	bool playing = 0;
-	uint8_t tempNotification = mp.notification;
-	bool blinkState = 0;
-	uint32_t blinkMillis = millis();
-	uint8_t cursor = 0;
-	uint32_t callMillis = millis();
-	mp.ringVolume = 10;
-	goOut = 1;
-	while (goOut)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Speaker testing");
-		mp.display.setCursor(0,mp.display.height()/2 - 14);
-		mp.display.printCenter("Listen to the speaker");
-		uint32_t speakerMillis = millis();
-		callMillis = millis();
-		state = 1;
-		while(millis() - speakerMillis < 2000)
-		{
-			if(millis() - callMillis >= 1000)
-			{
-				state = 1;
-				callMillis = millis();
-			}
-			if(state)
-			{
-				mp.playNotificationSound(4);
-				state = 0;
-			}
-			mp.update();
-		}
-		while(1)
-		{
-			mp.display.fillScreen(TFT_WHITE);
-			mp.display.setTextFont(2);
-			mp.display.setTextSize(1);
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setCursor(4, 110);
-			mp.display.print("Press A to confirm");
-
-			if(millis() - blinkMillis >= 350)
-			{
-				blinkMillis = millis();
-				blinkState = !blinkState;
-			}
-			mp.display.setCursor(0,6);
-			mp.display.printCenter("Did you hear");
-			mp.display.setCursor(0,22);
-			mp.display.printCenter("the speaker");
-
-			mp.display.setCursor(4, 110);
-			mp.display.print("Press A to confirm");
-			switch (cursor)
-			{
-				case 0:
-					mp.display.drawRect(28, 50, 35, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(27, 49, 37, 20, blinkState ? TFT_RED : TFT_WHITE);
-					break;
-				case 1:
-					mp.display.drawRect(98, 50, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(97, 49, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-					break;
-				case 2:
-					mp.display.drawRect(59, 80, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(58, 79, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-					break;
-			}
-
-			if(mp.buttons.released(BTN_LEFT) && cursor == 1)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 0;
-			}
-			if(mp.buttons.released(BTN_RIGHT) && cursor == 0)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 1;
-			}
-			if(mp.buttons.released(BTN_DOWN) && cursor < 2)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 2;
-			}
-			if(mp.buttons.released(BTN_UP) && cursor == 2)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 0;
-			}
-			mp.display.setCursor(0,50);
-			mp.display.printCenter("Yes        No");
-			mp.display.setCursor(0,80);
-			mp.display.printCenter("Retry");
-			if(mp.buttons.released(BTN_A))
-			{
-				while(!mp.update());
-				if(cursor == 1)
-				{
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setTextSize(1);
-					mp.display.setTextFont(2);
-					mp.display.setCursor(47, 5);
-					mp.display.printCenter("Don't worry!");
-					mp.display.setCursor(47, 30);
-					mp.display.printCenter("Check soldering joints");
-					mp.display.setCursor(47, 48);
-					mp.display.printCenter("and contact us via");
-					mp.display.setCursor(47, 66);
-					mp.display.printCenter("circuitmess.com/contact");
-					mp.display.setCursor(47, 84);
-					mp.display.printCenter("for more assistance.");
-					mp.display.setCursor(4, 112);
-					mp.display.print("Press A to continue");
-					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					goOut = 0;
-					break;
-				}
-				else
-				{
-					if(cursor == 0)
-						goOut = 0;
-					break;
-				}
-			}
-			mp.update();
-		}
-	}
-	mp.notification = tempNotification;
-	while(!mp.update());
-
-
-	//SIM module testing
-	goOut = 1;
-	bool response = 0;
-	uint32_t tempMillis = millis();
-		String reply = "";
-	while(goOut)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Network module test");
-		mp.display.setCursor(0,mp.display.height()/2 - 22);
-		mp.display.printCenter("SIM functionality test");
-		mp.display.setCursor(0,mp.display.height()/2 - 2);
-		mp.display.printCenter("Performing test 1/3");
-		while(!mp.update());
-		tempMillis = millis();
-		reply = "";
-		response = 0;
-		while(millis() < tempMillis + 1500)
-		{
-			Serial1.println("AT");
-
-			reply = Serial1.readString();
-			Serial.println(reply);
-			if(reply.indexOf("OK") != -1)
-			{
-				response = 1;
-				break;
-			}
-		}
-		if(response)
-		{
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 55);
-			mp.display.printCenter("AT OK!");
-			tempMillis = millis();
-			while(millis() < tempMillis + 1000)
-				mp.update();
-			break;
-		}
-		else
-		{
-			Serial1.begin(9600, SERIAL_8N1, 17, 16);
-			while(millis() < tempMillis + 1500)
-			{
-				Serial1.println("AT");
-				if(reply.indexOf("OK") != -1)
-				{
-					response = 1;
-					break;
-				}
-				reply = Serial1.readString();
-			}
-			if(response)
-			{
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-				mp.display.setCursor(47, 55);
-				mp.display.printCenter("AT OK!");
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				break;
-			}
-			else
-			{
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-				mp.display.setCursor(47, 48);
-				mp.display.printCenter("Network module");
-				mp.display.setCursor(47, 63);
-				mp.display.printCenter("not inserted!");
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				tempMillis = millis();
-				bool blinkState = 0;
-				uint32_t blinkMillis = millis();
-				uint8_t cursor = 0;
-				while(1)
-				{
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setTextFont(2);
-					mp.display.setTextSize(1);
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setCursor(4, 110);
-					mp.display.print("Press A to confirm");
-
-					if(millis() - blinkMillis >= 350)
-					{
-						blinkMillis = millis();
-						blinkState = !blinkState;
-					}
-					mp.display.setCursor(0,6);
-					mp.display.printCenter("Reinsert the");
-					mp.display.setCursor(0,22);
-					mp.display.printCenter("network module");
-
-					mp.display.setCursor(4, 110);
-					mp.display.print("Press A to confirm");
-					switch (cursor)
-					{
-						case 0:
-							mp.display.drawRect(28, 50, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-							mp.display.drawRect(27, 49, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-							break;
-						case 1:
-							mp.display.drawRect(98, 50, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-							mp.display.drawRect(97, 49, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-							break;
-					}
-
-					if(mp.buttons.released(BTN_LEFT) && cursor == 1)
-					{
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 0;
-					}
-					if(mp.buttons.released(BTN_RIGHT) && cursor == 0)
-					{
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 1;
-					}
-					mp.display.setCursor(0,50);
-					mp.display.printCenter("Retry      Skip");
-					if(mp.buttons.released(BTN_A))
-					{
-						while(!mp.update());
-						if(cursor == 1)
-						{
-							goOut = 0;
-							break;
-						}
-						else
-							break;
-					}
-					mp.update();
-				}
-			}
-		}
-	}
-	if(response)
-	{
-		mp.sim_module_version = 1;
-		while(1)
-		{
-			mp.display.fillScreen(TFT_WHITE);
-			mp.display.setTextFont(2);
-			mp.display.setTextSize(1);
-			mp.display.setCursor(4,4);
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.printCenter("Network module test");
-			mp.display.setCursor(0,mp.display.height()/2 - 22);
-			mp.display.printCenter("SIM functionality test");
-			mp.display.setCursor(0,mp.display.height()/2 - 2);
-			mp.display.printCenter("Performing test 2/3");
-			while(!mp.update());
-			tempMillis = millis();
-			response = 0;
-			reply = "";
-			while(millis() < tempMillis + 1500)
-			{
-				Serial1.println("AT+CSQ");
-
-				reply = Serial1.readString();
-				Serial.println(reply);
-				if(reply.indexOf("+CSQ:") != -1)
-				{
-					response = 1;
-					break;
-				}
-			}
-			if(response)
-			{
-				uint16_t foo = reply.indexOf(" ", reply.indexOf("+CSQ:")) + 1;
-				if(reply.substring(foo, reply.indexOf(",", foo)).toInt() == 99)
-					response = 0;
-			}
-			if(response)
-			{
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-				mp.display.setCursor(47, 55);
-				mp.display.printCenter("Signal OK!");
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				break;
-			}
-			else
-			{
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-				mp.display.setCursor(47, 55);
-				mp.display.printCenter("Signal error!");
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				bool blinkState = 0;
-				uint32_t blinkMillis = millis();
-				bool cursor = 0;
-				while(!mp.buttons.released(BTN_A))
-				{
-					if(millis() - blinkMillis >= 350)
-					{
-						blinkMillis = millis();
-						blinkState = !blinkState;
-					}
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setCursor(0, 32);
-					mp.display.printCenter("Check the antenna");
-					mp.display.setCursor(0,70);
-					mp.display.printCenter("Retry      Skip");
-					mp.display.setCursor(4, 110);
-					mp.display.print("Press A to confirm");
-					if(cursor)
-					{
-						mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-					}
-					else
-					{
-						mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-					}
-
-					if(mp.buttons.released(BTN_LEFT) && cursor)
-					{
-						while(!mp.update());
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 0;
-					}
-					if(mp.buttons.released(BTN_RIGHT) && !cursor)
-					{
-						while(!mp.update());
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 1;
-					}
-					mp.update();
-				}
-				if(cursor)
-					break;
-				else
-				{
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setCursor(0,mp.display.height()/2 - 22);
-					mp.display.printCenter("Refreshing signal data");
-					mp.display.setCursor(0,mp.display.height()/2 - 2);
-					mp.display.printCenter("Please wait...");
-					tempMillis = millis();
-					while(millis() < tempMillis + 4000)
-						mp.update();
-				}
-
-			}
-		}
-		while(1)
-		{
-			mp.display.fillScreen(TFT_WHITE);
-			mp.display.setTextFont(2);
-			mp.display.setTextSize(1);
-			mp.display.setCursor(4,4);
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.printCenter("Network module test");
-			mp.display.setCursor(0,mp.display.height()/2 - 22);
-			mp.display.printCenter("SIM functionality test");
-			mp.display.setCursor(0,mp.display.height()/2 - 2);
-			mp.display.printCenter("Performing test 3/3");
-			while(!mp.update());
-			mp.checkSim();
-			if(mp.simInserted)
-			{
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-				mp.display.setCursor(47, 55);
-				mp.display.printCenter("SIM card OK!");
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				bool blinkState = 0;
-				uint32_t blinkMillis = millis();
-				bool cursor = 0;
-				while(!mp.buttons.released(BTN_A))
-				{
-					if(millis() - blinkMillis >= 350)
-					{
-						blinkMillis = millis();
-						blinkState = !blinkState;
-					}
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setCursor(0, 22);
-					mp.display.printCenter("Make a test call?");
-					mp.display.setCursor(0,70);
-					mp.display.printCenter("Yes        No");
-					mp.display.setCursor(4, 110);
-					mp.display.print("Press A to confirm");
-					if(cursor)
-					{
-						mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-					}
-					else
-					{
-						mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-					}
-
-					if(mp.buttons.released(BTN_LEFT) && cursor)
-					{
-						while(!mp.update());
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 0;
-					}
-					if(mp.buttons.released(BTN_RIGHT) && !cursor)
-					{
-						while(!mp.update());
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 1;
-					}
-					mp.update();
-				}
-				if(!cursor)
-				{
-					while(!mp.update());
-					phoneApp();
-				}
-				break;
-			}
-			else
-			{
-				mp.display.setTextColor(TFT_BLACK);
-				mp.display.setTextSize(1);
-				mp.display.setTextFont(2);
-				mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-				mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-				mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-				mp.display.setCursor(47, 55);
-				mp.display.printCenter("SIM card not found!");
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
-				bool blinkState = 0;
-				uint32_t blinkMillis = millis();
-				bool cursor = 0;
-				while(!mp.buttons.released(BTN_A))
-				{
-					if(millis() - blinkMillis >= 350)
-					{
-						blinkMillis = millis();
-						blinkState = !blinkState;
-					}
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setCursor(0, 16);
-					mp.display.printCenter("Reinsert SIM card");
-					mp.display.setCursor(0, 32);
-					mp.display.printCenter("and press retry");
-					mp.display.setCursor(0,70);
-					mp.display.printCenter("Retry      Skip");
-					mp.display.setCursor(4, 110);
-					mp.display.print("Press A to confirm"); // prompt za manual turn on
-					if(cursor)
-					{
-						mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-					}
-					else
-					{
-						mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-					}
-
-					if(mp.buttons.released(BTN_LEFT) && cursor)
-					{
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 0;
-					}
-					if(mp.buttons.released(BTN_RIGHT) && !cursor)
-					{
-						blinkState = 1;
-						blinkMillis = millis();
-						cursor = 1;
-					}
-					mp.update();
-				}
-				if(cursor)
-					break;
-				else
-				{
-					mp.display.setCursor(0,50);
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.printCenter("Reseting network module");
-					while(!mp.update());
-					while(Serial1.available())
-						Serial1.read();
-					Serial1.println("AT+CFUN=1,1");
-					char buffer[300];
-					bool found = 0;
-					memset(buffer, 0, sizeof(buffer));
-					Serial1.flush();
-					uint32_t timer = millis();
-					while(!found)
-					{
-						if(Serial1.available())
-						{
-
-							char test = (char)Serial1.read();
-							strncat(buffer, &test, 1);
-							Serial.println(buffer);
-						}
-						if(strstr(buffer, "RDY") != nullptr)
-							found = 1;
-						if((millis() - timer > 5000 && (mp.sim_module_version == 1 || mp.sim_module_version == 255)) ||
-						(millis() - timer > 28000 && mp.sim_module_version == 0))
-							break;
-					}
-					delay(3000);
-					// mp.tft.setTextFont(2);
-					// mp.tft.setTextSize(1);
-					// mp.tft.setTextColor(TFT_BLACK);
-					// mp.tft.fillRect(0, 0, 160, 128, TFT_WHITE);
-					// mp.tft.setCursor(40, 37);
-					// mp.tft.print("Turning off...");
-					// mp.tft.setCursor(40, 60);
-					// mp.tft.print("You need to ");
-					// mp.tft.setCursor(20, 74);
-					// mp.tft.print("power on manually");
-
-					// delay(2500);
-					// Serial.println("TURN OFF");
-					// digitalWrite(OFF_PIN, 1);
-				}
-
-			}
-
-
-			mp.update();
-		}
-	}
-
-	//SD card testing
-	while(1)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Startup wizard");
-		mp.display.setCursor(0,mp.display.height()/2 - 16);
-		mp.display.printCenter("SD card test");
-		while(!mp.update());
-		delay(500);
-		mp.SDinsertedFlag = 1;
-		uint32_t tempMillis = millis();
-		while (!SD.begin(5, SPI, 8000000))
-		{
-			Serial.println("SD ERROR");
-			if(millis()-tempMillis > 5)
-			{
-				mp.SDinsertedFlag = 0;
-				break;
-			}
-		}
-		if(!mp.SDinsertedFlag)
-		{
-			SD.end();
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 55);
-			mp.display.printCenter("SD card error!");
-			tempMillis = millis();
-			while(millis() < tempMillis + 1000)
-				mp.update();
-			bool blinkState = 0;
-			uint32_t blinkMillis = millis();
-			bool cursor = 0;
-			while(!mp.buttons.released(BTN_A))
-			{
-				if(millis() - blinkMillis >= 350)
-				{
-					blinkMillis = millis();
-					blinkState = !blinkState;
-				}
-				mp.display.fillScreen(TFT_WHITE);
-				mp.display.setCursor(0, 32);
-				mp.display.printCenter("Reinsert SD card");
-				mp.display.setCursor(0,70);
-				mp.display.printCenter("Retry      Skip");
-				mp.display.setCursor(4, 110);
-				mp.display.print("Press A to confirm");
-				if(cursor)
-				{
-					mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-				}
-				else
-				{
-					mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-				}
-
-				if(mp.buttons.released(BTN_LEFT) && cursor)
-				{
-					blinkState = 1;
-					blinkMillis = millis();
-					cursor = 0;
-				}
-				if(mp.buttons.released(BTN_RIGHT) && !cursor)
-				{
-					blinkState = 1;
-					blinkMillis = millis();
-					cursor = 1;
-				}
-				mp.update();
-			}
-			while(!mp.update());
-			if(cursor)
-				break;
-		}
-		else
-		{
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(14, 45, 134, 38, TFT_BLACK);
-			mp.display.drawRect(13, 44, 136, 40, TFT_BLACK);
-			mp.display.fillRect(15, 46, 132, 36, TFT_WHITE);
-			mp.display.setCursor(47, 55);
-			mp.display.printCenter("SD card OK!");
-			tempMillis = millis();
-			while(millis() < tempMillis + 1000)
-				mp.update();
-			break;
-		}
-	}
-
-	//Neopixel testing
-	goOut = 1;
-	while(goOut)
-	{
-		mp.display.fillScreen(TFT_WHITE);
-		mp.display.setTextFont(2);
-		mp.display.setTextSize(1);
-		mp.display.setCursor(4,4);
-		mp.display.setTextColor(TFT_BLACK);
-		mp.display.printCenter("Testing the LEDs");
-		mp.display.setCursor(0,mp.display.height()/2 - 20);
-		mp.display.printCenter("Take a look at the");
-		mp.display.setCursor(0,mp.display.height()/2 - 2);
-		mp.display.printCenter("RGB LEDs on the back");
-		while(!mp.update());
-		for (uint8_t i = 0; i < NUMPIXELS; i++) {
-			for (uint8_t x = 0; x <= 128; x += 2) {
-				mp.leds[i] = CRGB(x, 0, 0);
-				delay(1);
-				FastLED.show();
-			}
-		}
-		for (uint8_t i = 0; i < NUMPIXELS; i++) {
-			for (int16_t x = 128; x >= 0; x -= 2) {
-				mp.leds[i] = CRGB(x, 0, 0);
-				delay(1);
-				FastLED.show();
-			}
-		}
-		for (uint8_t i = 0; i < NUMPIXELS; i++) {
-			for (uint8_t x = 0; x <= 128; x += 2) {
-				mp.leds[i] = CRGB(0, x, 0);
-				delay(1);
-				FastLED.show();
-			}
-		}
-		for (uint8_t i = 0; i < NUMPIXELS; i++) {
-			for (int16_t x = 128; x >= 0; x -= 2) {
-				mp.leds[i] = CRGB(0, x, 0);
-				delay(1);
-				FastLED.show();
-			}
-		}
-		for (uint8_t i = 0; i < NUMPIXELS; i++) {
-			for (uint8_t x = 0; x <= 128; x += 2) {
-				mp.leds[i] = CRGB(0, 0, x);
-				delay(1);
-				FastLED.show();
-			}
-		}
-		for (uint8_t i = 0; i < NUMPIXELS; i++) {
-			for (int16_t x = 128; x >= 0; x -= 2) {
-				mp.leds[i] = CRGB(0, 0, x);
-				delay(1);
-				FastLED.show();
-			}
-		}
-		bool blinkState = 0;
-		uint32_t blinkMillis = millis();
-		uint8_t cursor = 0;
-		while(1)
-		{
-			mp.display.fillScreen(TFT_WHITE);
-			mp.display.setTextFont(2);
-			mp.display.setTextSize(1);
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setCursor(4, 110);
-			mp.display.print("Press A to confirm");
-
-			if(millis() - blinkMillis >= 350)
-			{
-				blinkMillis = millis();
-				blinkState = !blinkState;
-			}
-			mp.display.setCursor(0,6);
-			mp.display.printCenter("Did every LED");
-			mp.display.setCursor(0,22);
-			mp.display.printCenter("work correctly?");
-
-			mp.display.setCursor(4, 110);
-			mp.display.print("Press A to confirm");
-			switch (cursor)
-			{
-				case 0:
-					mp.display.drawRect(28, 50, 35, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(27, 49, 37, 20, blinkState ? TFT_RED : TFT_WHITE);
-					break;
-				case 1:
-					mp.display.drawRect(98, 50, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(97, 49, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
-					break;
-				case 2:
-					mp.display.drawRect(59, 80, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-					mp.display.drawRect(58, 79, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
-					break;
-			}
-
-			if(mp.buttons.released(BTN_LEFT) && cursor == 1)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 0;
-			}
-			if(mp.buttons.released(BTN_RIGHT) && cursor == 0)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 1;
-			}
-			if(mp.buttons.released(BTN_DOWN) && cursor < 2)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 2;
-			}
-			if(mp.buttons.released(BTN_UP) && cursor == 2)
-			{
-				blinkState = 1;
-				blinkMillis = millis();
-				cursor = 0;
-			}
-			mp.display.setCursor(0,50);
-			mp.display.printCenter("Yes        No");
-			mp.display.setCursor(0,80);
-			mp.display.printCenter("Retry");
-			if(mp.buttons.released(BTN_A))
-			{
-				while(!mp.update());
-				if(cursor == 1)
-				{
-					mp.display.fillScreen(TFT_WHITE);
-					mp.display.setTextColor(TFT_BLACK);
-					mp.display.setTextSize(1);
-					mp.display.setTextFont(2);
-					mp.display.setCursor(47, 5);
-					mp.display.printCenter("Don't worry!");
-					mp.display.setCursor(47, 30);
-					mp.display.printCenter("Check soldering joints");
-					mp.display.setCursor(47, 48);
-					mp.display.printCenter("and contact us via");
-					mp.display.setCursor(47, 66);
-					mp.display.printCenter("circuitmess.com/contact");
-					mp.display.setCursor(47, 84);
-					mp.display.printCenter("for more assistance.");
-					mp.display.setCursor(4, 112);
-					mp.display.print("Press A to continue");
-					while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-						mp.update();
-					goOut = 0;
-					break;
-				}
-				else
-				{
-					if(cursor == 0)
-						goOut = 0;
-					break;
-				}
-			}
-			mp.update();
-		}
-	}
-	while(!mp.update());
-	timeMenu();
-	// Wifi testing
-	// if(!mp.wifi)
-	// {
-		// mp.wifi = 1;
-	delay(50);
-	WiFi.begin();
-	delay(50);
-	// }
-	mp.display.fillScreen(TFT_WHITE);
-	mp.display.setTextFont(2);
-	mp.display.setTextSize(1);
-	mp.display.setCursor(4,4);
-	mp.display.setTextColor(TFT_BLACK);
-	mp.display.printCenter("Wi-Fi testing");
-	mp.display.setCursor(0,mp.display.height()/2 - 14);
-	mp.display.printCenter("Searching networks");
-	while(!mp.update());
-	wifiConnect();
-	mp.shutdownPopupEnable(1);
-	EEPROM.writeBool(33, 0);
-	EEPROM.commit();
-  	mp.display.setTextColor(TFT_BLACK);
-	mp.display.setTextSize(1);
-	mp.display.setTextFont(2);
- 	mp.display.fillScreen(TFT_WHITE);
-	mp.display.drawRect(10, 45, 138, 38, TFT_BLACK);
-	mp.display.drawRect(9, 44, 140, 40, TFT_BLACK);
-	mp.display.fillRect(11, 46, 136, 36, TFT_WHITE);
-	mp.display.setCursor(43, 55);
-	mp.display.printCenter("Setup wizard done!");
-	mp.update();
-	tempMillis = millis();
-	while(millis() < tempMillis + 2000)
-	mp.update();
-	mp.sleepTimeActual = oldSleepTimeActual;
-	mp.sleepTime = oldSleepTime;
-	mp.sleepTimer = millis();
- 	return 1;
-}
-void controlTry() //for debug purposes
-{
-	int16_t oldSleepTimeActual = mp.sleepTimeActual;
-	int16_t oldSleepTime = mp.sleepTime;
-	int16_t y = 0;
-	mp.sleepTime = 0;
-	mp.sleepTimeActual = 0;
-	mp.textInput("");
-	mp.textPointer = 0;
-
-	String content = "";
-	String prevContent = "";
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
-	uint8_t scale;
-	char c = ' ';
-	String outBuffer = "";
-	uint32_t cursorY = 1;
-	mp.dataRefreshFlag = 0;
-	uint32_t blinkMillis = millis();
-	bool cursor = 0;
-	String buffer = "";
-	while(!mp.buttons.released(BTN_A))
+	while(1)
 	{
-		if(millis() - blinkMillis >= 350)
-		{
-			blinkMillis = millis();
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setTextFont(2);
+
+		if (millis() - elapsedMillis >= multi_tap_threshold) {
+			elapsedMillis = millis();
 			blinkState = !blinkState;
 		}
-		mp.display.fillScreen(TFT_DARKGREY);
-		mp.display.setTextSize(1);
-		mp.display.setTextFont(2);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(0, 32);
-		mp.display.printCenter("List operators?");
-		mp.display.setCursor(0,70);
-		mp.display.printCenter("Yes        No");
-		mp.display.setCursor(4, 110);
-		mp.display.print("Press A to confirm");
-		if(cursor)
-		{
-			mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_DARKGREY);
-			mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_DARKGREY);
-		}
-		else
-		{
-			mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_DARKGREY);
-			mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_DARKGREY);
-		}
 
-		if(mp.buttons.released(BTN_LEFT) && cursor)
-		{
-			blinkState = 1;
-			blinkMillis = millis();
-			cursor = 0;
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.setCursor(4, 5);
+		mp.display.printCenter("ARE YOU SURE?");
+		mp.display.setCursor(4, 25);
+		mp.display.printCenter("This cannot be reverted");
+
+		if (blinkState){
+			mp.display.drawRect((mp.display.width() - 60)/2, 102, 30*2, 9*2, TFT_RED);
+			mp.display.setTextColor(TFT_RED);
+			mp.display.setCursor(28*2, 103);
+			mp.display.printCenter("DELETE");
 		}
-		if(mp.buttons.released(BTN_RIGHT) && !cursor)
+		else {
+			mp.display.fillRect((mp.display.width() - 60)/2, 102, 30*2, 9*2, TFT_RED);
+			mp.display.setTextColor(TFT_WHITE);
+			mp.display.setCursor(28*2, 103);
+			mp.display.printCenter("DELETE");
+		}
+		if (mp.buttons.released(BTN_B)) //BUTTON BACK
 		{
-			blinkState = 1;
-			blinkMillis = millis();
-			cursor = 1;
+			Serial.println("Go back");
+      		mp.buttons.update();
+			break;
+		}
+		if (mp.buttons.released(BTN_A)) // DELETE
+		{
+      		mp.buttons.update();
+			JsonArray &empty = mp.jb.createArray();
+			File file = SD.open(highscoresPath, "w");
+			empty.prettyPrintTo(file);
+			file.close();
+			gamestatus = "title";
+			break;
 		}
 		mp.update();
 	}
 	while(!mp.update());
-	if(!cursor)
+}
+
+void dataDisplay()
+{
+	// mp.homePopupEnable(0);
+	// shootSound->stop();
+	// titleMusic->stop();
+	// invaderDestroyed->stop();
+	// playerDestroyed->stop();
+	// removeTrack(shootSound);
+	// removeTrack(titleMusic);
+	// removeTrack(invaderDestroyed);
+	// removeTrack(playerDestroyed);
+	
+	File file = SD.open(highscoresPath);
+	JsonArray &hiscores = mp.jb.parseArray(file);
+	file.close();
+	const char* nameArray[6];
+	memset(nameArray, 0, 6);
+	uint16_t scoreArray[6];
+	memset(scoreArray, 0, 6);
+	uint16_t hiscoresSize = hiscores.size();
+	for(uint8_t i = 0; i < 6; i++)
 	{
-		Serial1.println("AT+COPS=?");
-		while(!Serial1.available());
-		String temp = Serial1.readString();
-		Serial.println(temp);
-		if(temp.indexOf("ERROR") == -1)
+		for(JsonObject& element:hiscores)
 		{
-			mp.display.fillScreen(TFT_DARKGREY);
-			mp.display.setTextColor(TFT_WHITE);
-			mp.display.setTextFont(2);
-			mp.display.setCursor(0,mp.display.height()/2-12);
-			mp.display.printCenter("Loading operators");
-			while(!mp.update());
-			while(!Serial1.available());
-			temp = Serial1.readString();
-			temp = temp.substring(2, temp.indexOf("\r", 2));
-			Serial.println(temp);
-			mp.display.fillScreen(TFT_DARKGREY);
-			mp.display.setTextColor(TFT_WHITE);
-			mp.display.setTextFont(1);
-			while(!mp.buttons.released(BTN_B))
+			if(element["Rank"] == i)
 			{
-				mp.display.fillScreen(TFT_DARKGREY);
-				mp.display.setCursor(1, cursorY);
-				mp.display.setTextWrap(1);
-				mp.display.print(temp);
-				if (mp.buttons.repeat(BTN_DOWN, 3)) { //BUTTON DOWN
-					Serial.println(mp.display.cursor_y);
-					if (mp.display.cursor_y >= 110)
-					{
-
-						cursorY -= 4;
-					}
-				}
-
-				if (mp.buttons.repeat(BTN_UP, 3)) { //BUTTON UP
-					if (cursorY < 1)
-					{
-						cursorY += 4;
-					}
-				}
-				mp.update();
+				nameArray[i] = element["Name"];
+				scoreArray[i] = element["Score"];
 			}
-			while(!mp.update());
-			mp.display.setTextFont(2);
 		}
 	}
-	// mp.dataRefreshFlag = 1;
-	while (1)//+CLCC: 1,1,4,0,0,"+385953866578",145,""
+	while(1)
 	{
-		mp.display.fillScreen(TFT_DARKGREY);
-
-		mp.display.setTextColor(TFT_WHITE);
-        scale = 2;
-        mp.display.setTextFont(1);
+		mp.display.fillScreen(TFT_BLACK);
+		mp.display.setCursor(32, -2);
 		mp.display.setTextSize(1);
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(0,0);
-		mp.display.print(buffer);
-		if(mp.display.getCursorY() > 120)
-			buffer = "";
-		buffer.replace("\n\n", "");
+		mp.display.setTextFont(2);
+		mp.display.setTextColor(TFT_RED);
+		mp.display.printCenter("HIGHSCORES");
+		mp.display.setCursor(3, 110);
+		for (int i = 1; i < 6;i++)
+		{
+			mp.display.setCursor(24, i * 20);
+			if(i <= hiscores.size())
+				mp.display.printf("%d.   %.3s    %04d", i, nameArray[i], scoreArray[i]);
+			else
+				mp.display.printf("%d.    ---   ----", i);
+		}
+		mp.display.setCursor(2, 115);
+		mp.display.print("Erase");
+		if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_A))
+		{
+      mp.buttons.update();
+			gamestatus = "title";
+			break;
+		}
+		if (mp.buttons.released(BTN_FUN_LEFT))
+		{
+      mp.buttons.update();
 
-		if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
+			eraseData();
+			break;
+		}
+		mp.update();
+	}
+	mp.homePopupEnable(1);
+	// addTrack(titleMusic);
+	// titleMusic->play();
+	// titleMusic->setRepeat(1);
+}
+void showtitle() {
+	cursor = 0;
+	uint32_t blinkMillis = millis();
+	bool blinkState = 0;
+	while(!mp.buttons.released(BTN_A))
+	{
+		mp.display.fillScreen(TFT_BLACK);
+		for(int i = 0; i < STAR_COUNT; i++)
+		{
+			// Remove the star from the screen by changing its pixel to the background color.
+			mp.display.drawPixel(stars[i].x, stars[i].y, BACKGROUND_COLOR);
+
+			// Update the position of the star.
+			stars[i].update();
+
+			// If the star's Y position is off the screen after the update.
+			if(stars[i].y >= mp.display.height())
+			{
+				// Randomize its position.
+				stars[i].randomize(0, mp.display.width(), 0, mp.display.height(), STAR_SPEED_MIN, STAR_SPEED_MAX);
+				// Set its Y position back to the top.
+				stars[i].y = 0;
+			}
+
+			// Draw the star at its new coordinate.
+			mp.display.fillRect(stars[i].x, stars[i].y, 2, 2, STAR_COLOR);
+		}
+		if(millis() - blinkMillis >= 250)
+		{
+			blinkMillis = millis();
+			blinkState = !blinkState;
+		}
+		mp.display.setTextColor(TFT_WHITE);
+		mp.display.drawIcon(titleLogo, 7, 10, 73, 21, 2, TFT_WHITE);
+		mp.display.setTextColor(TFT_RED);
+		mp.display.setFreeFont(TT1);
+		mp.display.setTextSize(2);
+		mp.display.setCursor(10, 80);
+		mp.display.printCenter("START");
+		mp.display.setCursor(10, 100);
+		mp.display.printCenter("HIGHSCORES");
+		mp.display.setCursor(10, 120);
+		mp.display.printCenter("QUIT");
+		if(blinkState)
+		{
+			mp.display.drawRect(25, 67 + cursor * 20, 110, 16, TFT_RED);
+			mp.display.drawRect(24, 66 + cursor * 20, 112, 18, TFT_RED);
+		}
+		if(mp.buttons.released(BTN_UP) && cursor > 0)
+		{
+			cursor--;
+      mp.buttons.update();
+			blinkMillis = millis();
+			blinkState = 1;
+		}
+		if(mp.buttons.released(BTN_DOWN) && cursor < 2)
+		{
+			cursor++;
+      mp.buttons.update();
+			blinkMillis = millis();
+			blinkState = 1;
+		}		
+		mp.update();
+	}
+	while(!mp.update());
+	switch (cursor)
+	{
+		case 0:
+			gamestatus = "newgame";
+			break;
+		case 1:
+			dataDisplay();
+			break;
+		case 2:
+			mp.loader();
+			break;
+	}
+}
+
+void enterInitials() {
+  name = "";
+  String previous = "";
+  uint32_t elapsedMillis = millis();
+  uint32_t hiscoreMillis = millis();
+  bool blinkState = 1;
+  bool hiscoreBlink = 0;
+  mp.textInput("");
+  mp.textPointer = 0;
+  while (!mp.buttons.released(BTN_A) || name.length() != 3) {
+    if(mp.update())
+      name = mp.textInput(name, 3);
+    if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
 			blinkState = !blinkState;
 		}
-		mp.display.setTextColor(TFT_WHITE);
-		mp.display.setCursor(2, -1);
-		prevContent = content;
-		content = mp.textInput(content, -1);
-		if (prevContent != content)
-		{
-			blinkState = 1;
-			elapsedMillis = millis();
-		}
-		mp.display.setTextWrap(1);
-		mp.display.setCursor(1*scale, y);
-		mp.display.print(content);
-		if(blinkState == 1)
-			mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
+    if(millis()-hiscoreMillis >= 1000)
+    {
+      hiscoreMillis = millis();
+      hiscoreBlink = !hiscoreBlink;
+    }
+    previous = name;
+   
+    if(name.indexOf(' ') != -1)
+      name = name.substring(0, name.length() - 1);
+    if (previous != name)
+    {
+      blinkState = 1;
+      elapsedMillis = millis();
+    }
+    
+    mp.display.fillScreen(TFT_BLACK);
+    mp.display.setCursor(16, 8);
+    mp.display.setTextFont(2);
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.setTextSize(1);
+    mp.display.printCenter("ENTER NAME");
+    mp.display.setCursor(39, 80);
+    
+    if(hiscoreBlink && score > tempScore)
+      mp.display.printCenter("NEW HIGH!");
+    else
+      mp.display.printf("SCORE: %04d", score);
 
-		if (mp.buttons.released(BTN_B)) //BUTTON BACK
-		{
-			mp.sleepTimeActual = oldSleepTimeActual;
-			mp.sleepTime = oldSleepTime;
-			mp.sleepTimer = millis();
-			Serial.println("B pressed");
-			while(!mp.update());
-			break;
-		}
-		if (mp.buttons.released(BTN_A) && content != "") // SEND SMS
-		{
-			Serial1.println(content);
-			content = "";
-			prevContent = "";
-			mp.textInput("");
-			mp.textPointer = 0;
-		}
-		if(Serial1.available())
-		{
-			String input = Serial1.readString();
-			Serial.println(input);
-			if(input.indexOf("+CREG:") != -1)
-				buffer+=input;
-			
-		}
-		if(Serial.available())
-		{
-			Serial1.println(Serial.readString());
-		}
-		mp.update();
-	}
+    mp.display.setCursor(50, 40);
+    mp.display.printCenter(name);
+    if(blinkState)
+      mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY()+3, 10, TFT_WHITE);
+    mp.display.drawRect(30, 38, 100, 20, TFT_WHITE);
+  }
+  while(!mp.update());
 }
-void setup()
-{
-	Serial.begin(115200);	
-	EEPROM.begin(256);
-	mp.homePopupEnable(0);
-	mp.shutdownPopupEnable(0);
 
-	if(EEPROM.readBool(34))
-	{
-		EEPROM.writeBool(34, 0);
-		EEPROM.commit();
-		SD.begin(5, SPI, 8000000);
-		mp.tft.init();
-		mp.tft.invertDisplay(0);
-		mp.tft.setRotation(3);
-		mp.tft.setTextColor(TFT_WHITE);
-		mp.tft.setTextSize(1);
-		mp.tft.setTextFont(2);
-		Serial.println(EEPROM.readString(35).c_str());
-		Serial.println(EEPROM.readString(100).c_str());
-		delay(1000);
-		WiFi.begin(EEPROM.readString(35).c_str(), EEPROM.readString(100).c_str());
-		delay(1000);
-		Serial.print("Connected: ");
-		Serial.println(WiFi.status() == WL_CONNECTED);
-		Serial.println("FREE HEAP:");
-		Serial.println(ESP.getFreeHeap());
-		delay(5);
-		if(!fetchUpdate())
-		{
-			mp.tft.fillRect(0,0,160,128,TFT_BLACK);
-			mp.tft.setCursor(10,mp.tft.height()/2 - 26);
-			mp.tft.print("Error while downloading");
-			mp.tft.setCursor(22,mp.tft.height()/2 - 5);
-			mp.tft.print("Reverting firmware!");
-			ESP.restart();
-		}
-		mp.tft.fillRect(0,0,160,128,TFT_BLACK);
-		mp.tft.setCursor(20,mp.tft.height()/2 - 26);
-		mp.tft.print("Installing firmware...");
-		mp.tft.setCursor(32,mp.tft.height()/2 - 5);
-		mp.tft.print("Don't turn off!");
-		mp.updateFromFS("/.core/LOADER.BIN");
-		ESP.restart();
-	}
+/*
+//----------------------------------------------------------------------------
+// setup
+//----------------------------------------------------------------------------
+*/
+
+void setup() {
+	Serial.begin(115200);
+	// shootSound = new MPTrack("/Invaderz/shoot.wav");
+	// invaderDestroyed = new MPTrack("/Invaderz/invaderDestroyed.wav");
+	// mainMusic = new MPTrack("/Invaderz/main.wav");
+	// titleMusic = new MPTrack("/Invaderz/title.wav");
+	// playerDestroyed = new MPTrack("/Invaderz/playerDestroyed.wav");
+	// gameoverMusic = new MPTrack("/Invaderz/gameover.wav");
+	// ufoSound = new MPTrack("/Invaderz/ufo.wav");
 	mp.begin();
-	// osc = new Oscillator();
-	// mp.osc->setVolume(mp.oscillatorVolumeList[mp.volume]);
-	// addOscillator(osc);
-	Serial.print("Setup: ");
-	Serial.println(EEPROM.readBool(33));
-	if(EEPROM.readBool(33))
-		startupWizard();
-	mp.shutdownPopupEnable(1);
-	// startupWizard();
-	// controlTry();
-	// settingsApp();
-	mp.lockscreen();
-	// pinMode(39, INPUT_PULLUP);
-	// mp.buttons.activateInterrupt();
-}
-void loop()
-{
-	// mp.dataRefreshFlag = 1;
-	// mp.display.fillScreen(TFT_WHITE);
-	// mp.display.setTextColor(TFT_BLACK);
-	// mp.display.setTextFont(2);
-	// mp.display.setTextSize(1);
-	// mp.display.setCursor(40, 40);
-	// mp.display.printCenter((float)mp.batteryVoltage);
-	// mp.display.setCursor(60,60);
-	// mp.display.printCenter((float)mp.simVoltage);
-	// mp.update();
+	mp.display.fillScreen(TFT_BLACK);
+	starsSetup();
+	gamestatus = "title";
+	File file = SD.open(highscoresPath);
+	JsonArray &hiscores = mp.jb.parseArray(file);
+	file.close();
+	if(!SD.exists("/Invaderz"))
+		SD.mkdir("/Invaderz");
+	if(hiscores.success())
+		savePresent = 1;
+	else
+	{
+		Serial.println("No save present");
+		JsonArray &hiscores = mp.jb.createArray();
+		JsonObject &test = mp.jb.createObject();
+		File file = SD.open(highscoresPath, "w");
+		hiscores.prettyPrintTo(file);
+		file.close();
+		mp.readFile(highscoresPath);
+		// mp.saveJSONtoSAV(highscoresPath, hiscores);
+	}
+	hiscores.prettyPrintTo(Serial);
+	shoot = new Oscillator(SQUARE);
+	destroyed = new Oscillator(NOISE);
+	shoot->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]);
+	destroyed->setVolume(mp.oscillatorVolumeList[mp.mediaVolume]/2);
+	addOscillator(shoot);
+	addOscillator(destroyed);
 
-	// startupWizard();
-	// messagesApp();
-	// phoneApp();
-	// clockApp();
-
-	// mp.update();
-	// mp.display.fillScreen(TFT_BLACK);
-	// mp.display.setCursor(20,0);
-	// mp.display.printCenter("Buttons INT: ");
-	// mp.display.setCursor(20,20);
-	// mp.display.printCenter(digitalRead(BTN_INT));
-	// mp.display.setCursor(20,40);
-	// mp.display.printCenter("RTC INT");
-	// mp.display.setCursor(20,60);
-	// mp.display.printCenter(digitalRead(RTC_INT));
-	// mp.display.setCursor(20,80);
-	// mp.display.printCenter("   USB INT: ");
-	// mp.display.setCursor(20,100);
-	// mp.display.printCenter(digitalRead(39));
+	// shoot->play();
+  // shootSound->setVolume(256*mp.volume/14);
+  // invaderDestroyed->setVolume(256*mp.volume/14);
+  // mainMusic->setVolume(256*mp.volume/14);
+  // titleMusic->setVolume(256*mp.volume/14);
+  // playerDestroyed->setVolume(256*mp.volume/14);
+  // gameoverMusic->setVolume(256*mp.volume/14);
+  // ufoSound->setVolume(256*mp.volume/14);
+  // gameoverMusic->setRepeat(1);
+  // mainMusic->setRepeat(1);
+  // addTrack(titleMusic);
+  // titleMusic->setRepeat(1);
+  // titleMusic->play();
 
 	
-	mainMenu();
-	// mediaApp();
-	// phoneApp();
-	// calculatorApp();
-	// contactsApp();
+}
 
-	// mp.display.fillScreen(TFT_BLACK);
-	// mp.display.setTextColor(TFT_WHITE);
-	// mp.display.setTextSize(2);
-	// mp.display.setCursor(10, 30);
-	// mp.display.print(mp.buttons.released(BTN_2));
-	// mp.display.setCursor(30, 30);
-	// mp.display.print(mp.buttons.released(BTN_1));
+//----------------------------------------------------------------------------    
+// loop
+//----------------------------------------------------------------------------    
+void loop() {
+    if (gamestatus == "title") {
+		showtitle();
+		if (mp.buttons.released(BTN_B))
+			mp.loader();
+    }
+    if (gamestatus == "newgame") { newgame(); } // new game
 
-	// for(int i = 0; i < 16; ++i) {
-	// 	Serial.print(mp.buttons.states[i]);
-	// 	Serial.print(" ");
-	// }
-	// Serial.println("");
+	if (gamestatus == "newlevel") { newlevel(); } // new level
 
-	// mp.update();
+	if (gamestatus == "running") { // game running loop
+    mp.display.fillScreen(TFT_BLACK);
+    for(int i = 0; i < STAR_COUNT; i++)
+    {
+      // Remove the star from the screen by changing its pixel to the background color.
+      mp.display.drawPixel(stars[i].x, stars[i].y, BACKGROUND_COLOR);
+
+      // Update the position of the star.
+      stars[i].update();
+
+      // If the star's Y position is off the screen after the update.
+      if(stars[i].y >= mp.display.height())
+      {
+        // Randomize its position.
+        stars[i].randomize(0, mp.display.width(), 0, mp.display.height(), STAR_SPEED_MIN, STAR_SPEED_MAX);
+        // Set its Y position back to the top.
+        stars[i].y = 0;
+      }
+
+      // Draw the star at its new coordinate.
+      mp.display.fillRect(stars[i].x, stars[i].y, 2, 2, STAR_COLOR);
+    }
+    if (mp.buttons.released(BTN_B))
+    {
+      // if(mainMusic->isPlaying())
+      // mainMusic->pause();
+      // if(ufoSound->isPlaying())
+      // ufoSound->pause();
+      gamestatus = "paused";
+      mp.buttons.update();
+    }
+    showscore();
+    checkbuttons(); // check buttons and move playership
+    drawplayership(); // draw player ship
+    drawplayershot(); // move + draw player shoot
+    invaderlogic(); // invader logic
+    drawinvaders(); // draw invaders
+    invadershot(); // invaders shoot
+    nextlevelcheck(); // next level?
+    drawbunkers(); // draw bunkers & check collission with player shot
+    saucerappears(); // saucer appears?
+    movesaucer(); // move saucer
+    drawsaucer(); // draw saucer & remove if hit
+    showscore(); // show lives, score, level
+		// end of: gamestatus = running
+  }
+	if (gamestatus == "gameover") { // game over
+		mp.display.setTextColor(TFT_RED);
+		mp.display.setTextSize(2);
+		mp.display.setTextFont(1);
+		mp.display.drawRect(14, 45, 134, 38, TFT_WHITE);
+		mp.display.drawRect(13, 44, 136, 40, TFT_WHITE);
+		mp.display.fillRect(15, 46, 132, 36, TFT_BLACK);
+		mp.display.setCursor(47, 57);
+		mp.display.printCenter("GAME OVER");
+		// removeTrack(mainMusic);
+		// addTrack(gameoverMusic);
+		// gameoverMusic->play();
+		if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_A))
+		{
+			// removeTrack(gameoverMusic);
+			// removeTrack(shootSound);
+			// removeTrack(invaderDestroyed);
+			// removeTrack(playerDestroyed);
+			// removeTrack(shootSound);
+			// removeTrack(invaderDestroyed);
+			File file;
+			file = SD.open(highscoresPath);
+			JsonArray &hiscores = mp.jb.parseArray(file);
+			file.close();
+			for (JsonObject& element : hiscores)
+			{
+				if(element["Rank"] == 1)
+					tempScore = element["Score"].as<int>();
+			}
+			Serial.println("HERE");
+			delay(5);
+			
+			enterInitials();
+			JsonObject &newHiscore = mp.jb.createObject();
+			newHiscore["Name"] = name;
+			newHiscore["Score"] = score;
+			newHiscore["Rank"] = 1;
+
+			if(savePresent && hiscores.size() > 0)
+			{
+				newHiscore["Rank"] = 999;
+				Serial.println(hiscores.size());
+				uint16_t tempSize = hiscores.size();
+				for (int16_t i = 0; i < tempSize;i++)//searching for a place in the leaderboard for our new score
+				{
+					Serial.printf("i: %d\n", i);
+					Serial.println((uint16_t)(hiscores[i]["Rank"]));
+					Serial.println((uint16_t)(hiscores[i]["Score"]));
+					delay(5);
+					if(score >= (uint16_t)(hiscores[i]["Score"]))
+					{
+					Serial.println("ENTERED");
+					delay(5);
+					if((uint16_t)(newHiscore["Rank"]) >  (uint16_t)(hiscores[i]["Rank"]))
+					{
+						newHiscore["Rank"] = (uint16_t)(hiscores[i]["Rank"]);
+					}
+					JsonObject &tempObject = mp.jb.createObject();
+					tempObject["Name"] = (const char *)(hiscores[i]["Name"]);
+					tempObject["Score"] = (uint16_t)(hiscores[i]["Score"]);
+					tempObject["Rank"] = (uint16_t)(hiscores[i]["Rank"]) + 1;
+					tempObject.prettyPrintTo(Serial);
+					delay(5);
+					hiscores.remove(i);
+					hiscores.add(tempObject);
+					tempSize--;
+					i--;
+					}
+					else
+					{
+					if(newHiscore["Rank"] <= (uint16_t)(hiscores[i]["Rank"]) || newHiscore["Rank"] == 999)
+						newHiscore["Rank"] = (uint16_t)(hiscores[i]["Rank"]) + 1;
+					}
+				}
+			}
+
+			hiscores.add(newHiscore);
+			file = SD.open(highscoresPath, "w");
+			hiscores.prettyPrintTo(file);
+			file.close();
+			// mp.saveJSONtoSAV(highscoresPath, hiscores);
+			// addTrack(titleMusic);
+			// titleMusic->play();
+			// titleMusic->setRepeat(1);
+			while(!mp.update());
+				dataDisplay();	
+			gamestatus="title";
+		}
+	}
+	if(gamestatus == "paused")
+	{
+		while (!mp.buttons.released(BTN_A)) {
+			mp.display.fillScreen(TFT_BLACK);
+			mp.display.setTextColor(TFT_RED);
+			mp.display.setCursor(0, mp.display.height()/2 - 18);
+			mp.display.setTextFont(2);
+			mp.display.setTextSize(2);
+			mp.display.printCenter("Paused");
+			mp.display.setCursor(4, 110);
+			mp.display.setFreeFont(TT1);
+			mp.display.printCenter("A: RESUME       B: QUIT");
+			if (mp.buttons.released(BTN_B))
+			{
+				// removeTrack(mainMusic);
+				// removeTrack(shootSound);
+				// removeTrack(playerDestroyed);
+				// removeTrack(invaderDestroyed);
+				// addTrack(titleMusic);
+				// titleMusic->play();
+				// titleMusic->setRepeat(1);
+				gamestatus = "title";
+				mp.buttons.update();
+				break;
+			}
+			mp.update();
+			gamestatus = "running";
+		}
+		// mainMusic->resume();
+		// ufoSound->resume();
+  }
+  mp.update();
 }
