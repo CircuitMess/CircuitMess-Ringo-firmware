@@ -739,7 +739,7 @@ void dataDisplay()
 	// removeTrack(titleMusic);
 	// removeTrack(invaderDestroyed);
 	// removeTrack(playerDestroyed);
-	
+	mp.jb.clear();
 	File file = SD.open(highscoresPath);
 	JsonArray &hiscores = mp.jb.parseArray(file);
 	file.close();
@@ -887,8 +887,8 @@ void enterInitials() {
   mp.textInput("");
   mp.textPointer = 0;
   while (!mp.buttons.released(BTN_A) || name.length() != 3) {
-    if(mp.update())
-      name = mp.textInput(name, 3);
+    mp.update();
+    name = mp.textInput(name, 3);
     if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
 		{
 			elapsedMillis = millis();
