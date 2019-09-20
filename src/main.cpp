@@ -427,7 +427,10 @@ void callNumber(String number)
 				mp.display.fillScreen(TFT_WHITE);
 				mp.display.setCursor(32, 9);
 				if (timeOffset == 0)
+				{
 					mp.display.printCenter("00:00");
+					tmp_time = 0;
+				}
 				else
 				{
 					temp = "";
@@ -523,7 +526,10 @@ void callNumber(String number)
 			mp.display.fillScreen(TFT_WHITE);
 			mp.display.setCursor(32, 9);
 			if (timeOffset == 0)
+			{
+				tmp_time = 0;
 				mp.display.printCenter("00:00");
+			}
 			else
 			{
 				temp = "";

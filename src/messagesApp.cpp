@@ -659,7 +659,7 @@ int16_t smsMenu(JsonArray& messages, int16_t prevCursor)
 		mp.display.setTextColor(TFT_WHITE);
 		mp.display.print("Messages");
 		mp.display.print("          ");
-		mp.display.printf("%d/35", actualMessagesSize);
+		mp.display.printf("%d/%d", actualMessagesSize, SMS_LIMIT);
 		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
 		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
 		mp.display.setCursor(5, 113);
@@ -836,10 +836,11 @@ void composeSMS(JsonArray *messages)
 	bool helpPop;
 	bool contactsApp = false;
 	String contactLabel = "";
-
+	bool contactsEmpty = 0;
 	File file = SD.open("/.core/contacts.json", "r");
 	if (file.size() < 2)
 	{
+		contactsEmpty = 1;
 		Serial.println("Override");
 		file.close();
 		jb.clear();
@@ -855,7 +856,8 @@ void composeSMS(JsonArray *messages)
 	jb.clear();
 	JsonArray &jarr = jb.parseArray(file);
 	file.close();
-
+	if(jarr.measureLength() < 3)
+		contactsEmpty = 1;
 	while (1)
 	{
 		if(mp.buttons.released(BTN_HOME)) {
@@ -983,10 +985,21 @@ void composeSMS(JsonArray *messages)
 		}
 		if(mp.buttons.released(BTN_FUN_RIGHT) && cursor == 0 && contactsApp == false)
 		{
+			while(!mp.update());
 			contactsApp = true;
 			contactID = 0;
 			if (!jarr.success())
 				Serial.println("Error loading contacts");
+			else if(contactsEmpty)
+			{
+				mp.display.fillScreen(TFT_BLACK);
+				mp.display.setCursor(0,mp.display.height()/2 -16);
+				mp.display.printCenter(F("Contacts empty!"));
+				uint32_t tempMillis = millis();
+				while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
+			}
 			else
 			{
 				contactID = contactsMenu(&jarr, true); //call contacts app with smsFlag set to true
@@ -997,9 +1010,8 @@ void composeSMS(JsonArray *messages)
 			}
 			if(contactTemp != "")
 				contact = contactTemp;
-			while(!mp.update());
 			contactsApp = false;
-			mp.update();
+			
 		}
 		while(contactsApp) 
 		{

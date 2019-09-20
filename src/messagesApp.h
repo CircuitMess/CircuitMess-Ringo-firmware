@@ -3,15 +3,15 @@
 
 #include "main.h"
 extern int16_t y;
-extern String smsContent[smsNumber];
-extern String phoneNumber[smsNumber];
-extern String tempDate[smsNumber];
-extern uint16_t smsYear[smsNumber];
-extern uint8_t smsDay[smsNumber];
-extern uint8_t smsMonth[smsNumber];
-extern uint8_t smsMinute[smsNumber];
-extern uint8_t smsSecond[smsNumber];
-extern uint8_t smsHour[smsNumber];
+extern String smsContent[SMS_LIMIT];
+extern String phoneNumber[SMS_LIMIT];
+extern String tempDate[SMS_LIMIT];
+extern uint16_t smsYear[SMS_LIMIT];
+extern uint8_t smsDay[SMS_LIMIT];
+extern uint8_t smsMonth[SMS_LIMIT];
+extern uint8_t smsMinute[SMS_LIMIT];
+extern uint8_t smsSecond[SMS_LIMIT];
+extern uint8_t smsHour[SMS_LIMIT];
 extern uint32_t start;
 extern uint32_t end;
 extern String input;
