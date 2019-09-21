@@ -237,6 +237,19 @@ void contactsApp(bool smsFlag)
 								mp.update();
 							while(!mp.update());
 						}
+						else if(mp.airplaneMode)
+						{
+							mp.display.fillScreen(TFT_BLACK);
+							mp.display.setCursor(0, mp.display.height()/2 - 20);
+							mp.display.setTextFont(2);
+							mp.display.printCenter(F("Can't make calls!"));
+							mp.display.setCursor(0, mp.display.height()/2);
+							mp.display.printCenter(F("Turn off airplane mode"));
+							uint32_t tempMillis = millis();
+							while(millis() < tempMillis + 2000 && !mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+								mp.update();
+							while(!mp.update());
+						}
 						else if(!mp.simInserted)
 						{
 							mp.display.setTextColor(TFT_BLACK);
