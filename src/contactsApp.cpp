@@ -559,10 +559,10 @@ int contactsMenu(JsonArray *contacts, bool smsFlag)
 		mp.display.fillRect(0, smsFlag ? 104 : 112, 160, 28, TFT_BLACK);
 		mp.display.drawFastHLine(0, 112, BUF2WIDTH, TFT_WHITE);
 		mp.display.fillRect(0, 113, mp.display.width(), 30, TFT_DARKGREY);
-		mp.display.setCursor(110, 113);
+		mp.display.setCursor(115, 113);
 		if(smsFlag)
 		{
-			mp.display.printCenter("Select               View");
+			mp.display.print("Select");
 		}
 		else
 		{
@@ -576,12 +576,14 @@ int contactsMenu(JsonArray *contacts, bool smsFlag)
 		}
 		if (mp.buttons.released(BTN_A) && contactsMenuCursor == 0 && !smsFlag) 
 		{   //BUTTON CONFIRM
-			while(!mp.update());// Exit when pressed
+			Serial.println("pressed1");
+			mp.buttons.update();
 			break;
 		}
 		if((mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) && contactsMenuCursor == 1 && !smsFlag )
 		{
-			while(!mp.update());
+			Serial.println("pressed2");
+			mp.buttons.update();
 			if(searchContacts(searchBuf).length() > 0)
 			{
 				searchBuf= "";
@@ -593,7 +595,7 @@ int contactsMenu(JsonArray *contacts, bool smsFlag)
 		}
 		if (mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor != 0 && !smsFlag && contactsMenuCursor != 1) 
 		{
-			while(!mp.update()); // Delete
+			mp.buttons.update();
 			return -1000 + contactsMenuCursor - 1;
 		}
 		else if(mp.buttons.released(BTN_FUN_LEFT) && contactsMenuCursor == 1)
@@ -610,14 +612,16 @@ int contactsMenu(JsonArray *contacts, bool smsFlag)
 		}
 		//Check if we're picking a number for sending a message (smsFlag == true)
 		//if so, return the number of the picked contact
-		else if((mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_A)) && !smsFlag)
+		else if((mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) && smsFlag)
 		{
-			while(!mp.update());
+			Serial.println("pressed3");
+			mp.buttons.update();
 			return contactsMenuCursor - 1;
 		}
 		if ((mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A)) && contactsMenuCursor > 1 && !smsFlag) 
 		{
-			while(!mp.update()); // View contact
+			Serial.println("pressed4");
+			mp.buttons.update();
 			return -3000 + contactsMenuCursor - 1;
 		}
 
