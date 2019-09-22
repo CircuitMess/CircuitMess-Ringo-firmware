@@ -145,6 +145,8 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 		if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
+			blinkState = 1;
+			blinkMillis = millis();
 			if (cursor == 0) {
 				cursor = length - 1;
 				if (length > 6) {
@@ -163,6 +165,8 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
 			mp.osc->note(75, 0.05);
 			mp.osc->play();
+			blinkState = 1;
+			blinkMillis = millis();
 			cursor++;
 			if ((cursor * boxHeight + cameraY + offset) > 128) {
 				cameraY -= boxHeight;
@@ -181,9 +185,7 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 			return -1;
 		}
 	}
-
 	return cursor;
-
 }
 void clockMenuDrawBox(String title, uint8_t i, int32_t y) {
 	uint8_t offset = 4;
@@ -990,19 +992,20 @@ void clockAlarmEdit(uint8_t index)
 		}
 		if(mp.buttons.released(BTN_B))
 		{
-			while(!mp.update());
-			mp.display.setTextColor(TFT_BLACK);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(10, 45, 142, 38, TFT_BLACK);
-			mp.display.drawRect(9, 44, 144, 40, TFT_BLACK);
-			mp.display.fillRect(11, 46, 140, 36, 0xFC92);
-			mp.display.setCursor(47, 48);
-			mp.display.printCenter("Exit without saving?");
-			mp.display.setCursor(47, 61);
-			mp.display.printCenter("A: Yes      B: No");
+			mp.buttons.update();
+			
 			while(1)
 			{
+				mp.display.fillScreen(0xFC92);
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(10, 45, 142, 38, TFT_BLACK);
+				mp.display.drawRect(9, 44, 144, 40, TFT_BLACK);
+				mp.display.setCursor(47, 48);
+				mp.display.printCenter("Exit without saving?");
+				mp.display.setCursor(47, 61);
+				mp.display.printCenter("A: Yes      B: No");
 				if(mp.buttons.released(BTN_B))
 				{
 					while(!mp.update());
@@ -1025,18 +1028,17 @@ void clockTimer()
 	uint8_t cursor = 0;
 	uint32_t blinkMillis = millis();
 	bool blinkState = 1;
-	uint32_t timeMillis;
+	uint32_t timeMillis = millis();
 	uint8_t state = 0;
 	String temp = "";
 	char key;
 	mp.display.setTextColor(TFT_BLACK);
+	uint16_t _tempSleepTime = mp.sleepTime;
+	mp.sleepTime = 0;
 	while (!mp.buttons.released(BTN_B))
 	{
+
 		key = mp.buttons.getKey();
-		Serial.println(state);
-		Serial.println(key);
-		Serial.println("-------------");
-		delay(5);
 		mp.display.fillScreen(0x97F6);
 		temp = "";
 		if (hours < 10)
@@ -1188,6 +1190,26 @@ void clockTimer()
 							bool playState = 1;
 							while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
 							{
+								mp.display.fillScreen(0x97F6);
+								temp = "";
+								if (hours < 10)
+									temp.concat("0");
+								temp.concat(hours);
+								temp.concat(":");
+								if (mins < 10)
+									temp.concat("0");
+								temp.concat(mins);
+								temp.concat(":");
+								if (secs < 10)
+									temp.concat("0");
+								temp.concat(secs);
+								mp.display.setTextFont(2);
+								mp.display.setTextSize(2);
+								mp.display.setCursor(15, 25);
+								mp.display.printCenter(temp);
+								mp.display.setTextFont(2);
+								mp.display.setTextSize(1);
+								mp.display.setCursor(123,110);
 								mp.display.fillRect(0, 64, 160, 100, 0x97F6);
 								mp.display.setCursor(70, 85);
 								mp.display.printCenter("(press A)");
@@ -1280,4 +1302,6 @@ void clockTimer()
 		mp.update();
 	}
 	while(!mp.update());
+	mp.sleepTime = _tempSleepTime;
+	mp.sleepTimer = millis();
 }

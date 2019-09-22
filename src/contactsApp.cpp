@@ -430,19 +430,19 @@ uint8_t newContact(String *name, String *number)
 			mp.update();
 		}
 		if (mp.buttons.released(BTN_B)) { //BUTTON BACK
-			while(!mp.update());
-			mp.display.setTextColor(TFT_WHITE);
-			mp.display.setTextSize(1);
-			mp.display.setTextFont(2);
-			mp.display.drawRect(10, 45, 142, 38, TFT_BLACK);
-			mp.display.drawRect(9, 44, 144, 40, TFT_BLACK);
-			mp.display.fillRect(11, 46, 140, 36, TFT_DARKGREY);
-			mp.display.setCursor(47, 48);
-			mp.display.printCenter("Exit without saving?");
-			mp.display.setCursor(47, 61);
-			mp.display.printCenter("A: Yes      B: No");
+			mp.buttons.update();
 			while(1)
 			{
+				mp.display.fillScreen(TFT_DARKGREY);
+				mp.display.setTextColor(TFT_WHITE);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(10, 45, 142, 38, TFT_BLACK);
+				mp.display.drawRect(9, 44, 144, 40, TFT_BLACK);
+				mp.display.setCursor(47, 48);
+				mp.display.printCenter("Exit without saving?");
+				mp.display.setCursor(47, 61);
+				mp.display.printCenter("A: Yes      B: No");
 				if(mp.buttons.released(BTN_B))
 				{
 					mp.buttons.update();

@@ -230,7 +230,7 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 		{
 			// mp.osc->note(75, 0.05);
 			// mp.osc->play();
-			while(!mp.update());
+			mp.buttons.update();
 			return cursorY * x_elements + cursorX;  //returns index of selected icon
 		}
 		if (mp.buttons.pressed(BTN_UP)) //UP

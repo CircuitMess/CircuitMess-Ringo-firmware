@@ -793,8 +793,8 @@ void soundMenu()
 			}
 			else
 			{
-				mp.display.drawRect(36, 92, 88, 8, TFT_BLACK);
-				mp.display.fillRect(38, 94, mp.micGain * 6, 4, TFT_BLACK);
+				mp.display.drawRect(33, 92, 94, 8, TFT_BLACK);
+				mp.display.fillRect(35, 94, mp.micGain * 6, 4, TFT_BLACK);
 				mp.display.drawBitmap(137, 82, fullMic, TFT_BLACK, 2);
 				mp.display.drawBitmap(6, 82, noMic, TFT_BLACK, 2);
 				mp.display.drawBitmap(66, 114, arrowDown, TFT_BLACK, 2);
@@ -882,9 +882,15 @@ void soundMenu()
 				mp.display.drawBitmap(6, 82, noMic, blinkState ? TFT_BLACK : 0xA7FF, 2);
 				if(mp.buttons.repeat(BTN_RIGHT, 7) && ((mp.micGain < 15 && mp.sim_module_version == 1) ||
 				(mp.micGain < 8 && mp.sim_module_version == 0)))
+				{
 						mp.micGain++;
+						mp.buttons.update();
+				}
 				if(mp.buttons.repeat(BTN_LEFT, 7) && mp.micGain > 0)
+				{
 						mp.micGain--;
+						mp.buttons.update();
+				}
 				break;
 
 			case 3: //ARROWDOWN
