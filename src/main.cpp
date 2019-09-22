@@ -564,11 +564,22 @@ void callNumber(String number)
 			while(!mp.update());
 			mp.updateTimeRTC();
 			Serial.println("B PRESSED");
-			// Serial1.println("ATH");
-			// mp.waitForOK();
 			Serial1.println("ATH");
-			buffer = mp.waitForOK();
-			Serial.println(buffer);
+			while(Serial1.available())
+				Serial1.read();
+			Serial1.println("ATH");
+			// mp.waitForOK();
+			// while (!digitalRead(SIM_INT))
+			// {
+			// 	while(Serial1.available())
+			// 	{
+			// 		if(digitalRead(SIM_INT))
+			// 			break;
+			// 		Serial1.read();
+			// 	}
+			// 	Serial1.println("ATH");
+			// 	delay(200);
+			// }
 			if(mp.SDinsertedFlag)
 				mp.addCall(number, mp.checkContact(number), mp.RTC.now().unixtime(), tmp_time, 1);
 			delay(1000);
