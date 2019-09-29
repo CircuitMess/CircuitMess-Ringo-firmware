@@ -2195,7 +2195,7 @@ void setup()
 	// addOscillator(osc);
 	Serial.print("Setup: ");
 	Serial.println(EEPROM.readBool(33));
-	if(EEPROM.readBool(33))
+	if(EEPROM.readBool(33) && REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_BLK3_PART_RESERVE) == 1)
 		startupWizard();
 	mp.shutdownPopupEnable(1);
 	// startupWizard();
