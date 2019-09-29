@@ -1917,6 +1917,8 @@ bool startupWizard()
 	}
 	while(!mp.update());
 	timeMenu();
+	EEPROM.writeBool(33, 0);
+	EEPROM.commit();
 	// Wifi testing
 	// if(!mp.wifi)
 	// {
@@ -1936,8 +1938,7 @@ bool startupWizard()
 	while(!mp.update());
 	wifiConnect();
 	mp.shutdownPopupEnable(1);
-	EEPROM.writeBool(33, 0);
-	EEPROM.commit();
+	
   	mp.display.setTextColor(TFT_BLACK);
 	mp.display.setTextSize(1);
 	mp.display.setTextFont(2);
@@ -2140,7 +2141,7 @@ void controlTry() //for debug purposes
 void setup()
 {
 	Serial.begin(115200);	
-	EEPROM.begin(256);
+	EEPROM.begin(300);
 	mp.homePopupEnable(0);
 	mp.shutdownPopupEnable(0);
 
@@ -2157,11 +2158,16 @@ void setup()
 		mp.tft.setTextFont(2);
 		Serial.println(EEPROM.readString(35).c_str());
 		Serial.println(EEPROM.readString(100).c_str());
-		delay(1000);
-		WiFi.begin(EEPROM.readString(35).c_str(), EEPROM.readString(100).c_str());
-		delay(1000);
+		uint8_t counter = 0;
+		while(WiFi.status() != WL_CONNECTED && counter < 5)
+		{
+			delay(3000);
+			WiFi.begin(EEPROM.readString(35).c_str(), EEPROM.readString(100).c_str());
+			delay(3000);
+			counter++;
+		}
 		Serial.print("Connected: ");
-		Serial.println(WiFi.status() == WL_CONNECTED);
+		Serial.println();
 		Serial.println("FREE HEAP:");
 		Serial.println(ESP.getFreeHeap());
 		delay(5);
@@ -2172,6 +2178,7 @@ void setup()
 			mp.tft.print("Error while downloading");
 			mp.tft.setCursor(22,mp.tft.height()/2 - 5);
 			mp.tft.print("Reverting firmware!");
+			delay(2000);
 			ESP.restart();
 		}
 		mp.tft.fillRect(0,0,160,128,TFT_BLACK);
@@ -2198,7 +2205,7 @@ void setup()
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
 }
-void loop()
+void loop() 
 {
 	// mp.dataRefreshFlag = 1;
 	// mp.display.fillScreen(TFT_WHITE);

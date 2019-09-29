@@ -3324,8 +3324,6 @@ int8_t checkForUpdate()
 					}
 					mp.update();
 				}
-				EEPROM.write(FIRMWARE_VERSION_ADDRESS, version);
-				EEPROM.commit();
 				return 1;
 			}
 			return 0;
