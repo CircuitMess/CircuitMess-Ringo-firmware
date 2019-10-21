@@ -2897,7 +2897,7 @@ void wifiConnect()
 				while (1)
 				{
 					mp.display.fillScreen(TFT_BLACK);
-					mp.display.setCursor(8, 8);
+					mp.display.setCursor(8, 0);
 					mp.display.printCenter(networkNames[selection]);
 					mp.display.setCursor(4, 30);
 					mp.display.printCenter("Enter password:");
@@ -2918,17 +2918,24 @@ void wifiConnect()
 					mp.display.setTextColor(TFT_WHITE);
 					mp.display.setCursor(1, 6);
 					prevContent = content;
-					content = mp.textInput(content, 18);
+					content = mp.textInput(content, 63);
 					if (prevContent != content)
 					{
 						blinkState = 1;
 						elapsedMillis = millis();
 					}
 
-					mp.display.setTextWrap(1);
-					mp.display.setCursor(1, 56);
+					mp.display.setCursor(4, 56);
 					mp.display.setTextFont(2);
-					mp.display.printCenter(content);
+					mp.display.print(content);
+					mp.display.setTextWrap(0);
+					Serial.println(mp.display.cursor_x);
+					if (mp.display.cursor_x + 8 >= mp.display.width())
+					{
+						mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
+						mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 4, 56);
+						mp.display.print(content);
+					}
 					if (blinkState == 1)
 						mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
 
