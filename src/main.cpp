@@ -1487,6 +1487,22 @@ bool startupWizard()
 				tempMillis = millis();
 				while(millis() < tempMillis + 1000)
 					mp.update();
+				mp.display.setTextColor(TFT_BLACK);
+				mp.display.setTextSize(1);
+				mp.display.setTextFont(2);
+				mp.display.drawRect(4, 25, 154, 78, TFT_BLACK);
+				mp.display.drawRect(3, 24, 156, 80, TFT_BLACK);
+				mp.display.fillRect(5, 26, 152, 76, TFT_WHITE);
+				mp.display.setCursor(47, 30);
+				mp.display.printCenter("Tip: Also check if your");
+				mp.display.setCursor(47, 48);
+				mp.display.printCenter("SIM card is activated");
+				mp.display.setCursor(47, 74);
+				mp.display.printCenter("Press A to continue");
+				tMillis = millis();
+				while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+					mp.update();
+				while(!mp.update());
 				bool blinkState = 0;
 				uint32_t blinkMillis = millis();
 				bool cursor = 0;
@@ -1549,12 +1565,27 @@ bool startupWizard()
 				mp.display.setCursor(47, 55);
 				mp.display.printCenter("SIM card not found!");
 				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
+				while(millis() < tempMillis + 2000)
 					mp.update();
 				tempMillis = millis();
-				while(millis() < tempMillis + 1000)
-					mp.update();
 				bool blinkState = 0;
+				while(!mp.buttons.released(BTN_A))
+				{
+					if(millis() - tempMillis > 400)
+					{
+						blinkState = !blinkState;
+						tempMillis = millis();
+					}
+					mp.display.fillScreen(TFT_WHITE);
+					mp.display.setCursor(0, 4);
+					mp.display.printCenter("How to insert SIM card?");
+					mp.display.setCursor(4, 110);
+					mp.display.drawBitmap(22, 25, blinkState ? simCardInsert : simCardInsert2, TFT_BLACK, 2);
+					mp.display.print("Press A to continue");
+					mp.update();
+				}
+				while(!mp.update());
+				blinkState = 0;
 				uint32_t blinkMillis = millis();
 				bool cursor = 0;
 				while(!mp.buttons.released(BTN_A))
@@ -1569,19 +1600,19 @@ bool startupWizard()
 					mp.display.printCenter("Reinsert SIM card");
 					mp.display.setCursor(0, 32);
 					mp.display.printCenter("and press retry");
-					mp.display.setCursor(0,70);
+					mp.display.setCursor(0,80);
 					mp.display.printCenter("Retry      Skip");
 					mp.display.setCursor(4, 110);
 					mp.display.print("Press A to confirm"); // prompt za manual turn on
 					if(cursor)
 					{
-						mp.display.drawRect(98, 70, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(97, 69, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
+						mp.display.drawRect(98, 80, 33, 18, blinkState ? TFT_RED : TFT_WHITE);
+						mp.display.drawRect(97, 79, 35, 20, blinkState ? TFT_RED : TFT_WHITE);
 					}
 					else
 					{
-						mp.display.drawRect(28, 70, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
-						mp.display.drawRect(27, 69, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
+						mp.display.drawRect(28, 80, 42, 18, blinkState ? TFT_RED : TFT_WHITE);
+						mp.display.drawRect(27, 79, 44, 20, blinkState ? TFT_RED : TFT_WHITE);
 					}
 
 					if(mp.buttons.released(BTN_LEFT) && cursor)
@@ -1645,14 +1676,10 @@ bool startupWizard()
 					// Serial.println("TURN OFF");
 					// digitalWrite(OFF_PIN, 1);
 				}
-
 			}
-
-
 			mp.update();
 		}
 	}
-
 	//SD card testing
 	while(1)
 	{
@@ -1919,24 +1946,6 @@ bool startupWizard()
 	timeMenu();
 	EEPROM.writeBool(33, 0);
 	EEPROM.commit();
-	// Wifi testing
-	// if(!mp.wifi)
-	// {
-		// mp.wifi = 1;
-	delay(50);
-	WiFi.begin();
-	delay(50);
-	// }
-	mp.display.fillScreen(TFT_WHITE);
-	mp.display.setTextFont(2);
-	mp.display.setTextSize(1);
-	mp.display.setCursor(4,4);
-	mp.display.setTextColor(TFT_BLACK);
-	mp.display.printCenter("Wi-Fi testing");
-	mp.display.setCursor(0,mp.display.height()/2 - 14);
-	mp.display.printCenter("Searching networks");
-	while(!mp.update());
-	wifiConnect();
 	mp.shutdownPopupEnable(1);
 	
   	mp.display.setTextColor(TFT_BLACK);
