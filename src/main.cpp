@@ -2214,7 +2214,7 @@ void setup()
 	// pinMode(39, INPUT_PULLUP);
 	// mp.buttons.activateInterrupt();
 }
-void loop() 
+void loop()
 {
 	// mp.dataRefreshFlag = 1;
 	// mp.display.fillScreen(TFT_WHITE);

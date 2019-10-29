@@ -65,6 +65,6 @@ Here are some examples of how the current version of the firmware looks:
 Copyright © 2019 CircuitMess
 
 Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
-version=99
+version=101
 
 
