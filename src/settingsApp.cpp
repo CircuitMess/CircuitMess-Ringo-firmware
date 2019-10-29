@@ -2439,7 +2439,7 @@ bool updateMenu()
 
 		mp.display.setCursor(90, 110);
 		mp.display.setTextColor(TFT_DARKGREY);
-		foo = "Version: " + (String)((int)mp.firmware_version / 100) + "." + (String)((int)mp.firmware_version / 10) + "." + (String)(mp.firmware_version % 10);
+		foo = "Version: " + (String)((int)mp.firmware_version / 100) + "." + (String)(((int)mp.firmware_version / 10) % 10) + "." + (String)(mp.firmware_version % 10);
 		mp.display.printCenter(foo);
 		switch (cursor)
 		{
@@ -3309,7 +3309,7 @@ int8_t checkForUpdate()
 			if (version > mp.firmware_version)
 			{
 				Serial.println("HERE");
-				String foo = String("Version: " + String((int)version/100) + "." + String((int)version/10)
+				String foo = String("Version: " + String((int)version/100) + "." + String(((int)version/10) % 10)
 					+ "." + String(version%10));
 				Serial.println(foo);
 				mp.tft.fillRect(0,0,160,128,TFT_BLACK);
