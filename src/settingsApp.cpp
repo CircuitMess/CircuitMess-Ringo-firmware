@@ -2968,7 +2968,7 @@ void wifiConnect()
 						uint8_t counter = 0;
 						while (WiFi.status() != WL_CONNECTED)
 						{
-							delay(1000);
+							delay(1500);
 							mp.display.print(".");
 							while(!mp.update());
 							counter++;
