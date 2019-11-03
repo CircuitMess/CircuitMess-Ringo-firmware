@@ -15,7 +15,7 @@ Functionalities that are currently available:
 - media app (photos and videos)
 - settings app
 - loading other apps (.bin format) from SD card
-- music player (.mp3 and wav)
+- music player (.wav)
 - basic notification sounds and ringtones
 
 Here are some examples of how the current version of the firmware looks:
