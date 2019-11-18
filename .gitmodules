@@ -1,0 +1,3 @@
+﻿[submodule "lib/MAKERphone"]
+	path = lib/MAKERphone
+	url = https://github.com/steka/CircuitMess-Ringo.git
