@@ -239,7 +239,7 @@ bool settingsApp() {
 
 }
 void networkMenu() {
-	uint8_t cursor = 0;
+	//uint8_t cursor = 0;
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
 	uint16_t color = 0;
@@ -754,7 +754,6 @@ void soundMenu()
 	start = 0;
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
-	uint8_t micDraw = 0;
 	if(mp.micGain > 8 && mp.sim_module_version == 0)
 		mp.sim_module_version = 8;
 	while (1)
@@ -3334,7 +3333,8 @@ int8_t checkForUpdate()
 				return 1;
 			}
 			return 0;
-		}
+		} else
+			return -2;
 	}
 	else
 		return -2;
@@ -3391,7 +3391,8 @@ bool fetchUpdate()
 			http.end();
 			file.close();
 			return 1;
-		}
+		} else 
+			return 0;
 	}
 	else
 		return 0;
@@ -3537,7 +3538,6 @@ int16_t ringtoneAudioMenu(String* items, uint16_t length) {
 	int32_t cameraY = 0;
 	int32_t cameraY_actual = 0;
 	String Name;
-	uint8_t scale = 2;
 	uint8_t offset = 17;
 	uint8_t boxHeight = 15;
 	uint16_t start = 0;

@@ -199,51 +199,51 @@ void phoneApp()
 			switch (key)
 			{
 				case '1':
-					mp.osc->note(C5,0.05);
+					mp.osc->note(NOTE_C5, 0.05);
 					mp.osc->play();
 					break;
 				case '2':
-					mp.osc->note(D5,0.05);
+					mp.osc->note(NOTE_D5, 0.05);
 					mp.osc->play();
 					break;
 				case '3':
-					mp.osc->note(E5,0.05);
+					mp.osc->note(NOTE_E5, 0.05);
 					mp.osc->play();
 					break;
 				case '4':
-					mp.osc->note(F5,0.05);
+					mp.osc->note(NOTE_F5, 0.05);
 					mp.osc->play();
 					break;
 				case '5':
-					mp.osc->note(G5,0.05);
+					mp.osc->note(NOTE_G5, 0.05);
 					mp.osc->play();
 					break;
 				case '6':
-					mp.osc->note(A5,0.05);
+					mp.osc->note(NOTE_A5, 0.05);
 					mp.osc->play();
 					break;
 				case '7':
-					mp.osc->note(B5,0.05);
+					mp.osc->note(NOTE_B5, 0.05);
 					mp.osc->play();
 					break;
 				case '8':
-					mp.osc->note(C6,0.05);
+					mp.osc->note(NOTE_C6, 0.05);
 					mp.osc->play();
 					break;
 				case '9':
-					mp.osc->note(D6,0.05);
+					mp.osc->note(NOTE_D6, 0.05);
 					mp.osc->play();
 					break;
 				case '*':
-					mp.osc->note(E6,0.05);
+					mp.osc->note(NOTE_E6, 0.05);
 					mp.osc->play();
 					break;
 				case '0':
-					mp.osc->note(F6,0.05);
+					mp.osc->note(NOTE_F6, 0.05);
 					mp.osc->play();
 					break;
 				case '#':
-					mp.osc->note(G6,0.05);
+					mp.osc->note(NOTE_G6, 0.05);
 					mp.osc->play();
 					break;
 
@@ -506,8 +506,6 @@ void phoneMenuDrawBox(String name, String number, uint8_t i, int32_t y, bool blS
     uint8_t offset = 19;
     uint8_t boxHeight = 28;
 	y += i * boxHeight + offset;
-	int tempCursor = 0;
-	int k;
 	if (y < 0 || y > mp.display.height()) 
 	{
 		return;
@@ -665,7 +663,7 @@ void callLog()
 				{
 					File file = SD.open("/.core/call_log.json", "r");
 					jb.clear();
-					JsonArray& jarr = jb.parseArray(file);
+					jb.parseArray(file);
 					file.close();
 				}
 				while(!mp.update());

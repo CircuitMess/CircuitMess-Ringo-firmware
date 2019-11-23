@@ -302,7 +302,7 @@ void messagesApp()
 					file = SD.open("/.core/messages.json", "r");
 					if(!file.available())
 						Serial.println("Messages ERROR");
-					JsonArray& jarr = jb.parseArray(file);
+					jb.parseArray(file);
 					file.close();
 				}
 			}
@@ -459,14 +459,12 @@ bool viewSms(String content, String contact, uint32_t date, bool direction)
 }
 void smsMenuDrawBox(String contact, DateTime date, String content, bool direction, bool isRead, uint8_t i, int32_t y) 
 {
-	uint8_t scale;
 	uint8_t offset;
 	uint8_t boxHeight;
 	uint8_t composeHeight;
 	int sms_day = date.day();
 	int sms_month = date.month();
 	mp.display.setTextSize(1);
-	scale = 2;
 	offset = 19;
 	composeHeight=21;
 	boxHeight = 30;

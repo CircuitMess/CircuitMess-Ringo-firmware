@@ -269,10 +269,8 @@ int8_t mediaMenu(String* title, uint8_t length) {
 
 }
 void mediaMenuDrawBox(String title, uint8_t i, int32_t y) {
-	uint8_t scale;
 	uint8_t boxHeight;
 	uint8_t offset = 11;
-	scale = 2;
 	boxHeight = 54;
 	y += i * boxHeight + offset;
 	if (y < 0 || y > mp.display.width()) {
@@ -325,7 +323,6 @@ int16_t audioPlayer(uint16_t index) {
 		mp3 = new MPTrack((char*)audioFiles[index].c_str());
 		addTrack(mp3);
 	}
-	uint8_t isPlaying[100];
 	while(1)
 	{
 		bool trackAdded = 0;
@@ -344,9 +341,6 @@ int16_t audioPlayer(uint16_t index) {
 		}
 		else if(!mp.SDinsertedFlag)
 			return 0;
-		uint8_t x = 1;
-		uint8_t y = 53;
-		int8_t i = 0;
 		
 		if(firstPass)
 		{
@@ -493,7 +487,6 @@ int16_t audioPlayer(uint16_t index) {
 					mp3->resume();
 				}
 				playState = !playState;
-				isPlaying[index] = 1;
 			}
 		/*
 			if (mp.buttons.released(BTN_DOWN) && mp.mediaVolume > 0) //DOWN
@@ -589,7 +582,6 @@ int16_t audioPlayer(uint16_t index) {
 			{
 				Serial.println("previous");
 				mp.buttons.update();
-				isPlaying[index] = 0;
 				playState = 1;
 				if(shuffle && !shuffleReset)
 				{
@@ -636,7 +628,6 @@ int16_t audioPlayer(uint16_t index) {
 				Serial.println("next");
 				mp.buttons.update();
 				playState = 1;
-				isPlaying[index] = 0; 
 				if(shuffle && !shuffleReset)
 				{
 					bool allTrue=1;
@@ -764,10 +755,9 @@ void listPhotos(const char * dirname, uint8_t levels) {
 		return;
 	}
 	int counter = 1;
-	uint8_t start = 0;
 	File file = root.openNextFile();
 	while (file) {
-		char temp[100];
+		// char temp[100];
 		// file.getName(temp, 100);
 		String Name(file.name());
 		Serial.println(Name);
