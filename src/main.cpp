@@ -66,18 +66,15 @@ int8_t menu(const char* title, String* items, uint8_t length) {
 	int32_t cameraY_actual = 0;
 	int16_t cursor = 0;
 	uint8_t offset;
-	uint8_t boxHeight;
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
 	if(mp.resolutionMode)
 	{
 		offset = menuYOffset;
-		boxHeight = 7;
 	}
 	else
 	{
 		offset = 19;
-		boxHeight = 15;
 	}
 	while (1) {
 		mp.update();
@@ -299,7 +296,6 @@ void listAudio(const char * dirname, uint8_t levels) {
 		return;
 	}
 	int counter = 1;
-	uint8_t start = 0;
 	File file = root.openNextFile();
 	while (file) {
 		String Name(file.name());
@@ -1037,7 +1033,6 @@ bool startupWizard()
 
 	//Speaker testing
 	bool state = 0;
-	bool playing = 0;
 	uint8_t tempNotification = mp.notification;
 	bool blinkState = 0;
 	uint32_t blinkMillis = millis();
@@ -1981,7 +1976,6 @@ void controlTry() //for debug purposes
 	unsigned long elapsedMillis = millis();
 	bool blinkState = 1;
 	uint8_t scale;
-	char c = ' ';
 	String outBuffer = "";
 	uint32_t cursorY = 1;
 	mp.dataRefreshFlag = 0;

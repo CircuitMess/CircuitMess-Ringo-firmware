@@ -77,7 +77,7 @@ void listBinaries(const char * dirname, uint8_t levels)
 		  BinaryFiles[counter-1] = file.name();
 		  }
 		  }*/
-		char temp[100];
+		//char temp[100];
 		// file.getName(temp, 100);
 		String Name(file.name());
 		Serial.println(Name);
@@ -104,7 +104,8 @@ int16_t scrollingMainMenu(uint16_t _cursor)
 	uint8_t elements = 9 + directoryCount; //9 default apps
 	uint8_t x_elements = 3;
 	uint8_t y_elements = ceil((float)elements/x_elements);
-
+	(void)previousButtonState;
+	
 	uint8_t pageNumber;
 	if(elements < 6)
 		pageNumber = 0;

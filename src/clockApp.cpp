@@ -97,7 +97,6 @@ void clockApp()
 }
 int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 	uint8_t offset = 4;
-	bool pressed = 0;
 	uint32_t blinkMillis = millis();
 	bool blinkState = 0;
 	uint8_t cursor = prevCursor;
@@ -159,7 +158,6 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 					cameraY += 15;
 				}
 			}
-			pressed = 1;
 		}
 
 		if (mp.buttons.released(BTN_DOWN)) { //BUTTON DOWN
@@ -176,7 +174,6 @@ int8_t clockMenu(String* title, uint8_t length, int8_t prevCursor) {
 				cameraY = 0;
 
 			}
-			pressed = 1;
 		}
 
 
@@ -392,7 +389,7 @@ void clockAlarm()
 					if(mp.alarmEnabled[i] != 2)
 						alarmCount++;
 				}
-				alarmsArray[alarmCount];
+				// alarmsArray[alarmCount];			// What was the intention with this statement? As it is now, it doesn't do anything!
 				temp = 0;
 				for (int i = 0; i < 5;i++)
 				{
