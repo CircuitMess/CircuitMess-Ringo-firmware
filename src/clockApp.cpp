@@ -389,7 +389,6 @@ void clockAlarm()
 					if(mp.alarmEnabled[i] != 2)
 						alarmCount++;
 				}
-				// alarmsArray[alarmCount];			// What was the intention with this statement? As it is now, it doesn't do anything!
 				temp = 0;
 				for (int i = 0; i < 5;i++)
 				{
