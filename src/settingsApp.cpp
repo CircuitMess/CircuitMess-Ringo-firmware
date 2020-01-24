@@ -3289,7 +3289,7 @@ int8_t checkForUpdate()
 	Serial.print("[HTTP] begin...\n");
 	delay(5);
 	// configure traged server and url
-	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/README.md", ca); //HTTPS
+	http.begin("https://raw.githubusercontent.com/CircuitMess/CircuitMess-Ringo-firmware/master/version.md", ca); //HTTPS
 	//http.begin("http://example.com/index.html"); //HTTP
 
 	Serial.print("[HTTP] GET...\n");
