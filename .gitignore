@@ -3,7 +3,6 @@
 .piolibdeps
 .vscode
 include
-platformio.ini
 .travis.yml
 test
 .history
