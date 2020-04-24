@@ -1,2 +1,2 @@
 # Current Ringo version
-version=103
+version=105
