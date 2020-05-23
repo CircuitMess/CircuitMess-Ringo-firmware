@@ -2960,7 +2960,7 @@ void wifiConnect()
 						while(!mp.update());
 
 						char temp[networkNames[selection].length()+1];
-						char temp2[content.length()];
+						char temp2[content.length()+1];
 						networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
 						content.toCharArray(temp2, content.length()+1);
 						WiFi.begin(temp, temp2);
