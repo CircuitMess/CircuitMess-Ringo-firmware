@@ -22,13 +22,13 @@ Here are some examples of how the current version of the firmware looks:
 
  ### **Home**
  
-![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_46-export.png)
+![alt text](https://circuitmess.com/wp-content/uploads/screenshot_46-export.png)
 
 <br/>
 
  ### **Main menu**
 
-![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_28-export.png)
+![alt text](https://circuitmess.com/wp-content/uploads/screenshot_28-export.png)
 
 <br/>
 
