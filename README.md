@@ -22,27 +22,27 @@ Here are some examples of how the current version of the firmware looks:
 
  ### **Home**
  
-![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_46-export.png)
+![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_46-export.png)
 
 <br/>
 
  ### **Main menu**
 
-![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_28-export.png)
+![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_28-export.png)
 
 <br/>
 
 ### **Apps**
 
-![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_30-export.png)
+![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_30-export.png)
 
 ### **Wi-Fi**
 
-![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_44-export.png)
+![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_44-export.png)
 
 ## **Settings**
 
-![alt text](https://www.circuitmess.com/wp-content/uploads/screenshot_45-export.png)
+![alt text](https://old.circuitmess.com/wp-content/uploads/screenshot_45-export.png)
 
 <br/>
 
