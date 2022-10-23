@@ -338,6 +338,9 @@ void callNumber(String number)
 	String contact = mp.checkContact(number);
 	mp.inCall = 1;
 	mp.dataRefreshFlag = 0;
+	bool muted = false;
+	const byte *current_call_icon = call_icon;
+	uint16_t current_call_icon_color = TFT_GREEN;
 	char c;
 	String localBuffer = "";
 	String buffer = "";
@@ -516,6 +519,24 @@ void callNumber(String number)
 				callState = 1;
 			}
 		}
+		if (mp.buttons.pressed(14)) // mute, 14 is power button
+		{
+			if (mp.sim_module_version == 1 || mp.sim_module_version == 0)
+			{
+				muted = !muted;
+				Serial1.print(F("AT+CMUT="));
+				if (muted) {
+					current_call_icon = call_icon_muted;
+					current_call_icon_color = TFT_RED;
+					Serial1.println(1);
+				} else {
+					current_call_icon = call_icon;
+					current_call_icon_color = TFT_GREEN;
+					Serial1.println(0);
+				}
+				mp.waitForOK();
+			}
+		}
 		if (mp.buttons.pressed(BTN_FUN_RIGHT)) // hanging up
 		{
 			
@@ -662,7 +683,7 @@ void callNumber(String number)
 				}
 				mp.display.setCursor(9, 9);
 				mp.display.printCenter(temp);
-				mp.display.drawBitmap(29*scale, 24*scale, call_icon, TFT_GREEN, scale);
+				mp.display.drawBitmap(29*scale, 24*scale, current_call_icon, current_call_icon_color, scale);
 				mp.display.setCursor(11, 28);
 				if(contact == "")
 					mp.display.printCenter(number);
